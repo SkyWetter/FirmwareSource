@@ -500,6 +500,7 @@ void displaySolarCurrent()
 void doPulseIn()
 {
 	//Pulse IN shit
+	//changes for example
 	for (int i = 0; i < 5; i++)
 	{
 		duration += float(pulseIn(pulsePin, HIGH));
