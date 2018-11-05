@@ -1,11 +1,12 @@
 /*
  Name:		MainCode.ino
  Created:	11/5/2018 3:29:50 PM
- Author:	bubsington
+ Author:	andy vanier
 */
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+	Serial.begin(666);
 
 }
 
