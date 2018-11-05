@@ -3,6 +3,8 @@
 // turret control firmware for esp32 dev kit C
 //  october 31, 2018
 
+//askdjhsadhiuhehfka error cannot compute
+
 
 // *********   P R E P R O C E S S O R S
 #include <Stepper.h>
