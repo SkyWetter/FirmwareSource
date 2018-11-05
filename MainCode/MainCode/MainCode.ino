@@ -3,6 +3,8 @@
 // turret control firmware for esp32 dev kit C
 //  october 31, 2018
 
+//test changes bla bla bla
+
 
 // *********   P R E P R O C E S S O R S
 #include <Stepper.h>
@@ -501,6 +503,7 @@ void doPulseIn()
 {
 	//Pulse IN shit
 	//changes for example
+	//more changes locally
 	for (int i = 0; i < 5; i++)
 	{
 		duration += float(pulseIn(pulsePin, HIGH));
