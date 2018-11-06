@@ -3,9 +3,8 @@
 // turret control firmware for esp32 dev kit C
 //  october 31, 2018
 
-//test changes bla bla bla
 
-//askdjhsadhiuhehfka error cannot compute
+//askdjhsadhiuhehfka error cannot computer test test
 
 
 // *********   P R E P R O C E S S O R S
