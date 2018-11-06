@@ -264,7 +264,7 @@ void realTimeClock()
 void solarPowerTracker()
 {
 	int peakInsolationSteps = 0;
-	static int stepDivider = 5;		//sets number of steps between each measurement. Must divide evenly in to 400
+	static int stepDivider = 8;		//sets number of steps between each measurement. Must divide evenly in to 400
 
 	long delayTimer1, delayTimer2;
 	long currentSenseVal1, currentSenseVal2;
@@ -305,10 +305,19 @@ void solarPowerTracker()
 
 				while (delayComplete2 == false)
 				{
-					if (delayTimer2 >= delayTimer1 + 50 * stepDivider)			//10ms delay per step
+					if (delayTimer2 >= delayTimer1 + 100 * stepDivider)			//10ms delay per step
 					{
 						delayComplete2 = true;
-						currentSenseVal2 = analogRead(currentSense);	//take next voltage reading
+						
+						for (int y = 0; y < 100; y++)
+						{
+							currentSenseVal2 += analogRead(currentSense);	//take next voltage reading
+							delay(1);
+							//Serial.printf("current reading is %i \n", currentSenseVal2);
+						}
+
+						currentSenseVal2 = currentSenseVal2 / 100;
+						
 						Serial.printf("current reading is %i \n", currentSenseVal2);
 
 						if (currentSenseVal1 < currentSenseVal2)
