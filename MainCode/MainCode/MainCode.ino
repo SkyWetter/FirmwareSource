@@ -3,6 +3,7 @@
 // turret control firmware for esp32 dev kit C
 //  october 31, 2018
 
+
 //askdjhsadhiuhehfka error cannot computer test test
 
 
@@ -509,6 +510,7 @@ void doPulseIn()
 {
 	//Pulse IN shit
 	//changes for example
+	//more changes locally
 	for (int i = 0; i < 5; i++)
 	{
 		duration += float(pulseIn(pulsePin, HIGH));
