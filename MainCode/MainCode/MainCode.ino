@@ -1,7 +1,8 @@
 // **********   S * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
-//  october 31, 2018
+//  november 5, 2018 -- adding RTC shit
+
 
 
 // *********   P R E P R O C E S S O R S
