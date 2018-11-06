@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <pthread.h>
 #include "sys/time.h"
 
 #include "sdkconfig.h"
@@ -113,6 +113,9 @@ void setup()
 
 	// pin assignments
 	pinMode(pulsePin, INPUT);								// pin to read pulse frequency										// init timers need for pulseCounters
+
+	//test pthread
+	//pthread_t threads[4];
 
 	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
 	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
@@ -260,7 +263,7 @@ void realTimeClock()
 void solarPowerTracker()
 {
 	int peakInsolationSteps = 0;
-	static int stepDivider = 2;		//sets number of steps between each measurement. Must divide evenly in to 400
+	static int stepDivider = 5;		//sets number of steps between each measurement. Must divide evenly in to 400
 
 	long delayTimer1, delayTimer2;
 	long currentSenseVal1, currentSenseVal2;
@@ -301,10 +304,11 @@ void solarPowerTracker()
 
 				while (delayComplete2 == false)
 				{
-					if (delayTimer2 >= delayTimer1 + 10 * stepDivider)			//10ms delay per step
+					if (delayTimer2 >= delayTimer1 + 50 * stepDivider)			//10ms delay per step
 					{
 						delayComplete2 = true;
 						currentSenseVal2 = analogRead(currentSense);	//take next voltage reading
+						Serial.printf("current reading is %i \n", currentSenseVal2);
 
 						if (currentSenseVal1 < currentSenseVal2)
 						{
@@ -323,6 +327,8 @@ void solarPowerTracker()
 						delayTimer2 = millis();		//increment timer if limit not reached
 					}
 				}
+
+				delayComplete2 = false;
 			}
 
 			Serial.printf("Final highest reading reading is %i \n", currentSenseVal1);
@@ -363,7 +369,7 @@ void solarPowerTracker()
 void stepperGoHome(byte x, byte y, byte z, byte s)											// x STEP, y DIR, z EN, s HALL
 {
 
-	digitalWrite(y, HIGH);																	// SET stepper CW
+	digitalWrite(y, LOW);																	// SET stepper CW
 	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
 
 	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
