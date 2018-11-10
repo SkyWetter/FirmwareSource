@@ -20,6 +20,7 @@
 #include "sys/time.h"
 
 #include "sdkconfig.h"
+#include <driver/adc.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -151,6 +152,9 @@ int squareArray[TOTAL_SQUARES][4]; // [square id #][ {x,y,distance,angle} ]
 
 void setup()
 {
+
+	adc1_config_width(ADC_WIDTH_BIT_12);
+	adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_6);
 
 	//PWM Stuff for output of duty cycle to current control
 
@@ -324,7 +328,7 @@ void realTimeClock()
 void solarPowerTracker()
 {
 	int peakInsolationSteps = 0;
-	static int stepDivider = 10;		//sets number of steps between each measurement. Must divide evenly in to 400
+	static int stepDivider = 20;		//sets number of steps between each measurement. Must divide evenly in to 400
 
 	long delayTimer1, delayTimer2;
 	long currentSenseVal1 = 0;
@@ -356,12 +360,12 @@ void solarPowerTracker()
 	
 			for (int y = 0; y < 100; y++)
 			{
-				currentSenseVal1 += analogRead(currentSense);	//take next voltage reading
+				currentSenseVal1 += adc1_get_raw(ADC1_CHANNEL_6);	//take next voltage reading
 				//delay(1);
 				//Serial.printf("current reading is %i \n", currentSenseVal2);
 			}
 			
-			//currentSenseVal1 = currentSenseVal1 / 100;
+			currentSenseVal1 = currentSenseVal1 / 10;
 
 			//currentSenseVal1 = analogRead(currentSense);		//take first voltage reading at zero position
 
@@ -375,7 +379,7 @@ void solarPowerTracker()
 			{
 				for (int x = 0; x < stepDivider; x++)
 				{
-					stepperDomeOneStepHalfPeriod(10);		//take x steps
+					stepperDomeOneStepHalfPeriod(6);		//take steps number is the speed
 
 				}
 
@@ -384,7 +388,7 @@ void solarPowerTracker()
 				while (delayComplete2 == false)
 				{
 
-					if (delayTimer2 >= delayTimer1 + 50 * stepDivider)			//10ms delay per step
+					if (delayTimer2 >= delayTimer1+10)			//10ms delay per step
 					{
 						delayComplete2 = true;
 						
@@ -392,12 +396,12 @@ void solarPowerTracker()
 
 						for (int y = 0; y < 100; y++)
 						{
-							currentSenseVal2 += analogRead(currentSense);	//take next voltage reading
+							currentSenseVal2 += adc1_get_raw(ADC1_CHANNEL_6);	//take next voltage reading
 							//delay(1);
 							//Serial.printf("current reading is %i \n", currentSenseVal2);
 						}
 
-						//currentSenseVal2 = currentSenseVal2 / 100;
+						currentSenseVal2 = currentSenseVal2 / 10;
 						
 						Serial.printf("current reading is %i \n", currentSenseVal2);
 
@@ -434,7 +438,7 @@ void solarPowerTracker()
 
 			for (int i = 0; i < 400 - peakInsolationSteps; i++)   //return to point of peak insolation
 			{
-				stepperDomeOneStepHalfPeriod(10);
+				stepperDomeOneStepHalfPeriod(5);
 			}
 
 			while (delayComplete2 == false)
@@ -470,9 +474,9 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(10);
+		delay(5);
 		digitalWrite(x, LOW);
-		delay(10);
+		delay(5);
 	}
 
 	//digitalWrite(z, HIGH);																	// put stepper back to sleep
@@ -483,8 +487,8 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 void domeGoHome()
 {
 	stepperDomeDirCCW();
-	stepperDomeOneStepHalfPeriod(10);
-	stepperDomeOneStepHalfPeriod(10);
+	stepperDomeOneStepHalfPeriod(5);
+	stepperDomeOneStepHalfPeriod(5);
 	
 
 	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
