@@ -36,7 +36,7 @@
 #define stepperDomeStpPin 18
 #define stepperDomeSlpPin 2
 #define hallSensorDome 16
-#define stepperDomeCrtPin 14
+#define stepperDomeCrntPin 14
 
 // valve stepper
 #define stepperValveDirPin 5
@@ -84,7 +84,6 @@ void stepperDomeDirCCW();
 
 void toggleStepperValveDir();
 void valveStepperOneStep();
-long getFrequency(int pin);
 
 // ************* U S E R   D E F I N E D   V A R I A B L E S
 // bluetooth
@@ -112,6 +111,17 @@ struct timeval now;
 
 void setup()
 {
+
+	//PWM Stuff for output of duty cycle to current control
+
+	ledcSetup(stepperDomeCrntPin, 500, 8);
+	ledcSetup(stepperValveCrntPin, 500, 8);
+
+	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
+	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
+
+
+
 	// bluetooth 
 	Serial.begin(115200);
 	SerialBT.begin("Rain|)Bow");							// RainBow is name for Bluetooth device
@@ -119,18 +129,18 @@ void setup()
 	// pin assignments
 	pinMode(pulsePin, INPUT);								// pin to read pulse frequency										// init timers need for pulseCounters
 
-	//test pthread
-	//pthread_t threads[4];
 
 	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
 	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
 	pinMode(stepperDomeSlpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper ENABLE
 	pinMode(hallSensorDome, INPUT);
+	pinMode(stepperDomeCrntPin, OUTPUT);
 
 	pinMode(stepperValveDirPin, OUTPUT);					// OUTPUT pin setup for MP6500 to control VALVE stepper DIRECTION
 	pinMode(stepperValveStpPin, OUTPUT);					// OUTPUT pin setup for MP6500 to control VALVE stepper STEP
 	pinMode(stepperValveSlpPin, OUTPUT);					// OUTPUT pin setup for MP6500 to control VALVE stepper ENABLE
 	pinMode(hallSensorValve, INPUT);
+	pinMode(stepperValveCrntPin, OUTPUT);
 
 	pinMode(wakeUpPushButton, INPUT);
 
@@ -140,6 +150,7 @@ void setup()
 	pinMode(rgbLedBlue, OUTPUT);
 	pinMode(rgbLedRed, OUTPUT);
 	pinMode(rgbLedGreen, OUTPUT);
+
 
 	// init pin states
 	digitalWrite(stepperDomeStpPin, LOW);
@@ -154,6 +165,11 @@ void setup()
 	digitalWrite(rgbLedBlue, LOW);
 	digitalWrite(rgbLedRed, LOW);
 	digitalWrite(rgbLedGreen, LOW);
+
+	ledcWrite(stepperDomeCrntPin, 204);	//sets current limi of dome to ~500mA
+	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
+
+	
 
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
@@ -172,13 +188,12 @@ void setup()
 	domeGoHome();
 
 
+
 }
 
 
 void loop()
 {
-
-	//freq = getFrequency(pulsePin);
 
 
 	if (Serial.available() > 0)
@@ -420,10 +435,21 @@ void stepperGoHome(byte x, byte y, byte z, byte s)											// x STEP, y DIR, z
 // S U B   F U N C T I O N S --- dome and valve go home
 void domeGoHome()
 {
+
 	stepperDomeDirCCW();
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+
 	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
 	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
-	//digitalWrite(stepperDomeDirPin, LOW);																					// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
+	//digitalWrite(stepperDomeDirPin, LOW);		
+	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
+	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
+	digitalWrite(stepperDomeSlpPin, LOW);
+	
 	stepCountDome = 0;
 	SerialBT.println("dome go home");																						// LOW IS COUNTERCLOCKWISE
 }
@@ -435,6 +461,7 @@ void valveGoHome()
 	stepperGoHome(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, hallSensorValve);
 	//digitalWrite(stepperValveDirPin, HIGH);
 	stepCountValve = 0;
+	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
 	SerialBT.println("valve go home");
 }
 
@@ -469,12 +496,15 @@ void stepperOneStepHalfPeriod(byte x, byte y, byte z, int *q, int h)												
 // S U B   F U N C T I O N S --- dome and valve one step
 void stepperDomeOneStepHalfPeriod(int hf)
 {
+	digitalWrite(stepperDomeSlpPin, HIGH);
+	ledcWrite(stepperDomeCrntPin, 204);			//sets domestepper to 450mA of current(max)
 	stepperOneStepHalfPeriod(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, &stepCountDome, hf);
 }
 void stepperValveOneStepHalfPeriod(int hf)
 {
 	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
 }
+
 
 void stepperDomeDirCW()
 {
@@ -556,11 +586,6 @@ void doPulseIn()
 
 // M A I N   F U N C T I O N --- inputCase statement
 
-long getFrequency(int pin) {
-	long freq = 0;
-	for (unsigned int j = 0; j < SAMPLES; j++) freq += 500000 / pulseIn(pin, HIGH, 250000);
-	return freq / SAMPLES;
-}
 
 void inputCase()
 {			// read the incoming byte:
