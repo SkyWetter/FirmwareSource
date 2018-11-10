@@ -54,7 +54,7 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-
+/*
 // states
 #define sleep 0
 #define solar 1
@@ -63,6 +63,8 @@
 #define lowPower 4
 
 int state = sleep;
+*/
+
 
 // ********    P R O T O T Y P E S
 void inputCase();
@@ -134,9 +136,13 @@ char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 
 
 /* Program State enums */
 
-enum serialStates { doNothing, singleSquare, fullBed, sendData } serialState;
-enum packetState { ok, ignore, resend } squarePacketState;
 enum packetState squareChecksumState;
+enum systemStates { sleep, solar, program, water, low_power }systemState;		// States for the ESP
+enum serialStates { doNothing, singleSquare, fullBed, sendData } serialState;   // State during getSerial fxn
+enum packetState { ok, ignore, resend } squarePacketState;						// Used during serial error handling checks
+																				// Ok -- proceed with serial packet handling
+																				// Ignore -- skip packet
+																				// Resend -- request packet again
 
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
@@ -205,7 +211,6 @@ void setup()
 	// init turret conditions
 	domeGoHome();
 
-
 }
 
 
@@ -229,67 +234,67 @@ void loop()
 	//interupt: if low battery from BMS -> state = lowPower
 	//interupt: if pushbutton depressed -> state = program
 
-	switch (state)
+	switch (systemState)
 	{
-	case sleep:
-	{
-		//shut down peripherals
-		//set wake up interupts for:
-		  //hourly daytime -> state = solar
-		  //AM/PM schedule -> state = water
-		//enter sleep mode
+		case sleep:
+		{
+			//shut down peripherals
+			//set wake up interupts for:
+			  //hourly daytime -> state = solar
+			  //AM/PM schedule -> state = water
+			//enter sleep mode
 
-		break;
-	}
+			break;
+		}
 
-	case solar:
-	{
-		//run solar tracker program
+		case solar:
+		{
+			//run solar tracker program
 
-		solarPowerTracker();
+			solarPowerTracker();
 
-		state = sleep;
+			systemState = sleep;
 
-		break;
-	}
+			break;
+		}
 
-	case program:
-	{
-		//open thread for bluetooth
-		//store incoming instructions in buffer
-		//one second spray for each square
-		//save full bed data
-		//return error checker
+		case program:
+		{
+			//open thread for bluetooth
+			//store incoming instructions in buffer
+			//one second spray for each square
+			//save full bed data
+			//return error checker
 
-		state = sleep;
+			systemState = sleep;
 
-		break;
-	}
+			break;
+		}
 
-	case water:
-	{
-		//load correct instruction set for date and time
-		//reference temperature and apply modfifier to watering durations
-		//open thread for flow sensor
-		//run spray program
+		case water:
+		{
+			//load correct instruction set for date and time
+			//reference temperature and apply modfifier to watering durations
+			//open thread for flow sensor
+			//run spray program
 
-		state = sleep;
+			systemState = sleep;
 
-		break;
-	}
+			break;
+		}
 
-	case lowPower:
-	{
-		//close the valve
-		//set LED to red
-		//allow solar
-		//prevent water until battery > 50%
-		  //>50% -> perform last spray cycle
+		case low_power:
+		{
+			//close the valve
+			//set LED to red
+			//allow solar
+			//prevent water until battery > 50%
+			  //>50% -> perform last spray cycle
 
-		state = sleep;
+			systemState = sleep;
 
-		break;
-	}
+			break;
+		}
 	}
 }
 
