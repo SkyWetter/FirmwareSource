@@ -286,7 +286,7 @@ void realTimeClock()
 void solarPowerTracker()
 {
 	int peakInsolationSteps = 0;
-	static int stepDivider = 8;		//sets number of steps between each measurement. Must divide evenly in to 400
+	static int stepDivider = 10;		//sets number of steps between each measurement. Must divide evenly in to 400
 
 	long delayTimer1, delayTimer2;
 	long currentSenseVal1 = 0;
@@ -312,15 +312,16 @@ void solarPowerTracker()
 
 			delay(5);
 
+			//currentSenseVal1 = analogRead(currentSense);
+	
 			for (int y = 0; y < 100; y++)
 			{
 				currentSenseVal1 += analogRead(currentSense);	//take next voltage reading
-				delay(1);
+				//delay(1);
 				//Serial.printf("current reading is %i \n", currentSenseVal2);
 			}
-
-			currentSenseVal1 = currentSenseVal1 / 100;
 			
+			//currentSenseVal1 = currentSenseVal1 / 100;
 
 			//currentSenseVal1 = analogRead(currentSense);		//take first voltage reading at zero position
 			currentSenseVal2 = 0;
@@ -333,7 +334,7 @@ void solarPowerTracker()
 			{
 				for (int x = 0; x < stepDivider; x++)
 				{
-					stepperDomeOneStepHalfPeriod(5);		//take x steps
+					stepperDomeOneStepHalfPeriod(10);		//take x steps
 				}
 
 				delayTimer1 = millis();		//start timer
@@ -344,14 +345,16 @@ void solarPowerTracker()
 					{
 						delayComplete2 = true;
 						
+						currentSenseVal2 = 0;
+
 						for (int y = 0; y < 100; y++)
 						{
 							currentSenseVal2 += analogRead(currentSense);	//take next voltage reading
-							delay(1);
+							//delay(1);
 							//Serial.printf("current reading is %i \n", currentSenseVal2);
 						}
 
-						currentSenseVal2 = currentSenseVal2 / 100;
+						//currentSenseVal2 = currentSenseVal2 / 100;
 						
 						Serial.printf("current reading is %i \n", currentSenseVal2);
 
@@ -428,7 +431,7 @@ void stepperGoHome(byte x, byte y, byte z, byte s)											// x STEP, y DIR, z
 		delay(10);
 	}
 
-	digitalWrite(z, HIGH);																	// put stepper back to sleep
+	//digitalWrite(z, HIGH);																	// put stepper back to sleep
 	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
 
 }
@@ -437,15 +440,17 @@ void domeGoHome()
 {
 
 	stepperDomeDirCCW();
-	void stepperDomeOneStepHalfPeriod(int hf);
-	void stepperDomeOneStepHalfPeriod(int hf);
-	void stepperDomeOneStepHalfPeriod(int hf);
-	void stepperDomeOneStepHalfPeriod(int hf);
-	void stepperDomeOneStepHalfPeriod(int hf);
+	stepperDomeOneStepHalfPeriod(10);
+	stepperDomeOneStepHalfPeriod(10);
+	
 
 	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
 	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
-	//digitalWrite(stepperDomeDirPin, LOW);		
+
+	stepperDomeOneStepHalfPeriod(10);
+	//stepperDomeOneStepHalfPeriod(10);
+	
+																															//digitalWrite(stepperDomeDirPin, LOW);		
 	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
 	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
 	digitalWrite(stepperDomeSlpPin, LOW);
