@@ -61,7 +61,7 @@
 
 
 // ********    P R O T O T Y P E S
-void inputCase();
+void debugInputCase(char);
 
 void solarPowerTracker();
 
@@ -123,11 +123,13 @@ int lastSquarePacketNumber = 0;
 
 char squareChecksumChar[4] = { '0', '0', '0', 0x00 };
 
-char squareID[4] = { '0','0','0',0x00 };
+char squareID[4] = { '0','0','0',0x00 };  //Holds the value for the currently selected square during bed creation
 int squareIDInt = 998;
 
 char singleSquare_lastPacket[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
+
+int stepsFromHome = 0;
 
 /* Program State enums */
 
@@ -271,6 +273,7 @@ void loop()
 		{
 		
 			getSerialData();
+			
 
 			
 			systemState = sleeping;
@@ -669,6 +672,10 @@ void getSerialData()
 					}
 				}
 				break;
+
+			case '&':
+				serialState = debugCommand;
+				break;
 		}
 		
 	}
@@ -693,14 +700,14 @@ void getSerialData()
 			//Check checksum state
 			switch (squareChecksumState)
 			{
-				case ok: getSquareID(&singleSquareData[0]);
+				case ok: getSquareID(&singleSquareData[0]); //If checksum is fine, move turret
 					message = false;;
 					serialState = doNothing;
 					squareChecksumState = ignore;
 					squarePacketState = ignore;
 					squareIDInt = charToInt(squareID, 3);
 
-					break; //If checksum is fine, move turret
+					break; 
 				case ignore: break;
 				case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 			}
@@ -709,6 +716,8 @@ void getSerialData()
 		
 		case debugCommand:
 
+			debugInputParse(getDebugChar());
+
 			break;
 
 		default:;
@@ -716,17 +725,24 @@ void getSerialData()
 
 }
 
-// S U B F U N C T I O NS -- getSerialData
+
+
+// S U B F U N C T I O N S -- getSerialData
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
-void getSquareID(char singleSquaredata[])
+int getSquareID(char singleSquaredata[])
 {
+	
+	char thisSquareChar[3];
+
 	for (int i = 0; i < 3; i++)
 	{
-		squareID[i] = singleSquareData[i + 4];
+		thisSquareChar[i] = singleSquareData[i + 4];
 	}
 
-	Serial.printf("Square ID Rx'd: %s", squareID);
+	return charToInt(thisSquareChar,3);
+
+	
 }
 
 //CHECK PACKET NUMBER
@@ -817,6 +833,36 @@ void checkChecksum(char singleSquareData[])
 	}
 
 }
+
+char getDebugChar()
+{
+	if (Serial.available())
+	{
+		return Serial.read();
+	}
+
+	else
+	{
+		return '|'; //Returns pipe symbol if the serial monitor no longer has data in it
+	}
+}
+
+// M A I N  F U N C T I O N -- SHOOT SINGLE SQUARE
+
+void shootSingleSquare()
+{
+	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
+	int targetStep = squareArray[getSquareID(singleSquareData)][3];
+
+	targetStep -= stepsFromHome; //Determines number of steps needed to move from given position 
+	
+	
+
+}
+
+
+
+
 
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
@@ -1001,6 +1047,9 @@ int getFlow(int column, int row, int turretColumn, int turretRow)
 
 }
 
+
+
+
 // M I S C   F U N C T I O N S
 
 // CHAR TO INT 
@@ -1037,10 +1086,10 @@ int getSign(int x)
 // M A I N   F U N C T I O N --- inputCase statement
 
 
-void inputCase()
+void debugInputParse(char debugCommand)
 {     // read the incoming byte:
 
-	switch (stepperCase)
+	switch (debugCommand)
 	{
 
 	case '0':                             // send dome stepper to home posistion
