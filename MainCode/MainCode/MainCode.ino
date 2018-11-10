@@ -23,7 +23,8 @@
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
-
+#define CCW -1
+#define CW  1
 
 
 // ********* P I N   A S S I G N M E N T S
@@ -129,7 +130,8 @@ int squareIDInt = 998;
 char singleSquare_lastPacket[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 
-int stepsFromHome = 0;
+int currentDomePosition = 0;
+int currentDomeDirection = CW;
 
 /* Program State enums */
 
@@ -514,6 +516,45 @@ void valveGoHome()
 }
 
 
+
+
+// M O V E  D O M E  F U N C T I O N S 
+
+//Move dome to a given position (a position is defined as a number of steps away from the home position)
+void moveDome(int targetPosition)
+{
+	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
+	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+
+
+}
+
+
+//Move dome to a given position with non-default speed, accel and current values
+void moveDome(int targetPosition, int speed, int accel, int current)
+{
+	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
+	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+
+
+}
+
+// Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
+void moveDome(int stepsToMove, int direction)
+{
+	;
+}
+
+
+// Move dome a given number of steps in a given direciton, with non-default speed, accel and current values)
+void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
+{
+	;
+}
+
+
+
+
 // M A I N    F U N  C T I O N  --- STEPPER ONE STEP
 void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int halfFreq)                            //x STEP, y DIR, z EN, q SPCNT, h halFRQ ----!!!!!!check POINTERS!?!??!?!?--------
 {
@@ -553,17 +594,31 @@ void stepperValveOneStepHalfPeriod(int hf)
 	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
 }
 
+void setDomeDirection(int direction)
+{
+	if (direction == CW)
+	{
+		stepperDomeDirCW();
+	}
+	else if (direction == CCW)
+	{
+		stepperDomeDirCCW();
+	}
+
+}
 
 void stepperDomeDirCW()
 {
 	Serial.println("set dome direction CW---> HIGH IS CLOCKWISE!!!");
 	SerialBT.println("set direction CW---> HIGH IS CLOCKWISE!!!");
+	currentDomeDirection = CW;
 	digitalWrite(stepperDomeDirPin, HIGH);
 }
 void stepperDomeDirCCW()
 {
 	Serial.println("set dome direction CCW ---> LOW IS COUNTERCLOCKWISE");
 	SerialBT.println("set direction CCW---> LOW IS COUNTERCLOCKWISE");
+	currentDomeDirection = CCW;
 	digitalWrite(stepperDomeDirPin, LOW);
 }
 
@@ -854,7 +909,7 @@ void shootSingleSquare()
 	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
 	int targetStep = squareArray[getSquareID(singleSquareData)][3];
 
-	targetStep -= stepsFromHome; //Determines number of steps needed to move from given position 
+	
 	
 	
 
@@ -1161,3 +1216,4 @@ void debugInputParse(char debugCommand)
 
 	}
 }
+
