@@ -459,26 +459,26 @@ void solarPowerTracker()
 
 
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
-void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
+void stepperGoHome(byte step, byte dir, byte enable, byte hallSensor)                      // x STEP, y DIR, z EN, s HALL
 {
 																		// SET stepper CW
-	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
+	digitalWrite(enable, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
 
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 
-	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(hallSensor) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
-		digitalWrite(x, HIGH);
+		digitalWrite(step, HIGH);
 		delay(10);
-		digitalWrite(x, LOW);
+		digitalWrite(step, LOW);
 		delay(10);
 	}
 
 
-	digitalWrite(z, HIGH);																	// put stepper back to sleep
-	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
+	digitalWrite(enable, HIGH);																	// put stepper back to sleep
+	//digitalWrite(dir, LOW);																	// SET STEOPP BACK TO CCW
 
 }
 // S U B   F U N C T I O N S --- dome and valve go home
@@ -515,29 +515,29 @@ void valveGoHome()
 
 
 // M A I N    F U N  C T I O N  --- STEPPER ONE STEP
-void stepperOneStepHalfPeriod(byte x, byte y, byte z, int *q, int h)                            //x STEP, y DIR, z EN, q SPCNT, h halFRQ ----!!!!!!check POINTERS!?!??!?!?--------
+void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int halfFreq)                            //x STEP, y DIR, z EN, q SPCNT, h halFRQ ----!!!!!!check POINTERS!?!??!?!?--------
 {
 	//h = 500;
-	digitalWrite(z, HIGH);
+	digitalWrite(enable, HIGH);
 	delay(1);                                                       // proBablay GeT rId of HTis!!?!?
 
-	digitalWrite(x, HIGH);
+	digitalWrite(step, HIGH);
 	digitalWrite(rgbLedBlue, HIGH);
 	//digitalWrite(rgbLedGreen, LOW);
-	delay(h);
-	digitalWrite(x, LOW);
+	delay(halfFreq);
+	digitalWrite(step, LOW);
 	digitalWrite(rgbLedBlue, LOW);
 	//digitalWrite(rgbLedGreen, HIGH);
-	delay(h);
+	delay(halfFreq);
 
-	if (digitalRead(y) == LOW)
+	if (digitalRead(dir) == LOW)
 	{
-		*q--;
+		*spcnt--;
 	}
 
-	if (digitalRead(y) == HIGH)
+	if (digitalRead(dir) == HIGH)
 	{
-		*q++;                                                       // LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome
+		*spcnt++;                                                       // LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome
 	}
 
 }
