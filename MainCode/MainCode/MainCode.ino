@@ -11,7 +11,7 @@
 #include <Stepper.h>
 #include <BluetoothSerial.h>
 #include <soc\rtc.h>
-
+#include <pthread.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -133,12 +133,14 @@ char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 
 
 
 
-enum serialStates { doNothing, singleSquare, fullBed, sendData } serialState;   // State during getSerial fxn
+enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand } serialState;   // State during getSerial fxn
 enum packetState { ok, ignore, resend } squarePacketState;						// Used during serial error handling checks
 enum packetState squareChecksumState;											// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
 enum systemStates { sleeping, solar, program, water, low_power }systemState;		// States for the ESP
+enum systemStates systemState_previous;
+
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
@@ -164,7 +166,7 @@ void setup()
 
 	// bluetooth 
 	Serial.begin(115200);
-	SerialBT.begin("Rain|)Bow");              // RainBow is name for Bluetooth device
+	SerialBT.begin("Rain|)Bow - Bluetooth");              // RainBow is name for Bluetooth device
 
 	// pin assignments
 	pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
@@ -210,7 +212,8 @@ void setup()
 	ledcWrite(stepperDomeCrntPin, 204);	//sets current limi of dome to ~500mA
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 
-	
+	systemState = sleeping;
+	systemState_previous = water;
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
 
@@ -233,43 +236,32 @@ void setup()
 void loop()
 {
 
-
-	if (Serial.available() > 0)
-	{
-		stepperCase = Serial.read();
-		inputCase();
-	}
-
-	if (SerialBT.available() > 0)
-	{
-		stepperCase = SerialBT.read();
-		inputCase();
-	}
-
 	//state machine
 
 	//interupt: if low battery from BMS -> state = lowPower
 	//interupt: if pushbutton depressed -> state = program
-
+	
 	switch (systemState)
 	{
 		case sleeping:
 		{
-			//shut down peripherals
-			//set wake up interupts for:
-			  //hourly daytime -> state = solar
-			  //AM/PM schedule -> state = water
-			//enter sleep mode
+			
+			if (SerialBT.available() || Serial.available())
+			{
+				Serial.println("Changing to program State");
+				systemState = program;
 
+			}
+	
 			break;
 		}
 
 		case solar:
 		{
-			//run solar tracker program
-
+			
 			solarPowerTracker();
 
+		
 			systemState = sleeping;
 
 			break;
@@ -277,12 +269,10 @@ void loop()
 
 		case program:
 		{
-			//open thread for bluetooth
-			//store incoming instructions in buffer
-			//one second spray for each square
-			//save full bed data
-			//return error checker
+		
+			getSerialData();
 
+			
 			systemState = sleeping;
 
 			break;
@@ -294,8 +284,13 @@ void loop()
 			//reference temperature and apply modfifier to watering durations
 			//open thread for flow sensor
 			//run spray program
+			if (systemState_previous != systemState)
+			{
+				Serial.printf("SystemState: Watering Mode");
+			}
 
-			systemState = sleeping;
+			
+			systemState_previous = systemState;
 
 			break;
 		}
@@ -307,8 +302,12 @@ void loop()
 			//allow solar
 			//prevent water until battery > 50%
 			  //>50% -> perform last spray cycle
+			if (systemState_previous != systemState)
+			{
+				Serial.printf("SystemState: Low Power Mode");
+			}
 
-			systemState = sleeping;
+			systemState_previous = systemState;
 
 			break;
 		}
@@ -645,68 +644,74 @@ void getSerialData()
 	{
 		char incomingChar = SerialBT.read();  //Read a single byte
 
-		if (incomingChar == '*')       // CHECK START BIT TYPE --> Probably willl become a switch statement when more startbit values exist 
+		switch (incomingChar) 
 		{
-			Serial.println("Resent from android");  //Debug message to alert through serial monitor that data has been resent on ESP request
-		}
+			case '*': 
+				Serial.println("Resent from android");  //Debug message to alert through serial monitor that data has been resent on ESP request
+				break;
 
-		else if (incomingChar == '%')   //Single square data start bit
-		{
-			serialState = singleSquare;  //Puts serialState in singleSquare mode 
+			case '%':
+				serialState = singleSquare;  //Puts serialState in singleSquare mode 
 
-		  //Grabs a 10-byte single square packet from the serial buffer
-			for (int i = 0; i < 9; i++)  //
-			{
-
-				incomingChar = SerialBT.read();
-				if (incomingChar == ' ' || incomingChar == NULL)
+				//Grabs a 10-byte single square packet from the serial buffer
+				for (int i = 0; i < 9; i++)  //
 				{
-					Serial.printf("incoming char was an illegal character \n");
-					singleSquareData[i + 1] = '@';
+
+					incomingChar = SerialBT.read();
+					if (incomingChar == ' ' || incomingChar == NULL)
+					{
+						Serial.printf("incoming char was an illegal character \n");
+						singleSquareData[i + 1] = '@';
+					}
+					else
+					{
+						singleSquareData[i + 1] = incomingChar;
+					}
 				}
-				else
-				{
-					singleSquareData[i + 1] = incomingChar;
-				}
-			}
+				break;
 		}
+		
 	}
 
 	// Check the serial state 
 
 	switch (serialState)
 	{
-	case doNothing: break;
+		case doNothing: break;
 
-	case singleSquare:       //If in singleSquare mode
-		checkPacketNumber(&singleSquareData[0]); //Check the packet number
+		case singleSquare:       //If in singleSquare mode
+			checkPacketNumber(&singleSquareData[0]); //Check the packet number
 
-	  // Check Packet State
-		switch (squarePacketState)
-		{
-		case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
-		case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
-		case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
-		}
+			// Check Packet State
+			switch (squarePacketState)
+			{
+				case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
+				case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
+				case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
+			}
 
-		//Check checksum state
-		switch (squareChecksumState)
-		{
-		case ok: getSquareID(&singleSquareData[0]);
-			message = false;;
-			serialState = doNothing;
-			squareChecksumState = ignore;
-			squarePacketState = ignore;
-			squareIDInt = charToInt(squareID, 3);
+			//Check checksum state
+			switch (squareChecksumState)
+			{
+				case ok: getSquareID(&singleSquareData[0]);
+					message = false;;
+					serialState = doNothing;
+					squareChecksumState = ignore;
+					squarePacketState = ignore;
+					squareIDInt = charToInt(squareID, 3);
 
-			break; //If checksum is fine, move turret
-		case ignore: break;
-		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
-		}
+					break; //If checksum is fine, move turret
+				case ignore: break;
+				case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+			}
 
-		break;
+			break;
+		
+		case debugCommand:
 
-	default:;
+			break;
+
+		default:;
 	}
 
 }
@@ -720,6 +725,8 @@ void getSquareID(char singleSquaredata[])
 	{
 		squareID[i] = singleSquareData[i + 4];
 	}
+
+	Serial.printf("Square ID Rx'd: %s", squareID);
 }
 
 //CHECK PACKET NUMBER
@@ -782,10 +789,7 @@ void checkPacketNumber(char singleSquareData[])
 
 
 //CHECK CHECKSUM
-
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
-
-
 
 void checkChecksum(char singleSquareData[])
 {
@@ -804,6 +808,7 @@ void checkChecksum(char singleSquareData[])
 	if (androidChecksum == espChecksum) //If they match, allow the packet data to be used
 	{
 		squareChecksumState = ok;
+		
 	}
 
 	else
