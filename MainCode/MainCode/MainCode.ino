@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <pthread.h>
 #include "sys/time.h"
 
 #include "sdkconfig.h"
@@ -28,13 +28,14 @@
 // ********* P I N   A S S I G N M E N T S
 // flow meter
 #define pulsePin 23
+#define SAMPLES 4096
 
 // dome stepper
 #define stepperDomeDirPin 19
 #define stepperDomeStpPin 18
 #define stepperDomeSlpPin 2
 #define hallSensorDome 16
-#define stepperDomeCrtPin 14
+#define stepperDomeCrntPin 14
 
 // valve stepper
 #define stepperValveDirPin 5
@@ -61,6 +62,7 @@
 #define program 2
 #define water 3
 #define lowPower 4
+
 
 int state = sleep;
 */
@@ -106,6 +108,7 @@ byte hallSensorValveVal;
 
 // pulse counter
 double duration;
+int freq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
@@ -155,6 +158,17 @@ int squareArray[TOTAL_SQUARES][4]; // [square id #][ {x,y,distance,angle} ]
 
 void setup()
 {
+
+	//PWM Stuff for output of duty cycle to current control
+
+	ledcSetup(stepperDomeCrntPin, 500, 8);
+	ledcSetup(stepperValveCrntPin, 500, 8);
+
+	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
+	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
+
+
+
 	// bluetooth 
 	Serial.begin(115200);
 	SerialBT.begin("Rain|)Bow");              // RainBow is name for Bluetooth device
@@ -162,15 +176,19 @@ void setup()
 	// pin assignments
 	pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
 
-	pinMode(stepperDomeDirPin, OUTPUT);           // OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
-	pinMode(stepperDomeStpPin, OUTPUT);           // OUTPUT pin setup for MP6500 to control DOME stepper STEP
-	pinMode(stepperDomeSlpPin, OUTPUT);           // OUTPUT pin setup for MP6500 to control DOME stepper ENABLE
+
+	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
+	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
+	pinMode(stepperDomeSlpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper ENABLE
+
 	pinMode(hallSensorDome, INPUT);
+	pinMode(stepperDomeCrntPin, OUTPUT);
 
 	pinMode(stepperValveDirPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper DIRECTION
 	pinMode(stepperValveStpPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper STEP
 	pinMode(stepperValveSlpPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper ENABLE
 	pinMode(hallSensorValve, INPUT);
+	pinMode(stepperValveCrntPin, OUTPUT);
 
 	pinMode(wakeUpPushButton, INPUT);
 
@@ -180,6 +198,7 @@ void setup()
 	pinMode(rgbLedBlue, OUTPUT);
 	pinMode(rgbLedRed, OUTPUT);
 	pinMode(rgbLedGreen, OUTPUT);
+
 
 	// init pin states
 	digitalWrite(stepperDomeStpPin, LOW);
@@ -194,6 +213,11 @@ void setup()
 	digitalWrite(rgbLedBlue, LOW);
 	digitalWrite(rgbLedRed, LOW);
 	digitalWrite(rgbLedGreen, LOW);
+
+	ledcWrite(stepperDomeCrntPin, 204);	//sets current limi of dome to ~500mA
+	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
+
+	
 
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
@@ -216,6 +240,7 @@ void setup()
 
 void loop()
 {
+
 
 	if (Serial.available() > 0)
 	{
@@ -307,10 +332,12 @@ void realTimeClock()
 void solarPowerTracker()
 {
 	int peakInsolationSteps = 0;
-	static int stepDivider = 2;   //sets number of steps between each measurement. Must divide evenly in to 400
+
+	static int stepDivider = 8;		//sets number of steps between each measurement. Must divide evenly in to 400
 
 	long delayTimer1, delayTimer2;
-	long currentSenseVal1, currentSenseVal2;
+	long currentSenseVal1 = 0;
+	long currentSenseVal2 = 0;
 
 	bool delayComplete1 = false;
 	bool delayComplete2 = false;
@@ -322,7 +349,8 @@ void solarPowerTracker()
 
 	while (delayComplete1 == false)
 	{
-		if (digitalRead(hallSensorDome) == HIGH)    //Wait until dome returns home -- CHECK IF ACTIVE HIGH
+
+		if (digitalRead(hallSensorDome) == LOW)		//Wait until dome returns home -- CHECK IF ACTIVE HIGH
 		{
 			Serial.println("Dome has returned to home");
 
@@ -330,7 +358,21 @@ void solarPowerTracker()
 			delayTimer1 = 0;      //set timers
 			delayTimer2 = 0;
 
-			currentSenseVal1 = analogRead(currentSense);    //take first voltage reading at zero position
+
+			delay(5);
+
+			for (int y = 0; y < 100; y++)
+			{
+				currentSenseVal1 += analogRead(currentSense);	//take next voltage reading
+				delay(1);
+				//Serial.printf("current reading is %i \n", currentSenseVal2);
+			}
+
+			currentSenseVal1 = currentSenseVal1 / 100;
+			
+
+			//currentSenseVal1 = analogRead(currentSense);		//take first voltage reading at zero position
+
 			currentSenseVal2 = 0;
 
 			stepperDomeDirCW();   //set rotation to clockwise 
@@ -341,17 +383,31 @@ void solarPowerTracker()
 			{
 				for (int x = 0; x < stepDivider; x++)
 				{
-					stepperDomeOneStepHalfPeriod(10);   //take x steps
+
+					stepperDomeOneStepHalfPeriod(5);		//take x steps
+
 				}
 
 				delayTimer1 = millis();   //start timer
 
 				while (delayComplete2 == false)
 				{
-					if (delayTimer2 >= delayTimer1 + 10 * stepDivider)      //10ms delay per step
+
+					if (delayTimer2 >= delayTimer1 + 50 * stepDivider)			//10ms delay per step
 					{
 						delayComplete2 = true;
-						currentSenseVal2 = analogRead(currentSense);  //take next voltage reading
+						
+						for (int y = 0; y < 100; y++)
+						{
+							currentSenseVal2 += analogRead(currentSense);	//take next voltage reading
+							delay(1);
+							//Serial.printf("current reading is %i \n", currentSenseVal2);
+						}
+
+						currentSenseVal2 = currentSenseVal2 / 100;
+						
+						Serial.printf("current reading is %i \n", currentSenseVal2);
+
 
 						if (currentSenseVal1 < currentSenseVal2)
 						{
@@ -370,6 +426,8 @@ void solarPowerTracker()
 						delayTimer2 = millis();   //increment timer if limit not reached
 					}
 				}
+
+				delayComplete2 = false;
 			}
 
 			Serial.printf("Final highest reading reading is %i \n", currentSenseVal1);
@@ -409,11 +467,14 @@ void solarPowerTracker()
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
 void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
 {
+																		// SET stepper CW
+	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
 
-	digitalWrite(y, HIGH);                                  // SET stepper CW
-	digitalWrite(z, HIGH);                                  // ENSURE STEPPER IS NOT IN SLEEP MODE
+	//stepperDomeOneStepHalfPeriod(10);
+	//stepperDomeOneStepHalfPeriod(10);
+	//stepperDomeOneStepHalfPeriod(10);
 
-	while (digitalRead(s) == 1)                               // if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
 		delay(10);
@@ -421,24 +482,40 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 		delay(10);
 	}
 
-	digitalWrite(z, LOW);                                 // put stepper back to sleep
-	digitalWrite(y, LOW);                                 // SET STEOPP BACK TO CCW
+
+	digitalWrite(z, HIGH);																	// put stepper back to sleep
+	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
 
 }
 // S U B   F U N C T I O N S --- dome and valve go home
 void domeGoHome()
 {
-	//digitalWrite(stepperDomeDirPin, HIGH);                                        // HIGH IS CLOSEWISE!!!
-	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);                 // dome stepper go to home posisition
-	//digitalWrite(stepperDomeDirPin, LOW);                                         // LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
+	stepperDomeDirCCW();
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+	void stepperDomeOneStepHalfPeriod(int hf);
+
+	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
+	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
+	//digitalWrite(stepperDomeDirPin, LOW);		
+	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
+	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
+	digitalWrite(stepperDomeSlpPin, LOW);
+	
 	stepCountDome = 0;
 	SerialBT.println("dome go home");                                           // LOW IS COUNTERCLOCKWISE
 }
 void valveGoHome()
 {
+	
+	digitalWrite(stepperValveDirPin, HIGH);
+
 	stepperGoHome(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, hallSensorValve);
-	digitalWrite(stepperValveDirPin, LOW);
+	//digitalWrite(stepperValveDirPin, HIGH);
 	stepCountValve = 0;
+	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
 	SerialBT.println("valve go home");
 }
 
@@ -446,7 +523,7 @@ void valveGoHome()
 // M A I N    F U N  C T I O N  --- STEPPER ONE STEP
 void stepperOneStepHalfPeriod(byte x, byte y, byte z, int *q, int h)                            //x STEP, y DIR, z EN, q SPCNT, h halFRQ ----!!!!!!check POINTERS!?!??!?!?--------
 {
-
+	//h = 500;
 	digitalWrite(z, HIGH);
 	delay(1);                                                       // proBablay GeT rId of HTis!!?!?
 
@@ -473,12 +550,15 @@ void stepperOneStepHalfPeriod(byte x, byte y, byte z, int *q, int h)            
 // S U B   F U N C T I O N S --- dome and valve one step
 void stepperDomeOneStepHalfPeriod(int hf)
 {
+	digitalWrite(stepperDomeSlpPin, HIGH);
+	ledcWrite(stepperDomeCrntPin, 204);			//sets domestepper to 450mA of current(max)
 	stepperOneStepHalfPeriod(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, &stepCountDome, hf);
 }
 void stepperValveOneStepHalfPeriod(int hf)
 {
 	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
 }
+
 
 void stepperDomeDirCW()
 {
@@ -500,7 +580,7 @@ void toggleStepperValveDir()
 	valveDir = digitalRead(stepperValveDirPin);
 	digitalWrite(stepperValveDirPin, !valveDir);
 
-	if (valveDir == LOW)
+	if (valveDir == 1)
 	{
 		Serial.println("set direction open");
 		SerialBT.println("set direction open");
@@ -510,6 +590,8 @@ void toggleStepperValveDir()
 		Serial.println("set direction close");
 		SerialBT.println("set direction close");
 	}
+
+	digitalWrite(stepperValveDirPin, !valveDir);
 }
 
 void valveStepperOneStep()
@@ -550,14 +632,9 @@ void doPulseIn()
 {
 	//Pulse IN shit
 	//changes for example
-	//more changes locally
-	for (int i = 0; i < 5; i++)
-	{
-		duration += float(pulseIn(pulsePin, HIGH));
-	}
+		duration = float(pulseIn(pulsePin, HIGH));
 
-	duration /= 5;
-	SerialBT.println(duration);
+	//SerialBT.println(duration);
 
 }
 
@@ -961,6 +1038,8 @@ int getSign(int x)
 }
 
 // M A I N   F U N C T I O N --- inputCase statement
+
+
 void inputCase()
 {     // read the incoming byte:
 
@@ -979,7 +1058,7 @@ void inputCase()
 		//10 steps on dome stepper
 		for (int i = 0; i < 10; i++)
 		{
-			stepperDomeOneStepHalfPeriod(10);
+			stepperDomeOneStepHalfPeriod(5);
 		}
 
 		Serial.println(stepCountDome);
