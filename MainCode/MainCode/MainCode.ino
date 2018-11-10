@@ -12,6 +12,7 @@
 #include <BluetoothSerial.h>
 #include <soc\rtc.h>
 
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -55,17 +56,8 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-/*
-// states
-#define sleep 0
-#define solar 1
-#define program 2
-#define water 3
-#define lowPower 4
 
 
-int state = sleep;
-*/
 
 
 // ********    P R O T O T Y P E S
@@ -139,14 +131,14 @@ char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 
 
 /* Program State enums */
 
-enum packetState squareChecksumState;
-enum systemStates { sleep, solar, program, water, low_power }systemState;		// States for the ESP
+
+
 enum serialStates { doNothing, singleSquare, fullBed, sendData } serialState;   // State during getSerial fxn
 enum packetState { ok, ignore, resend } squarePacketState;						// Used during serial error handling checks
-																				// Ok -- proceed with serial packet handling
+enum packetState squareChecksumState;											// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
-
+enum systemStates { sleeping, solar, program, water, low_power }systemState;		// States for the ESP
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
@@ -155,6 +147,7 @@ static const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
 static const int STEPS_PER_FULL_TURN = 400;
 
 int squareArray[TOTAL_SQUARES][4]; // [square id #][ {x,y,distance,angle} ]
+
 
 void setup()
 {
@@ -218,7 +211,6 @@ void setup()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 
 	
-
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
 
@@ -261,7 +253,7 @@ void loop()
 
 	switch (systemState)
 	{
-		case sleep:
+		case sleeping:
 		{
 			//shut down peripherals
 			//set wake up interupts for:
@@ -278,7 +270,7 @@ void loop()
 
 			solarPowerTracker();
 
-			systemState = sleep;
+			systemState = sleeping;
 
 			break;
 		}
@@ -291,7 +283,7 @@ void loop()
 			//save full bed data
 			//return error checker
 
-			systemState = sleep;
+			systemState = sleeping;
 
 			break;
 		}
@@ -303,7 +295,7 @@ void loop()
 			//open thread for flow sensor
 			//run spray program
 
-			systemState = sleep;
+			systemState = sleeping;
 
 			break;
 		}
@@ -316,7 +308,7 @@ void loop()
 			//prevent water until battery > 50%
 			  //>50% -> perform last spray cycle
 
-			systemState = sleep;
+			systemState = sleeping;
 
 			break;
 		}
