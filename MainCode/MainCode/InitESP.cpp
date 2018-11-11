@@ -13,8 +13,6 @@
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
 
-
-
 #define GPIO_INPUT_IO_TRIGGER 0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION 10  // sleep 30 seconds and then wake up
 #define CCW -1
