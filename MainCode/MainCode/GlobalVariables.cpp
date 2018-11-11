@@ -1,4 +1,5 @@
 #include "GlobalVariables.h"
+#include "BluetoothSerial.h"
 
 // ************* U S E R   D E F I N E D   V A R I A B L E S
 // bluetooth

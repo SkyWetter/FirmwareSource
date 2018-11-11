@@ -1,6 +1,3 @@
- 
-
-
 #include <Stepper.h>
 #include <BluetoothSerial.h>
 #include <soc\rtc.h>
