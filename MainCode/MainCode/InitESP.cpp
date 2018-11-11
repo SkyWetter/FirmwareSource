@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include "sys/time.h"
 #include "sdkconfig.h"
+#include "driver\adc.h"
 
 
 
@@ -74,6 +75,9 @@ void initSerial()
 
 void initPins()
 {
+	adc1_config_width(ADC_WIDTH_BIT_12);
+	adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_6);
+
 	//PWM Stuff for output of duty cycle to current control
 
 	ledcSetup(stepperDomeCrntPin, 500, 8);

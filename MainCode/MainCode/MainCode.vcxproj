@@ -118,18 +118,24 @@
   <ItemGroup>
     <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="InitESP.h" />
+    <ClInclude Include="GeneralFunctions.h" />
+    <ClInclude Include="SolarPowerTracker.h" />
+    <ClInclude Include="StepperFunctions.h" />
     <ClInclude Include="__vm\.MainCode.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GlobalVariables.cpp" />
     <ClCompile Include="InitESP.cpp" />
+    <ClCompile Include="GeneralFunctions.cpp" />
+    <ClCompile Include="SolarPowerTracker.cpp" />
+    <ClCompile Include="StepperFunctions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties arduino.upload.port="COM8" />
+      <UserProperties arduino.upload.port="COM6" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

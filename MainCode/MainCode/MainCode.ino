@@ -14,12 +14,14 @@
 #include "InitESP.h"
 #include <pthread.h>
 #include "GlobalVariables.h"
-
+#include "GeneralFunctions.h"
+#include "StepperFunctions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include "sys/time.h"
+#include "SolarPowerTracker.h"
 
 #include "sdkconfig.h"
 #include <driver/adc.h>
@@ -65,9 +67,7 @@
 
 
 // ********    P R O T O T Y P E S
-void debugInputCase(char);
 
-void solarPowerTracker();
 
 void stepperOneStepHalfPeriod(byte x, byte y, byte z, int *q, int h);
 void stepperDomeOneStepHalfPeriod(int hf);
@@ -126,7 +126,7 @@ void loop()
 		case solar:
 		{
 			
-			solarPowerTracker();
+			//solarPowerTracker();
 
 		
 			systemState = sleeping;
@@ -187,360 +187,6 @@ void realTimeClock()
 
 }
 
-// M A I N   F U N C T I O N   ---- SOLAR POWER TRACKING
-void solarPowerTracker()
-{
-	int peakInsolationSteps = 0;
-	static int stepDivider = 20;		//sets number of steps between each measurement. Must divide evenly in to 400
-
-	long delayTimer1, delayTimer2;
-	long currentSenseVal1 = 0;
-	long currentSenseVal2 = 0;
-
-	bool delayComplete1 = false;
-	bool delayComplete2 = false;
-
-
-	Serial.println("Solar tracking begins");
-
-	domeGoHome();     //send turret to zero position
-
-	while (delayComplete1 == false)
-	{
-
-		if (digitalRead(hallSensorDome) == LOW)		//Wait until dome returns home -- CHECK IF ACTIVE HIGH
-		{
-			Serial.println("Dome has returned to home");
-
-			delayComplete1 = true;    //end loop
-			delayTimer1 = 0;      //set timers
-			delayTimer2 = 0;
-
-
-			delay(5);
-
-			//currentSenseVal1 = analogRead(currentSense);
-	
-			for (int y = 0; y < 100; y++)
-			{
-				currentSenseVal1 += adc1_get_raw(ADC1_CHANNEL_6);	//take next voltage reading
-				//delay(1);
-				//Serial.printf("current reading is %i \n", currentSenseVal2);
-			}
-			
-			currentSenseVal1 = currentSenseVal1 / 10;
-
-			//currentSenseVal1 = analogRead(currentSense);		//take first voltage reading at zero position
-
-			currentSenseVal2 = 0;
-
-			stepperDomeDirCW();   //set rotation to clockwise 
-
-			Serial.printf("First reading is %i \n", currentSenseVal1);
-
-			for (int i = 1; i <= 400 / stepDivider; i++)    //divide rotation in x number of steps
-			{
-				for (int x = 0; x < stepDivider; x++)
-				{
-					stepperDomeOneStepHalfPeriod(6);		//take steps number is the speed
-
-				}
-
-				delayTimer1 = millis();   //start timer
-
-				while (delayComplete2 == false)
-				{
-
-					if (delayTimer2 >= delayTimer1+10)			//10ms delay per step
-					{
-						delayComplete2 = true;
-						
-						currentSenseVal2 = 0;
-
-						for (int y = 0; y < 100; y++)
-						{
-							currentSenseVal2 += adc1_get_raw(ADC1_CHANNEL_6);	//take next voltage reading
-							//delay(1);
-							//Serial.printf("current reading is %i \n", currentSenseVal2);
-						}
-
-						currentSenseVal2 = currentSenseVal2 / 10;
-						
-						Serial.printf("current reading is %i \n", currentSenseVal2);
-
-
-						if (currentSenseVal1 < currentSenseVal2)
-						{
-							currentSenseVal1 = currentSenseVal2;  //if it is greater, save new reading
-							peakInsolationSteps = i * stepDivider;    //number of steps taken to reach position
-							delayTimer1 = 0;
-							delayTimer2 = 0;
-
-							Serial.printf("New highest reading is %i \n", currentSenseVal1);
-							Serial.printf("Position is %i steps from zero \n", peakInsolationSteps);
-						}
-					}
-
-					else
-					{
-						delayTimer2 = millis();   //increment timer if limit not reached
-					}
-				}
-
-				delayComplete2 = false;
-			}
-
-			Serial.printf("Final highest reading reading is %i \n", currentSenseVal1);
-			Serial.printf("Final position is %i steps back from 400 \n", 400 - peakInsolationSteps);
-
-			stepperDomeDirCCW();    //set rotation to ccw
-
-			delayComplete2 = false;   //reset timers
-			delayTimer1 = millis();
-			delayTimer2 = 0;
-
-			for (int i = 0; i < 400 - peakInsolationSteps; i++)   //return to point of peak insolation
-			{
-				stepperDomeOneStepHalfPeriod(5);
-			}
-
-			while (delayComplete2 == false)
-			{
-				if (delayTimer2 >= delayTimer1 + 2000)    //wait 2s to arrive, then exit function
-				{
-					delayComplete2 = true;
-
-					Serial.println("Exiting solar tracker");
-				}
-
-				else
-				{
-					delayTimer2 = millis();   //increment timer if limit not reached
-				}
-			}
-		}
-	}
-}
-
-
-
-// M A I N    F U N  C T I O N  --- STEPPER GO HOME
-void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
-{
-																		// SET stepper CW
-	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
-
-	//stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
-
-	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
-	{
-		digitalWrite(x, HIGH);
-		delay(5);
-		digitalWrite(x, LOW);
-		delay(5);
-	}
-
-	//digitalWrite(z, HIGH);																	// put stepper back to sleep
-	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
-
-}
-// S U B   F U N C T I O N S --- dome and valve go home
-void domeGoHome()
-{
-	stepperDomeDirCCW();
-	stepperDomeOneStepHalfPeriod(5);
-	stepperDomeOneStepHalfPeriod(5);
-	
-
-	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
-	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
-
-	stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
-	
-																															//digitalWrite(stepperDomeDirPin, LOW);		
-	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
-	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
-	digitalWrite(stepperDomeSlpPin, LOW);
-	
-	stepCountDome = 0;
-	SerialBT.println("dome go home");                                           // LOW IS COUNTERCLOCKWISE
-}
-void valveGoHome()
-{
-	
-	digitalWrite(stepperValveDirPin, HIGH);
-
-	stepperGoHome(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, hallSensorValve);
-	//digitalWrite(stepperValveDirPin, HIGH);
-	stepCountValve = 0;
-	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
-	SerialBT.println("valve go home");
-}
-
-
-
-
-// M O V E  D O M E  F U N C T I O N S 
-
-//Move dome to a given position (a position is defined as a number of steps away from the home position)
-void moveDome(int targetPosition)
-{
-	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-
-
-}
-
-
-//Move dome to a given position with non-default speed, accel and current values
-void moveDome(int targetPosition, int speed, int accel, int current)
-{
-	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-
-
-}
-
-// Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
-void moveDome(int stepsToMove, int direction)
-{
-	;
-}
-
-
-// Move dome a given number of steps in a given direciton, with non-default speed, accel and current values)
-void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
-{
-	;
-}
-
-
-
-
-// M A I N    F U N  C T I O N  --- STEPPER ONE STEP
-void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int halfFreq)                            //x STEP, y DIR, z EN, q SPCNT, h halFRQ ----!!!!!!check POINTERS!?!??!?!?--------
-{
-	//h = 500;
-	digitalWrite(enable, HIGH);
-	delay(1);                                                       // proBablay GeT rId of HTis!!?!?
-
-	digitalWrite(step, HIGH);
-	digitalWrite(rgbLedBlue, HIGH);
-	//digitalWrite(rgbLedGreen, LOW);
-	delay(halfFreq);
-	digitalWrite(step, LOW);
-	digitalWrite(rgbLedBlue, LOW);
-	//digitalWrite(rgbLedGreen, HIGH);
-	delay(halfFreq);
-
-	if (digitalRead(dir) == LOW)
-	{
-		*spcnt--;
-	}
-
-	if (digitalRead(dir) == HIGH)
-	{
-		*spcnt++;                                                       // LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome
-	}
-
-}
-// S U B   F U N C T I O N S --- dome and valve one step
-void stepperDomeOneStepHalfPeriod(int hf)
-{
-	digitalWrite(stepperDomeSlpPin, HIGH);
-	ledcWrite(stepperDomeCrntPin, 204);			//sets domestepper to 450mA of current(max)
-	stepperOneStepHalfPeriod(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, &stepCountDome, hf);
-}
-void stepperValveOneStepHalfPeriod(int hf)
-{
-	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
-}
-
-void setDomeDirection(int direction)
-{
-	if (direction == CW)
-	{
-		stepperDomeDirCW();
-	}
-	else if (direction == CCW)
-	{
-		stepperDomeDirCCW();
-	}
-
-}
-
-void stepperDomeDirCW()
-{
-	Serial.println("set dome direction CW---> HIGH IS CLOCKWISE!!!");
-	SerialBT.println("set direction CW---> HIGH IS CLOCKWISE!!!");
-	currentDomeDirection = CW;
-	digitalWrite(stepperDomeDirPin, HIGH);
-}
-void stepperDomeDirCCW()
-{
-	Serial.println("set dome direction CCW ---> LOW IS COUNTERCLOCKWISE");
-	SerialBT.println("set direction CCW---> LOW IS COUNTERCLOCKWISE");
-	currentDomeDirection = CCW;
-	digitalWrite(stepperDomeDirPin, LOW);
-}
-
-void toggleStepperValveDir()
-{
-	bool valveDir;
-
-	valveDir = digitalRead(stepperValveDirPin);
-	digitalWrite(stepperValveDirPin, !valveDir);
-
-	if (valveDir == 1)
-	{
-		Serial.println("set direction open");
-		SerialBT.println("set direction open");
-	}
-	else
-	{
-		Serial.println("set direction close");
-		SerialBT.println("set direction close");
-	}
-
-	digitalWrite(stepperValveDirPin, !valveDir);
-}
-
-void valveStepperOneStep()
-{
-	stepperValveOneStepHalfPeriod(10);
-	Serial.println(stepCountValve);
-	SerialBT.println(stepCountValve);
-	//digitalWrite(stepperValveEnPin, LOW);
-}
-
-void displaySolarVoltage()
-{
-	solarPanelVoltageVal = (float)analogRead(solarPanelVoltage);
-	delay(1);
-	solarPanelVoltageVal = (((solarPanelVoltageVal / 4096) * 3.3) * 4.2448);
-
-	Serial.print("solar panel voltage: ");
-	Serial.print(solarPanelVoltageVal);
-	Serial.println("V");
-	SerialBT.print("solar panel voltage: ");
-	SerialBT.print(solarPanelVoltageVal);
-	SerialBT.println("V");
-}
-
-void displaySolarCurrent()
-{
-	long currentSenseVal1 = 0;
-
-	currentSenseVal1 = analogRead(currentSense);
-
-	Serial.print("current val: ");
-	Serial.println(currentSenseVal1);
-	SerialBT.print("current val: ");
-	SerialBT.println(currentSenseVal1);
-}
 
 void doPulseIn()
 {
@@ -970,38 +616,6 @@ int getFlow(int column, int row, int turretColumn, int turretRow)
 
 
 
-// M I S C   F U N C T I O N S
-
-// CHAR TO INT 
-/*
-* Takes a char array, and the given length of the array
-* and returns
-*/
-
-int charToInt(char *thisChar, int thisCharLength)
-{
-
-	int intConversion = 0;
-	for (int i = 0; i < thisCharLength; i++)
-	{
-		intConversion += ((thisChar[i] - '0') * pow(10, thisCharLength - 1 - i));
-	}
-
-	return intConversion;
-}
-
-/* Get Sign
- *
- *  takes an int, returns sign (-1 = negative, 1 = positive, 0 = neither)
- *
- */
-
-int getSign(int x)
-{
-	if (x > 0) { return 1; }
-	else if (x < 0) { return -1; }
-	else { return 0; }
-}
 
 // M A I N   F U N C T I O N --- inputCase statement
 
