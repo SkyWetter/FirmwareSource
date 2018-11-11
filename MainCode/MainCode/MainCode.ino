@@ -11,7 +11,9 @@
 #include <Stepper.h>
 #include <BluetoothSerial.h>
 #include <soc\rtc.h>
+#include "InitESP.h"
 #include <pthread.h>
+#include "GlobalVariables.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -87,152 +89,12 @@ int getFlow(int column, int row, int turretColumn, int turretRow);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 int convertAngleToStep(double angle);
 
-// ************* U S E R   D E F I N E D   V A R I A B L E S
-// bluetooth
-BluetoothSerial SerialBT;
-byte stepperCase;
-
-// steppers
-int stepCountDome = 0;
-int stepCountValve = 0;
-
-byte hallSensorDomeVal;
-byte hallSensorValveVal;
-
-// pulse counter
-double duration;
-int freq;
-
-// power    
-float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
-
-// power management
-// RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
-RTC_DATA_ATTR static time_t last;                 // remember last boot in RTC Memory
-struct timeval now;
-
-
-//******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
-
-bool firstSingleSquare = true;  //Used to allow any packet # for first square
-bool repeatPacketReceived = false;  //Flag if packet received was a duplicate
-
-char squarePacketNumberChar[4] = { '0', '0', '0', 0x00 };
-char lastSquarePacketNumberChar[4] = { '0', '0', '0', 0x00 };
-int squarePacketNumberInt = 0;
-int lastSquarePacketNumber = 0;
-
-char squareChecksumChar[4] = { '0', '0', '0', 0x00 };
-
-char squareID[4] = { '0','0','0',0x00 };  //Holds the value for the currently selected square during bed creation
-int squareIDInt = 998;
-
-char singleSquare_lastPacket[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
-char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
-
-int currentDomePosition = 0;
-int currentDomeDirection = CW;
-
-/* Program State enums */
-
-
-
-enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand } serialState;   // State during getSerial fxn
-enum packetState { ok, ignore, resend } squarePacketState;						// Used during serial error handling checks
-enum packetState squareChecksumState;											// Ok -- proceed with serial packet handling
-																				// Ignore -- skip packet
-																				// Resend -- request packet again
-enum systemStates { sleeping, solar, program, water, low_power }systemState;		// States for the ESP
-enum systemStates systemState_previous;
-
-bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
-bool message = false;
-
-static const int SQUARES_PER_ROW = 7;
-static const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
-static const int STEPS_PER_FULL_TURN = 400;
-
-int squareArray[TOTAL_SQUARES][4]; // [square id #][ {x,y,distance,angle} ]
-
-
 void setup()
 {
-
-	//PWM Stuff for output of duty cycle to current control
-
-	ledcSetup(stepperDomeCrntPin, 500, 8);
-	ledcSetup(stepperValveCrntPin, 500, 8);
-
-	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
-	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
-
-
-
-	// bluetooth 
-	Serial.begin(115200);
-	SerialBT.begin("Rain|)Bow - Bluetooth");              // RainBow is name for Bluetooth device
-
-	// pin assignments
-	pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
-
-
-	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
-	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
-	pinMode(stepperDomeSlpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper ENABLE
-
-	pinMode(hallSensorDome, INPUT);
-	pinMode(stepperDomeCrntPin, OUTPUT);
-
-	pinMode(stepperValveDirPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper DIRECTION
-	pinMode(stepperValveStpPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper STEP
-	pinMode(stepperValveSlpPin, OUTPUT);          // OUTPUT pin setup for MP6500 to control VALVE stepper ENABLE
-	pinMode(hallSensorValve, INPUT);
-	pinMode(stepperValveCrntPin, OUTPUT);
-
-	pinMode(wakeUpPushButton, INPUT);
-
-	pinMode(currentSense, INPUT);
-	pinMode(solarPanelVoltage, INPUT);
-
-	pinMode(rgbLedBlue, OUTPUT);
-	pinMode(rgbLedRed, OUTPUT);
-	pinMode(rgbLedGreen, OUTPUT);
-
-
-	// init pin states
-	digitalWrite(stepperDomeStpPin, LOW);
-	digitalWrite(stepperValveStpPin, LOW);
-
-	digitalWrite(stepperDomeDirPin, LOW);
-	digitalWrite(stepperValveDirPin, LOW);
-
-	digitalWrite(stepperDomeSlpPin, LOW);
-	digitalWrite(stepperValveSlpPin, LOW);
-
-	digitalWrite(rgbLedBlue, LOW);
-	digitalWrite(rgbLedRed, LOW);
-	digitalWrite(rgbLedGreen, LOW);
-
-	ledcWrite(stepperDomeCrntPin, 204);	//sets current limi of dome to ~500mA
-	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
-
-	systemState = sleeping;
-	systemState_previous = water;
-	// power management
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-
-
-	// setup serial messages
-	Serial.println("*S*KY*W*E*T");
-	Serial.println("Rain|)Bow");
-	//Serial.println("Adafruit AM2320 Sensor...");
-
-	// setup serial BLUETOOTH messages
-	SerialBT.println("*S*KY*W*E*T");
-	SerialBT.println("Rain|)Bow");
-
-	// init turret conditions
-	domeGoHome();
+	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
+				// starting systemState (see InitESP.cpp)
+	Serial.println("ESP Initialized...");
+	domeGoHome(); 
 
 }
 

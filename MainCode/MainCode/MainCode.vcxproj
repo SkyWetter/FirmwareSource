@@ -116,7 +116,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GlobalVariables.h" />
+    <ClInclude Include="InitESP.h" />
     <ClInclude Include="__vm\.MainCode.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GlobalVariables.cpp" />
+    <ClCompile Include="InitESP.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
