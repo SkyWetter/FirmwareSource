@@ -15,6 +15,7 @@
 #include "GeneralFunctions.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
 
 void getSerialData()
 {
@@ -283,6 +284,15 @@ void debugInputParse(char debugCommand)
 
 	case 'h':
 		doPulseIn();
+		break;
+
+	case 'i':
+		spiffsBegin();
+		spiffsSave();
+		break;
+
+	case 'j':
+		spiffsRead();
 		break;
 
 	case 's':
