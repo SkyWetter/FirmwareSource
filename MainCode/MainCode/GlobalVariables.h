@@ -81,3 +81,8 @@ extern const int TOTAL_SQUARES;
 extern const int STEPS_PER_FULL_TURN;
 
 extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+
+
+//J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
+
+extern String serialBedData;

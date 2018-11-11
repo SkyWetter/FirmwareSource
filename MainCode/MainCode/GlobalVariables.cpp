@@ -65,3 +65,8 @@ enum packetState squarePacketState;// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet																				// Resend -- request packet aga
 enum systemStates systemState;
 enum systemStates systemState_previous;
+
+
+//J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
+
+String serialBedData;
