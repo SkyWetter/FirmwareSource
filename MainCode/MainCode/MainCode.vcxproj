@@ -119,6 +119,7 @@
     <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="InitESP.h" />
     <ClInclude Include="GeneralFunctions.h" />
+    <ClInclude Include="SerialData.h" />
     <ClInclude Include="SolarPowerTracker.h" />
     <ClInclude Include="StepperFunctions.h" />
     <ClInclude Include="__vm\.MainCode.vsarduino.h" />
@@ -127,6 +128,7 @@
     <ClCompile Include="GlobalVariables.cpp" />
     <ClCompile Include="InitESP.cpp" />
     <ClCompile Include="GeneralFunctions.cpp" />
+    <ClCompile Include="SerialData.cpp" />
     <ClCompile Include="SolarPowerTracker.cpp" />
     <ClCompile Include="StepperFunctions.cpp" />
   </ItemGroup>

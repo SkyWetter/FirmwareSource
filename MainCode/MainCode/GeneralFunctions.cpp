@@ -13,6 +13,8 @@
 #include "sdkconfig.h"
 #include "GeneralFunctions.h"
 
+#define pulsePin 23
+
 // M I S C   F U N C T I O N S
 
 // CHAR TO INT 
@@ -44,4 +46,14 @@ int getSign(int x)
 	if (x > 0) { return 1; }
 	else if (x < 0) { return -1; }
 	else { return 0; }
+}
+
+void doPulseIn()
+{
+	//Pulse IN shit
+	//changes for example
+	duration = float(pulseIn(pulsePin, HIGH));
+
+	//SerialBT.println(duration);
+
 }

@@ -11,3 +11,4 @@
 
 int charToInt(char *thisChar, int thisCharLength);
 int getSign(int x);
+void doPulseIn();
