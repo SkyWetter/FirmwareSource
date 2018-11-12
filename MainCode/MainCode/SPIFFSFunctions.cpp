@@ -18,7 +18,13 @@ void spiffsSave()
 {
 	File file = SPIFFS.open("garden.txt", FILE_WRITE); 
 
-	if (file.println(serialBedData))
+	if (!file)
+	{
+		Serial.println("There was an error opening the file for writing");
+		return;
+	}
+
+	if (file.println("12345"))
 	{
 		Serial.println("File was written");
 	}
