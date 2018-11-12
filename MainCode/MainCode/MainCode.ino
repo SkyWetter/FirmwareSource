@@ -1,4 +1,4 @@
-// **********   S * K * Y  |)  W * E * T *
+// **********   Sc  * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
 //  november 5, 2018 -- adding RTC shit
