@@ -53,7 +53,12 @@ void doPulseIn()
 	//Pulse IN shit
 	//changes for example
 	duration = float(pulseIn(pulsePin, HIGH));
-
 	//SerialBT.println(duration);
 
 }
+
+long getFlowMeter()
+{
+	return pulseIn(pulsePin, HIGH);
+}
+

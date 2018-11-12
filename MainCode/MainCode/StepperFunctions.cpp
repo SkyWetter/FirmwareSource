@@ -109,9 +109,6 @@ void valveGoHome()
 	SerialBT.println("valve go home");
 }
 
-
-
-
 // M O V E  D O M E  F U N C T I O N S 
 
 //Move dome to a given position (a position is defined as a number of steps away from the home position)
@@ -124,9 +121,8 @@ void moveDome(int targetPosition)
 	{
 		targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
 		setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-		stepperMove(abs(targetPosition), 5);
+		stepperMove(abs(targetPosition), domeDefaultSpeed);
 	}
-
 	
 }
 
@@ -144,7 +140,7 @@ void moveDome(int targetPosition, int speed, int accel, int current)
 // Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
 void moveDome(int stepsToMove, int direction)
 {
-	;
+	stepperMove(stepsToMove, domeDefaultSpeed);
 }
 
 
@@ -272,4 +268,18 @@ void valveStepperOneStep()
 	Serial.println(stepCountValve);
 	SerialBT.println(stepCountValve);
 	//digitalWrite(stepperValveEnPin, LOW);
+}
+
+
+/* S H O O T  F U N C T I O N S */
+
+void shootSingleSquare()
+{
+	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
+	int targetStep = squareArray[getSquareID(singleSquareData)][3];
+
+	moveDome(targetStep);
+
+	lowFlowTarget = 
+
 }

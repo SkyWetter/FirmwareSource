@@ -151,10 +151,4 @@ void checkSystemState()
 	}
 }
 
-void shootSingleSquare()
-{
-	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
-	int targetStep = squareArray[getSquareID(singleSquareData)][3];
 
-	
-}

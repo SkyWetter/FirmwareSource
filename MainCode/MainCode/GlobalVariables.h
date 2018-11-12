@@ -57,6 +57,8 @@ extern char singleSquareData[11];
 extern int currentDomePosition;
 extern int currentDomeDirection;
 
+extern int domeDefaultSpeed;
+
 /* Program State enums */
 
 
