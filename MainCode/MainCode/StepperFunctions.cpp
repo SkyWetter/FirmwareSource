@@ -117,11 +117,20 @@ void valveGoHome()
 //Move dome to a given position (a position is defined as a number of steps away from the home position)
 void moveDome(int targetPosition)
 {
-	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+	int finalPosition = targetPosition -= currentDomePosition;
+	finalPosition = abs(finalPosition);  // Arduino recommends not performing calculations inside the abs function, as you can a get strange 
+										// results/errors
+	while (currentDomePosition != finalPosition)
+	{
+		targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
+		setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+		stepperMove(abs(targetPosition), 5);
+	}
 
-
+	
 }
+
+
 
 
 //Move dome to a given position with non-default speed, accel and current values
@@ -129,7 +138,6 @@ void moveDome(int targetPosition, int speed, int accel, int current)
 {
 	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
 	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-
 
 }
 
@@ -147,6 +155,13 @@ void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
 }
 
 
+void stepperMove(int numberOfSteps,int speed)
+{
+	for (int i = 0; i < numberOfSteps; i++)
+	{
+		stepperDomeOneStepHalfPeriod(speed);
+    }
+}
 
 
 // M A I N    F U N  C T I O N  --- STEPPER ONE STEP
@@ -165,9 +180,23 @@ void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int 
 	//digitalWrite(rgbLedGreen, HIGH);
 	delay(halfFreq);
 
+	if (currentDomeDirection == CW)
+	{
+		currentDomePosition += 1;
+	}
+	
+	else if (currentDomePosition == CCW)
+	{
+		currentDomePosition -= 1;
+	}
+
+	if (currentDomePosition > 400) { currentDomePosition = 400; }
+	else if (currentDomePosition < 0) { currentDomePosition = 0; }
+
 	if (digitalRead(dir) == LOW)
 	{
 		*spcnt--;
+		
 	}
 
 	if (digitalRead(dir) == HIGH)
