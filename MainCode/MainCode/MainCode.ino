@@ -6,7 +6,7 @@
 
 // *********   P R E P R O C E S S O R S
 #include "SPIFFSFunctions.h"
-#include "SPIFFS.h"
+#include <SPIFFS.h>
 #include <Stepper.h>
 #include <BluetoothSerial.h>
 #include <soc\rtc.h>
@@ -108,7 +108,6 @@ void checkSystemState()
 	{
 
 		getSerialData();
-
 
 
 		systemState = sleeping;
