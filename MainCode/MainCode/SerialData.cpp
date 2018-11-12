@@ -19,10 +19,19 @@
 void getSerialData()
 {
 
-	if (SerialBT.available())     //If there is some data waiting in the buffer
+	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
-		char incomingChar = SerialBT.read();  //Read a single byte
-
+		
+		char incomingChar;
+		if (SerialBT.available())
+		{
+			incomingChar = SerialBT.read();  //Read a single byte
+		}
+		else if (Serial.available())
+		{
+			incomingChar = Serial.read();
+			
+		}
 		switch (incomingChar)
 		{
 		case '*':
@@ -55,6 +64,8 @@ void getSerialData()
 		}
 
 	}
+
+	
 
 	// Check the serial state 
 
@@ -215,6 +226,11 @@ char getDebugChar()
 	if (Serial.available())
 	{
 		return Serial.read();
+	}
+
+	else if(SerialBT.available())
+	{
+		return SerialBT.read();
 	}
 
 	else
