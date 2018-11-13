@@ -16,7 +16,7 @@ void spiffsBegin()
 
 void spiffsSave()
 {
-	File file = SPIFFS.open("garden.txt", FILE_WRITE); 
+	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
 	if (!file)
 	{
@@ -38,7 +38,7 @@ void spiffsSave()
 
 void spiffsRead()
 {
-	File file = SPIFFS.open("garden.txt");
+	File file = SPIFFS.open("/garden.txt");
 
 	if (!file)
 	{
