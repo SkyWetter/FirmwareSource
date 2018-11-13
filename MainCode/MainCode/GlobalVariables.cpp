@@ -1,6 +1,35 @@
+/* <<<<< G L O B A L  V A R I A B L E S . C P P / .H
+
+[ Instantiates and holds all global variables for the program ]
+ 
+
+-For a given variable, add in a protoype in the header file with type extern in front :
+
+extern int myInt;
+
+-Then define the variable in the.cpp file :
+
+int myInt = 12; < --note, you still need to declare the variable type, but no longer need the extern signifier
+
+	- Arrays can be externed as well, but must be given a real number initializer as an array size within the header file(no variables)
+
+	- enums also may be externed, but the steps are a little unusual :
+
+In the header file, first create the enum prototype :
+
+	enum week { mon, tues, weds, thur, fri, sat }; < -- - We haven't instantiated a weekDays object, just created the definition for the enum
+
+	Then create an extern for an instance of the enum (also in the header)
+
+	extern enum week weekFive; < --weekFive is the actual instance of a 'week' type enum
+
+	Finally, in the cpp file, repeated the instantiation of the weekFive enum, without the extern
+
+	enum week weekFive;
+
+*/
 #include "GlobalVariables.h"
 #include <BluetoothSerial.h> 
-
 
 
 // ************* U S E R   D E F I N E D   V A R I A B L E S

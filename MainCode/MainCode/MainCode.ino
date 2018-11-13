@@ -97,9 +97,6 @@ void checkSystemState()
 
 		solarPowerTracker();
 
-
-		systemState = sleeping;
-
 		break;
 	}
 
@@ -107,10 +104,6 @@ void checkSystemState()
 	{
 
 		getSerialData();
-
-
-
-		systemState = sleeping;
 
 		break;
 	}
@@ -121,13 +114,6 @@ void checkSystemState()
 		//reference temperature and apply modfifier to watering durations
 		//open thread for flow sensor
 		//run spray program
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Watering Mode");
-		}
-
-
-		systemState_previous = systemState;
 
 		break;
 	}
@@ -139,13 +125,7 @@ void checkSystemState()
 		//allow solar
 		//prevent water until battery > 50%
 		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Low Power Mode");
-		}
-
-		systemState_previous = systemState;
-
+	
 		break;
 	}
 	}

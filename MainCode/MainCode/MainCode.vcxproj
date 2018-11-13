@@ -114,6 +114,7 @@
     <None Include="MainCode.ino">
       <FileType>CppCode</FileType>
     </None>
+    <None Include="Read.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GlobalVariables.h" />
