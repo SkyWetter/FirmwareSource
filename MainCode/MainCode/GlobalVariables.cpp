@@ -52,13 +52,14 @@ int currentDomeDirection = 0;
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
-const int SQUARES_PER_ROW = 7;
+const double metersPerSquare = 0.5;
+const int SQUARES_PER_ROW = 25;
 const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
 const int STEPS_PER_FULL_TURN = 400;
 
 int domeDefaultSpeed = 10;
 
-int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+int squareArray[TOTAL_SQUARES][6]; // [square id #][ {x,y,distance,angle,lowFlowTolerance,HighFlowTolerance} ]
 
 enum serialStates serialState;
 				// Used during serial error handling checks

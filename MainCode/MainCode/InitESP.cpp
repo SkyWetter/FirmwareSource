@@ -50,16 +50,22 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
+
+
 int serialBaud = 115200;
 
-int getFlow(int column, int row, int turretColumn, int turretRow);
+int getFlow(int column, int row, int turretColumn, int turretRow, int squareID);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
+void createSquareArray(int squaresPerRow);
+double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initPins();
+
 	initSerial();
+	initPins();
+	createSquareArray(SQUARES_PER_ROW);
 	systemState = sleeping;
 	systemState_previous = water;
 	// power management
@@ -157,16 +163,21 @@ void createSquareArray(int squaresPerRow)
 			squareArray[squareID][1] = row;
 
 			// Calculates flow needed to reach this square, stores it in array
-			squareArray[squareID][2] = getFlow(column, row, turretColumn, turretRow);
+			squareArray[squareID][2] = getFlow(column, row, turretColumn, turretRow,squareID);
 
 			// Calculates # of steps taken from home needed to make turret face square
 			squareArray[squareID][3] = convertAngleToStep(angleToSquare(column, row, turretColumn, turretRow));
-			Serial.println(squareArray[squareID][3]);
+			
+			double myDistance = distanceToSquare(column, row, turretColumn, turretRow);
+			Serial.printf("InitESP: CreateSquareArray: || SquareID: %d | Dist: %f | Flow: %d | lowFlow: %d | highFlow: %d \n",
+				squareID,myDistance,squareArray[squareID][2],squareArray[squareID][4],squareArray[squareID][5]);
 
 			squareID += 1;
-			printf("Square id: %d\n", squareID);
+			
 		}
 	}
+
+	//Serial.printf("SquareID: %d", squareID);
 }
 
 // S U B   F U N C T I O N -- distance to square
@@ -182,7 +193,7 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 
 	int squareCoords = (x * x) + (y * y);
 
-	return sqrt((double)squareCoords);
+	return sqrt((double)squareCoords) * metersPerSquare;
 }
 
 // S U B   F U N C T I O N -- angleToSquare
@@ -271,7 +282,7 @@ int convertAngleToStep(double angle)
 	else
 	{
 		double stepsDouble = angle / anglePerStep;   //Get number of steps to reach this angle starting from home)
-		Serial.println(stepsDouble);
+		
 		int steps = stepsDouble * 1000;
 
 		for (int i = 0; i < 3; i++)   //Rounds the number (including 3 sigfigs after the decimal point)
@@ -298,12 +309,17 @@ int convertAngleToStep(double angle)
 */
 
 
-int getFlow(int column, int row, int turretColumn, int turretRow)
+int getFlow(int column, int row, int turretColumn, int turretRow, int squareID)
 {
 
 	double squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
 	double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
+	
+	double lowDist = squareDistance * 0.98;
+	double highDist = squareDistance * 1.02;
 
+	squareArray[squareID][4] = 99857.81 - 23136.9*lowDist + 1636.316*pow(lowDist, 2); //Calc low tolerance for flow value
+	squareArray[squareID][5] = 99857.81 - 23136.9*highDist + 1636.316*pow(highDist, 2);//Calc high tolerance for flow value
 	return (int)flow;
 
 	// ** Other equations describing our curve **

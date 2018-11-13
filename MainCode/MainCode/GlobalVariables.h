@@ -61,8 +61,6 @@ extern int domeDefaultSpeed;
 
 /* Program State enums */
 
-
-
 enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand };   // State during getSerial fxn
 extern enum serialStates serialState;
 
@@ -77,9 +75,9 @@ extern enum systemStates systemState_previous;
 
 extern bool quickOff;  //Used in debug to flag something off to avoid repeat serial prints
 extern bool message;
-
+extern const double metersPerSquare;
 extern const int SQUARES_PER_ROW;
 extern const int TOTAL_SQUARES; 
 extern const int STEPS_PER_FULL_TURN;
 
-extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+extern int squareArray[625][6]; // [square id #][ {x,y,distance,angle} ]

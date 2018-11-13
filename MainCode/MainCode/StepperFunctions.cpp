@@ -51,7 +51,7 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-
+void stepperMove(int numberOfSteps, int speed);
 
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
 void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
@@ -275,11 +275,18 @@ void valveStepperOneStep()
 
 void shootSingleSquare()
 {
-	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
-	int targetStep = squareArray[getSquareID(singleSquareData)][3];
+	int thisSquare = getSquareID(singleSquareData);
+	int targetFlow = squareArray[thisSquare][2];
+	int targetStep = squareArray[thisSquare][3];
 
 	moveDome(targetStep);
+	
+	while (targetFlow < squareArray[thisSquare][4] || targetFlow > squareArray[thisSquare][5])
+	{
+		if (targetFlow < squareArray[thisSquare][4])
+		{
 
-	lowFlowTarget = 
+		}
+	}
 
 }
