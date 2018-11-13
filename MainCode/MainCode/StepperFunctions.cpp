@@ -123,6 +123,8 @@ void moveDome(int targetPosition)
 		setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
 		stepperMove(abs(targetPosition), domeDefaultSpeed);
 	}
+
+
 	
 }
 
@@ -140,6 +142,14 @@ void moveDome(int targetPosition, int speed, int accel, int current)
 // Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
 void moveDome(int stepsToMove, int direction)
 {
+	if (direction == CW)
+	{
+		setDomeDirection(CW);
+	}
+	else
+	{
+		setDomeDirection(CCW);
+	}
 	stepperMove(stepsToMove, domeDefaultSpeed);
 }
 
@@ -272,7 +282,7 @@ void valveStepperOneStep()
 
 
 /* S H O O T  F U N C T I O N S */
-
+/*
 void shootSingleSquare()
 {
 	int thisSquare = getSquareID(singleSquareData);
@@ -289,4 +299,4 @@ void shootSingleSquare()
 		}
 	}
 
-}
+}*/

@@ -16,6 +16,8 @@
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 
+#define CW 1
+#define CCW -1
 void getSerialData()
 {
 
@@ -313,6 +315,12 @@ void debugInputParse(char debugCommand)
 		SerialBT.println(last);
 
 		last = now.tv_sec;
+		break;
+	case 'u':
+		moveDome(30, CW);
+		break;
+	case 'v':
+		moveDome(15, CCW);
 		break;
 
 	}
