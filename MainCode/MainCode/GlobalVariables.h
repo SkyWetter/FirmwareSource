@@ -11,21 +11,18 @@
 #include "sys/time.h"
 #include "sdkconfig.h"
 
-// ************* U S E R   D E F I N E D   V A R I A B L E S
-// bluetooth
-extern BluetoothSerial SerialBT;
-extern byte stepperCase;
 
-// steppers
+
+extern BluetoothSerial SerialBT;
+
+extern int dome_maxPos_CW;
+extern int dome_minPos_CCW;
 extern int stepCountDome;
 extern int stepCountValve;
+extern int currentDomePosition;
+extern int currentDomeDirection;
+extern int domeDefaultSpeed;
 
-extern byte hallSensorDomeVal;
-extern byte hallSensorValveVal;
-
-// pulse counter
-extern double duration;
-extern int freq;
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
@@ -54,10 +51,7 @@ extern int squareIDInt;
 extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
-extern int currentDomePosition;
-extern int currentDomeDirection;
 
-extern int domeDefaultSpeed;
 
 /* Program State enums */
 

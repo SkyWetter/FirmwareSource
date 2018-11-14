@@ -15,6 +15,9 @@
 
 #define pulsePin 23
 
+
+double duration;
+
 // M I S C   F U N C T I O N S
 
 // CHAR TO INT 
