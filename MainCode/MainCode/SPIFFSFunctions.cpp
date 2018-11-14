@@ -12,17 +12,12 @@ void spiffsBegin()
 		Serial.println("An Error has occurred while mounting SPIFFS");
 		return;
 	}
-
-	//for (int i = 0; i < strlen(serialBedData); i++)
-	//{
-		Serial.println(serialBedData);
-	//}
-
-	//Serial.println();
 }
 
 void spiffsSave()
 {
+	bool addMore = true;
+
 	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
 	if (!file)
@@ -31,16 +26,29 @@ void spiffsSave()
 		return;
 	}
 
-	if (file.print(serialBedData))
+	while (addMore == true)
 	{
-		Serial.print("File was written: ");
-		Serial.println(serialBedData);
+		Serial.println("Enter string");
+
+		while (!Serial.available()) {}
+
+		while (Serial.available())
+		{
+			file.print(Serial.readString());
+		}
+
+		Serial.println("Press '0' to stop adding text, '1' to continue");
+
+		while (!Serial.available()) {}
+
+		if (Serial.read() == '0')
+		{
+			addMore = false;
+		}
 
 	}
-	else
-	{
-		Serial.println("File write failed");
-	}
+
+	Serial.println("File saved");
 
 	file.close();
 }
@@ -57,11 +65,8 @@ void spiffsRead()
 
 	while (file.available())
 	{
-		//spiffsBedData = file.read();
+		Serial.print(file.readString());
 	}
-
-	Serial.print("File content: ");
-	Serial.println(spiffsBedData);
 
 	file.close();
 }
