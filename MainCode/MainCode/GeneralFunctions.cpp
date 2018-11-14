@@ -38,6 +38,18 @@ int charToInt(char *thisChar, int thisCharLength)
 	return intConversion;
 }
 
+int charToInt(char *thisChar, int thisCharLength, int startingCharIndex)
+{
+
+	int intConversion = 0;
+	for (int i = startingCharIndex; i < thisCharLength; i++)
+	{
+		intConversion += ((thisChar[i] - '0') * pow(10, thisCharLength - 1 - i));
+	}
+
+	return intConversion;
+}
+
 /* Get Sign
  *
  *  takes an int, returns sign (-1 = negative, 1 = positive, 0 = neither)

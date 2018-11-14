@@ -96,73 +96,6 @@ void valveGoHome()
 	SerialBT.println("valve go home");
 }
 
-// M O V E  D O M E  F U N C T I O N S 
-
-//Move dome to a given position (a position is defined as a number of steps away from the home position)
-void moveDome(int targetPosition)
-{
-	int finalPosition = targetPosition - currentDomePosition;
-	Serial.printf("StprFxns: moveDome (Abs): preparing to move, CurPos: %d | TarPos: %d | PosChange: %d \n", currentDomePosition, targetPosition, finalPosition);
-	setDomeDirection(getSign(finalPosition));		//Sets dome direction CW or CCW
-	finalPosition = abs(finalPosition);					// Arduino recommends not performing calculations inside the abs function,  
-														// as you can a get strange results and errors
-	stepperMove(abs(finalPosition), domeDefaultSpeed);
-
-	Serial.printf("StprFxns: moveDome (Abs): Dome moved, current position is now %d \n", currentDomePosition);
-}
-
-//Move dome to a given position with non-default speed, accel and current values
-void moveDome(int targetPosition, int speed, int accel, int current)
-{
-	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-
-}
-
-// Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
-void moveDome(int stepsToMove, int direction)
-{
-	if (direction == CW)
-	{
-		setDomeDirection(CW);
-	}
-	else
-	{
-		setDomeDirection(CCW);
-	}
-	stepperMove(stepsToMove, domeDefaultSpeed);
-}
-
-
-// Move dome a given number of steps in a given direciton, with non-default speed, accel and current values)
-void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
-{
-	;
-}
-
-
-void stepperMove(int numberOfSteps,int speed)
-{
-	 
-	for (int i = 0; i < numberOfSteps; i++)
-	{
-		if (currentDomeDirection == CW && currentDomePosition < 400 ||
-			currentDomeDirection == CCW && currentDomePosition > 0)
-		{
-
-			stepperDomeOneStepHalfPeriod(speed);
-			Serial.printf("StprFxns: stepperMove: curDomePos: %d \n", currentDomePosition);
-
-		}
-		else
-		{
-			if (currentDomeDirection == CW) { Serial.printf("StprFxns: stepperMove: Can't move any further CW"); }
-			else { Serial.printf("StprFxns: stepperMove: Can't move any further CCW"); }
-			break;
-		}
-		
-    }
-}
 
 
 // M A I N    F U N  C T I O N  --- STEPPER ONE STEP
@@ -210,18 +143,6 @@ void stepperValveOneStepHalfPeriod(int hf)
 	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
 }
 
-void setDomeDirection(int direction)
-{
-	if (direction == CW)
-	{
-		stepperDomeDirCW();
-	}
-	else if (direction == CCW)
-	{
-		stepperDomeDirCCW();
-	}
-
-}
 
 void stepperDomeDirCW()
 {
@@ -268,6 +189,106 @@ void valveStepperOneStep()
 }
 
 
+// M O V E  D O M E  F U N C T I O N S 
+//
+
+//Move dome to a given position (a position is defined as a number of steps away from the home position)
+// Updates currentDomeDirection and currentDomePosition, will take domePosition above 400 or below 0
+
+void moveDome(int targetPosition)
+{
+	
+	
+		int finalPosition = targetPosition - currentDomePosition;
+		Serial.printf("StprFxns: moveDome (Abs): preparing to move, CurPos: %d | TarPos: %d | PosChange: %d \n", currentDomePosition, targetPosition, finalPosition);
+		setDomeDirection(getSign(finalPosition));		//Sets dome direction CW or CCW
+		finalPosition = abs(finalPosition);					// Arduino recommends not performing calculations inside the abs function,  
+															// as you can a get strange results and errors
+		stepperMove(abs(finalPosition), domeDefaultSpeed);
+
+		Serial.printf("StprFxns: moveDome (Abs): Dome moved, current position is now %d \n", currentDomePosition);
+	
+}
+
+
+//Move dome to a given position with non-default speed, accel and current values
+// Currently unimplementd
+void moveDome(int targetPosition, int speed, int accel, int current)
+{
+	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
+	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+
+}
+
+
+// Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
+// Will take any number of steps, but will stop turning if attempting beyond the bounds of turret
+
+void moveDome(int stepsToMove, int direction)
+{
+	// Set direction of dome
+	if (direction == CW)
+	{
+		setDomeDirection(CW);
+	}
+	else
+	{
+		setDomeDirection(CCW);
+	}
+	//Move the dome by given steps by given speed;
+	stepperMove(stepsToMove, domeDefaultSpeed);
+}
+
+
+// Move dome a given number of steps in a given direciton, with non-default speed, accel and current values)
+void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
+{
+	;
+}
+
+
+void stepperMove(int numberOfSteps, int speed)
+{
+
+	for (int i = 0; i < numberOfSteps; i++)
+	{
+		if (currentDomeDirection == CW && currentDomePosition < 400 ||
+			currentDomeDirection == CCW && currentDomePosition > 0)
+		{
+
+			stepperDomeOneStepHalfPeriod(speed);
+			Serial.printf("StprFxns: stepperMove: curDomePos: %d \n", currentDomePosition);
+
+		}
+		else
+		{
+			if (currentDomeDirection == CW) { Serial.printf("StprFxns: stepperMove: Can't move any further CW"); }
+			else { Serial.printf("StprFxns: stepperMove: Can't move any further CCW"); }
+			break;
+		}
+
+	}
+}
+
+
+// S E T  D O M E  D I R E C T I O N
+// Pass a direction CW = 1, CCW = -1), sets the stepper direction and stores the current value globaly
+// as currentDomeDirection
+
+void setDomeDirection(int direction)
+{
+	if (direction == CW)
+	{
+		stepperDomeDirCW();
+	}
+	else if (direction == CCW)
+	{
+		stepperDomeDirCCW();
+	}
+
+}
+
+
 /* S H O O T  F U N C T I O N S */
 /*
 void shootSingleSquare()
@@ -283,7 +304,7 @@ void shootSingleSquare()
 		if (targetFlow < squareArray[thisSquare][4])
 		{
 
-		}
+		} 
 	}
 
 }*/
