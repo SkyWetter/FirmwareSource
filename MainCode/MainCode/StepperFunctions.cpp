@@ -54,25 +54,18 @@
 void stepperMove(int numberOfSteps, int speed);
 
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
-void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
+void stepperGoHome(byte x, byte y, byte z, byte s)   // x STEP, y DIR, z EN, s HALL
 {
 	// SET stepper CW
-	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
+	digitalWrite(z, HIGH);			// ENSURE STEPPER IS NOT IN SLEEP MODE
 
-	//stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
-
-	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(s) == 1)		// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
 		delay(5);
 		digitalWrite(x, LOW);
 		delay(5);
 	}
-
-	//digitalWrite(z, HIGH);																	// put stepper back to sleep
-	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
 
 }
 // S U B   F U N C T I O N S --- dome and valve go home
@@ -82,16 +75,10 @@ void domeGoHome()
 	stepperDomeOneStepHalfPeriod(5);
 	stepperDomeOneStepHalfPeriod(5);
 
-
-	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
-	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
-
+	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);		// dome stepper go to home posisition
 	stepperDomeOneStepHalfPeriod(10);
-	//stepperDomeOneStepHalfPeriod(10);
 
-																															//digitalWrite(stepperDomeDirPin, LOW);		
 	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
-	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
 	digitalWrite(stepperDomeSlpPin, LOW);
 
 	stepCountDome = 0;
@@ -114,22 +101,15 @@ void valveGoHome()
 //Move dome to a given position (a position is defined as a number of steps away from the home position)
 void moveDome(int targetPosition)
 {
-	int finalPosition = targetPosition -= currentDomePosition;
-	finalPosition = abs(finalPosition);  // Arduino recommends not performing calculations inside the abs function, as you can a get strange 
-										// results/errors
-	while (currentDomePosition != finalPosition)
-	{
-		targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-		setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
-		stepperMove(abs(targetPosition), domeDefaultSpeed);
-	}
+	int finalPosition = targetPosition - currentDomePosition;
+	Serial.printf("StprFxns: moveDome (Abs): preparing to move, CurPos: %d | TarPos: %d | PosChange: %d \n", currentDomePosition, targetPosition, finalPosition);
+	setDomeDirection(getSign(finalPosition));		//Sets dome direction CW or CCW
+	finalPosition = abs(finalPosition);					// Arduino recommends not performing calculations inside the abs function,  
+														// as you can a get strange results and errors
+	stepperMove(abs(finalPosition), domeDefaultSpeed);
 
-
-	
+	Serial.printf("StprFxns: moveDome (Abs): Dome moved, current position is now %d \n", currentDomePosition);
 }
-
-
-
 
 //Move dome to a given position with non-default speed, accel and current values
 void moveDome(int targetPosition, int speed, int accel, int current)
@@ -163,9 +143,24 @@ void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
 
 void stepperMove(int numberOfSteps,int speed)
 {
+	 
 	for (int i = 0; i < numberOfSteps; i++)
 	{
-		stepperDomeOneStepHalfPeriod(speed);
+		if (currentDomeDirection == CW && currentDomePosition < 400 ||
+			currentDomeDirection == CCW && currentDomePosition > 0)
+		{
+
+			stepperDomeOneStepHalfPeriod(speed);
+			Serial.printf("StprFxns: stepperMove: curDomePos: %d \n", currentDomePosition);
+
+		}
+		else
+		{
+			if (currentDomeDirection == CW) { Serial.printf("StprFxns: stepperMove: Can't move any further CW"); }
+			else { Serial.printf("StprFxns: stepperMove: Can't move any further CCW"); }
+			break;
+		}
+		
     }
 }
 
@@ -186,15 +181,7 @@ void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int 
 	//digitalWrite(rgbLedGreen, HIGH);
 	delay(halfFreq);
 
-	if (currentDomeDirection == CW)
-	{
-		currentDomePosition += 1;
-	}
-	
-	else if (currentDomePosition == CCW)
-	{
-		currentDomePosition -= 1;
-	}
+	currentDomePosition += currentDomeDirection;
 
 	if (currentDomePosition > 400) { currentDomePosition = 400; }
 	else if (currentDomePosition < 0) { currentDomePosition = 0; }

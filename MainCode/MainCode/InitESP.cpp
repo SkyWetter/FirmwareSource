@@ -52,7 +52,7 @@
 
 
 
-int serialBaud = 115200;
+int serialBaud = 500000;
 
 int getFlow(int column, int row, int turretColumn, int turretRow, int squareID);
 int convertAngleToStep(double angle);

@@ -2,10 +2,7 @@
 #include <BluetoothSerial.h> 
 
 
-
-// ************* U S E R   D E F I N E D   V A R I A B L E S
-// bluetooth
-BluetoothSerial SerialBT;
+BluetoothSerial SerialBT;  // Given name for the ESP's serialBT object
 byte stepperCase;
 
 // steppers

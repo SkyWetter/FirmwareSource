@@ -322,6 +322,12 @@ void debugInputParse(char debugCommand)
 	case 'v':
 		moveDome(15, CCW);
 		break;
+	case 'w':
+		moveDome(200);
+		break;
+	case 'x':
+		moveDome(120);
+		break;
 
 	}
 }

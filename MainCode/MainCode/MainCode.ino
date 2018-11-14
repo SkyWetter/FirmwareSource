@@ -87,73 +87,57 @@ void checkSystemState()
 {
 	switch (systemState)
 	{
-	case sleeping:
-	{
-
-		if (SerialBT.available() || Serial.available())
+		case sleeping:
 		{
-			systemState = program;
+
+			if (SerialBT.available() || Serial.available())
+			{
+				systemState = program;
+			}
+
+			break;
 		}
 
-		break;
-	}
-
-	case solar:
-	{
-
-		solarPowerTracker();
-
-
-		systemState = sleeping;
-
-		break;
-	}
-
-	case program:
-	{
-
-		getSerialData();
-
-
-
-		systemState = sleeping;
-
-		break;
-	}
-
-	case water:
-	{
-		//load correct instruction set for date and time
-		//reference temperature and apply modfifier to watering durations
-		//open thread for flow sensor
-		//run spray program
-		if (systemState_previous != systemState)
+		case solar:
 		{
-			Serial.printf("SystemState: Watering Mode");
+
+			solarPowerTracker();
+
+
+			systemState = sleeping;
+
+			break;
 		}
 
-
-		systemState_previous = systemState;
-
-		break;
-	}
-
-	case low_power:
-	{
-		//close the valve
-		//set LED to red
-		//allow solar
-		//prevent water until battery > 50%
-		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
+		case program:
 		{
-			Serial.printf("SystemState: Low Power Mode");
+
+			getSerialData();
+
+			break;
 		}
 
-		systemState_previous = systemState;
+		case water:
+		{
+			//load correct instruction set for date and time
+			//reference temperature and apply modfifier to watering durations
+			//open thread for flow sensor
+			//run spray program
+		
 
-		break;
-	}
+			break;
+		}
+
+		case low_power:
+		{
+			//close the valve
+			//set LED to red
+			//allow solar
+			//prevent water until battery > 50%
+			  //>50% -> perform last spray cycle
+
+			break;
+		}
 	}
 }
 
