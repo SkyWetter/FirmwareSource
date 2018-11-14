@@ -59,6 +59,7 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
+char myArray[356];
 
 void setup()
 {
@@ -66,14 +67,19 @@ void setup()
 				// starting systemState (see InitESP.cpp)
 	Serial.println("ESP Initialized...");
 	domeGoHome(); 
-
+	  
+	for (int i = 0; i < 355; i++)
+	{
+		myArray[i] = 'C';
+	}
+	myArray[355] = 0x00;
 }
 
 
 void loop()
 {	
 
-		
+	printString(myArray, 34);
 	//checkSystemState();
 }
 
