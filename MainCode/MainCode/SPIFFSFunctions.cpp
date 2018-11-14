@@ -12,6 +12,8 @@ void spiffsBegin()
 		Serial.println("An Error has occurred while mounting SPIFFS");
 		return;
 	}
+
+	//Serial.println(serialBedData);
 }
 
 void spiffsSave()
@@ -24,7 +26,7 @@ void spiffsSave()
 		return;
 	}
 
-	if (file.println(serialBedData))
+	if (file.print(serialBedData))
 	{
 		Serial.print("File was written: ");
 		Serial.println(serialBedData.length());
