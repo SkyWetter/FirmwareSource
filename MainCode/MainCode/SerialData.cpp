@@ -307,12 +307,12 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 't':
-		gettimeofday(&now, NULL);
+		gettimeofday(&RTC_TIME_now, NULL);
 
-		SerialBT.println(now.tv_sec);
-		SerialBT.println(last);
+		SerialBT.println(RTC_TIME_now.tv_sec);
+		SerialBT.println(RTC_TIME_last);
 
-		last = now.tv_sec;
+		RTC_TIME_last = RTC_TIME_now.tv_sec;
 		break;
 
 	}

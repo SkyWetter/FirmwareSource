@@ -32,8 +32,8 @@ extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3
 
 // power management
 // RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
-extern RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
-extern struct timeval now;
+extern RTC_DATA_ATTR time_t RTC_TIME_last;                 // remember last boot in RTC Memory
+extern struct timeval RTC_TIME_now;
 
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 

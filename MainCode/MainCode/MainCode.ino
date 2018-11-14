@@ -4,6 +4,8 @@
 //  october 31, 2018
 
 
+// http://williams.comp.ncat.edu/comp450/pthreadPC.c <--- pthreads example
+
 // *********   P R E P R O C E S S O R S
 #include <Stepper.h>
 #include <BluetoothSerial.h>
@@ -17,12 +19,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include "sys/time.h"
 #include "SolarPowerTracker.h"
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+#include "pthread.h"
+#include "config.h"
+
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -56,23 +60,107 @@
 #define rgbLedRed 25
 
 // solar panel
-#define currentSense A6
+#define currentSense A61
 #define solarPanelVoltage A7
 
+pthread_t thread1;
+int returnValue;
+int finished = false;
+
+void *inc_x(void *x_void_ptr)
+{
+	int *x_ptr = (int *)x_void_ptr;
+	while (++(*x_ptr) < 10000);
+
+	printf("x inc finished\n");
+
+	return NULL;
+}
+
+
+void *printThreadID(void *threadid)
+{
+	Serial.print((int)threadid);
+	Serial.println("a ");
+}
+
+int testVar1 = 0;
+int testVar2 = 0;
+pthread_t inc_x_thread;
+bool threadCreated = false;
 
 void setup()
 {
-	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
-				// starting systemState (see InitESP.cpp)
-	Serial.println("ESP Initialized...");
-	domeGoHome(); 
+	Serial.begin(115200); 
+
+	delay(250); // Delay must be input to insure that the Serial
+	printf("INIT x: %d, y: %d\n", testVar1, testVar2);
+	
+	
+	
+
+	/*
+	printf("y increment finished\n");
+
+	if (pthread_join(inc_x_thread, NULL))
+	{
+		printf("Error joining thread\n");
+
+	}
+	*/
 
 }
 
 
 void loop()
 {
-	checkSystemState();
+	
+	printf("X is: %d\n",testVar1);
+
+	if (!threadCreated)
+	{
+		if (pthread_create(&inc_x_thread, NULL, inc_x, &testVar1))
+		{
+			printf("error creating thread\n");
+
+		}
+		threadCreated = true;
+	}
+	
+	/*
+	
+	if (firstRun)
+	{
+		Serial.println("inFirstRun");
+		if (Serial.available())
+		{
+			Serial.println("Sweet");
+			firstRun = false;
+			for (int i = 0; i < 4; i++)
+			{
+				returnValue = pthread_create(&threads[i], NULL, printThreadID, (void *)i);
+				if (returnValue)
+				{
+					Serial.println("An error has occured");
+				}
+			}
+		}
+	}
+
+	else
+	{
+
+		if (Serial.available())
+		{
+			char newChar = Serial.read();
+
+			if (newChar == 0)
+			{
+
+			}
+		}
+	}
+	//checkSystemState();*/
 }
 
 
