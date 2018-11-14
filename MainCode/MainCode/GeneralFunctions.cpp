@@ -103,16 +103,16 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 		length++;
 		i++;
 	}
-
+	/* ///For debug only
 	if (charArray[i] == 0x00)
 	{
 		printf("Found null at pos %d\n", i);
-	}
+	}*/
 
 	if (!lengthIncludesNull)
 	{
 		return length;
-		printf("Length of array is %d\n", length);
+		//printf("Length of array is %d\n", length);
 	}
 
 	else
