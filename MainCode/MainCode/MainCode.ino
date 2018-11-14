@@ -28,6 +28,7 @@
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
+#define TEST 45
 
 // flow meter
 #define pulsePin 23
