@@ -59,9 +59,37 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
+TaskHandle_t Task_InputRead_Frequency;
+
+int myInc = 0;
+int secondsElapsed = 0;
+void getValveFrequency(void * parameter)
+{
+	
+	while (1) 
+	{
+		delay(100);
+		myInc += 1;
+		if (myInc >= 100);
+		{
+
+			Serial.printf("%d seconds have elapsed\n", secondsElapsed);
+			//vTaskDelete(Task_InputRead_Frequency);
+		}
+	}
+}
 
 void setup()
 {
+	xTaskCreatePinnedToCore(
+		getValveFrequency,
+		"Frequency_Task",
+		1000,
+		NULL,
+		1,
+		&Task_InputRead_Frequency,
+		0);
+
 	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
 				// starting systemState (see InitESP.cpp)
 	Serial.println("ESP Initialized...");
