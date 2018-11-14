@@ -24,9 +24,11 @@ void spiffsSave()
 		return;
 	}
 
-	if (file.println("12345"))
+	if (file.println(serialBedData))
 	{
-		Serial.println("File was written");
+		Serial.print("File was written: ");
+		Serial.println(serialBedData.length());
+
 	}
 	else
 	{
@@ -46,18 +48,13 @@ void spiffsRead()
 		return;
 	}
 
-	Serial.print("File Content: ");
-
 	while (file.available())
 	{
-		Serial.print(file.read());
-		spiffsBedData += file.read();
+		spiffsBedData += file.readString();
 	}
 
-	Serial.println();
-
-	Serial.print("spiffsBedData: ");
-	Serial.println(spiffsBedData);
+	Serial.print("File content: ");
+	Serial.println(spiffsBedData.length());
 
 	file.close();
 }
