@@ -13,7 +13,12 @@ void spiffsBegin()
 		return;
 	}
 
-	//Serial.println(serialBedData);
+	//for (int i = 0; i < strlen(serialBedData); i++)
+	//{
+		Serial.println(serialBedData);
+	//}
+
+	//Serial.println();
 }
 
 void spiffsSave()
@@ -29,7 +34,7 @@ void spiffsSave()
 	if (file.print(serialBedData))
 	{
 		Serial.print("File was written: ");
-		Serial.println(serialBedData.length());
+		Serial.println(serialBedData);
 
 	}
 	else
@@ -52,11 +57,11 @@ void spiffsRead()
 
 	while (file.available())
 	{
-		spiffsBedData += file.readString();
+		//spiffsBedData = file.read();
 	}
 
 	Serial.print("File content: ");
-	Serial.println(spiffsBedData.length());
+	Serial.println(spiffsBedData);
 
 	file.close();
 }
