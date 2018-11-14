@@ -57,3 +57,66 @@ void doPulseIn()
 	//SerialBT.println(duration);
 
 }
+
+void printString(char charArray[],int charsPerLine)
+{
+	int length = getArrayLength(charArray, false);
+	int charsPrinted = 0;
+
+	while (length > charsPerLine)
+	{
+		for (int i = 0; i < charsPerLine; i++)
+		{
+			printf("%c",charArray[i + charsPrinted]);
+		}
+
+		printf("\n");
+		charsPrinted += charsPerLine;
+		length -= charsPerLine;
+	}
+
+	if (length > 0)
+	{
+		for (int j = 0; j < length; j++)
+		{
+			printf("%c", charArray[j + charsPrinted]);
+		}
+
+		printf("\n");
+	}
+
+	else
+	{
+		printf("\n");
+	}
+	
+
+}
+
+int getArrayLength(char charArray[],bool lengthIncludesNull)
+{
+	int i = 0;
+	int length = 0;
+
+	while (charArray[i] != 0x00)
+	{
+		length++;
+		i++;
+	}
+
+	if (charArray[i] == 0x00)
+	{
+		printf("Found null at pos %d\n", i);
+	}
+
+	if (!lengthIncludesNull)
+	{
+		return length;
+		printf("Length of array is %d\n", length);
+	}
+
+	else
+	{
+		return length + 1;
+	}
+}
