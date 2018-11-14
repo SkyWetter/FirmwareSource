@@ -12,3 +12,5 @@
 int charToInt(char *thisChar, int thisCharLength);
 int getSign(int x);
 void doPulseIn();
+int getArrayLength(char charArray[], bool lengthIncludesNull);
+void printString(char charArray[], int charsPerLine);

@@ -71,8 +71,10 @@ void setup()
 
 
 void loop()
-{
-	checkSystemState();
+{	
+
+		
+	//checkSystemState();
 }
 
 
