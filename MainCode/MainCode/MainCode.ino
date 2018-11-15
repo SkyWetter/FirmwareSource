@@ -104,7 +104,7 @@ void checkSystemState()
 
 	case program:
 	{
-		Serial.println("main code program case");
+		//Serial.println("main code program case");
 		getSerialData();
 
 		break;
