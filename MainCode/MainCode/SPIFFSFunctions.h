@@ -1,5 +1,6 @@
 #pragma once
 
 void spiffsBegin();
-void spiffsSave();
+bool spiffsSave(char array[], int arraySize);
+bool spiffsAppend(char array[], int arraySize);
 void spiffsRead();

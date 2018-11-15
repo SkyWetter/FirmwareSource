@@ -4,7 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "GlobalVariables.h"
+#include "GeneralFunctions.h"
 
+
+//initialize the SPIFFS system
 void spiffsBegin()
 {
 	if (!SPIFFS.begin(true))
@@ -14,9 +17,10 @@ void spiffsBegin()
 	}
 }
 
-void spiffsSave()
+//create the SPIFFS save file and populate with first 
+bool spiffsSave(char array[], int arraySize)
 {
-	bool addMore = true;
+	bool success = false;
 
 	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
@@ -26,31 +30,59 @@ void spiffsSave()
 		return;
 	}
 
-	while (addMore == true)
+	for (int i = 0; i < arraySize; i++)
 	{
-		Serial.println("Enter string");
-
-		while (!Serial.available()) {}
-
-		while (Serial.available())
-		{
-			file.print(Serial.readString());
-		}
-
-		Serial.println("Press '0' to stop adding text, '1' to continue");
-
-		while (!Serial.available()) {}
-
-		if (Serial.read() == '0')
-		{
-			addMore = false;
-		}
-
+		file.print(array[i]);
 	}
 
-	Serial.println("File saved");
+	if(file.size() == arraySize)
+	{
+		Serial.println("File content was saved");
+		spiffsSize = arraySize;
+		success = true;
+	}
+	else
+	{
+		Serial.println("File save failed");
+	}
 
 	file.close();
+
+	return success;
+}
+
+bool spiffsAppend(char array[], int arraySize)
+{
+	bool success = false;
+
+	File file = SPIFFS.open("/garden.txt", FILE_APPEND);
+
+	if (!file)
+	{
+		Serial.println("There was an error opening the file for appending");
+		return;
+	}
+
+	for (int i = 0; i < arraySize; i++)
+	{
+		file.print(array[i]);
+	}
+
+	spiffsSize += arraySize;
+
+	if (file.size() == arraySize)
+	{
+		Serial.println("File content was saved");
+		success = true;
+	}
+	else
+	{
+		Serial.println("File save failed");
+	}
+
+	file.close();
+
+	return success;
 }
 
 void spiffsRead()
@@ -59,7 +91,7 @@ void spiffsRead()
 
 	if (!file)
 	{
-		Serial.println("Failed to open file for reading");
+		Serial.println("There was an error opening the file for reading");
 		return;
 	}
 
@@ -68,8 +100,7 @@ void spiffsRead()
 		Serial.print(file.readString());
 	}
 
+	//printString((char*)file.read(), 20);  //try this
+
 	file.close();
 }
-
-
-
