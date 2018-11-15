@@ -298,7 +298,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'h':
-		doPulseIn();
+		//doPulseIn();
 		Serial.print("frequency is ");
 		Serial.println(freq);
 		Serial.println("exiting pulseIn");

@@ -51,7 +51,6 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
-
 int serialBaud = 115200;
 
 int getFlow(int column, int row, int turretColumn, int turretRow);
@@ -62,11 +61,12 @@ void initESP()
 {
 	initSerial();
 	initPins();
-	
+	initThreads();
 	systemState = sleeping;
 	
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+
 }
 
 
@@ -139,6 +139,28 @@ void initPins()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
+void initThreads()
+{
+	//multiple threads
+	TaskHandle_t Task1;
+
+	xTaskCreatePinnedToCore(
+		codeForTask1,
+		"Task1",
+		1000,
+		NULL,
+		1,
+		&Task1,                   /* Task handle to keep track of created task */
+		0);                       /* Core */
+}
+
+void codeForTask1(void * parameter)
+{
+	while (1)
+	{
+		doPulseIn();
+	}
+}
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
 * Initializes the array of squares on startup

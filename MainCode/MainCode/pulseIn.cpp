@@ -50,7 +50,7 @@
 
 void doPulseIn()
 {
-	Serial.println("pulseIn begin");
+	//Serial.println("pulseIn begin");
 
 	int pulseStart;			//gets set when the pulse pin goes high
 	bool pulseState;		//the current pulse state of the pin starts unknown
