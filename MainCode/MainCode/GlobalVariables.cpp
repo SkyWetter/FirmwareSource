@@ -11,13 +11,13 @@ byte stepperCase;
 // steppers
 int stepCountDome = 0;
 int stepCountValve = 0;
-
+ 
 byte hallSensorDomeVal;
 byte hallSensorValveVal;
 
 // pulse counter
 double duration;
-int freq;
+float freq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7

@@ -102,7 +102,7 @@ void getSerialData()
 		break;
 
 	case debugCommand:
-
+		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
 
 		break;
@@ -299,6 +299,9 @@ void debugInputParse(char debugCommand)
 
 	case 'h':
 		doPulseIn();
+		Serial.print("frequency is ");
+		Serial.println(freq);
+		Serial.println("exiting pulseIn");
 		break;
 
 	case 's':
