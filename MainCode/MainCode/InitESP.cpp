@@ -13,8 +13,6 @@
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
 
-
-
 #define GPIO_INPUT_IO_TRIGGER 0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION 10  // sleep 30 seconds and then wake up
 #define CCW -1
@@ -60,10 +58,11 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initPins();
 	initSerial();
+	initPins();
+	
 	systemState = sleeping;
-	systemState_previous = water;
+	
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
 }

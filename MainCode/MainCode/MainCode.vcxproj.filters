@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MainCode.ino" />
+    <None Include="Read.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MainCode.vsarduino.h">
