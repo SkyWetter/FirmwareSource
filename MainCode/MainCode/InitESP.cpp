@@ -13,7 +13,8 @@
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
 #include "driver/gpio.h"
-
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 
 
 
@@ -142,9 +143,9 @@ void initPins()
 void initThreads()
 {
 	//multiple threads
-	TaskHandle_t Task1;
+	TaskHandle_t Task1;				//creating the handle for Task1
 
-	xTaskCreatePinnedToCore(
+	xTaskCreatePinnedToCore(		//creating Task1 and pinning it to core 0
 		codeForTask1,
 		"Task1",
 		1000,
@@ -154,10 +155,16 @@ void initThreads()
 		0);                       /* Core */
 }
 
-void codeForTask1(void * parameter)
+void codeForTask1(void * parameter)						//speecial code for task1
 {
 	while (1)
 	{
+
+
+		TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;		//feed the watchdoggy
+		TIMERG0.wdt_feed = 1;
+		TIMERG0.wdt_wprotect = 0;
+
 		doPulseIn();
 	}
 }

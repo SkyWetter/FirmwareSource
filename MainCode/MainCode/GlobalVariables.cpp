@@ -47,6 +47,7 @@ byte hallSensorValveVal;
 // pulse counter
 double duration;
 float freq;
+float oldfreq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7

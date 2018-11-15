@@ -59,7 +59,8 @@ void doPulseIn()
 	float pulseTime = 0;	// time of pulse for math
 	int newPulseLength = 0;	// continous pulse time
 	
-	while (begin + 1000 >= millis()) {					//if time is available do the things
+
+	while (begin + 500 >= millis()) {					//if time is available do the things
 		//while(1){
 
 			//delay(1);
@@ -78,7 +79,7 @@ void doPulseIn()
 				waitTime = millis();					//set wait timer
 				delay(4);								//this delay is only needed for button debugging	
 				//Serial.println("pulse detected");
-				while (pulseState == gpio_get_level(pulsePin) && waitTime + 1000 >= millis()) {			//while the pin is still high and timer is avail
+				while (pulseState == gpio_get_level(pulsePin) && waitTime + 500 >= millis()) {			//while the pin is still high and timer is avail
 
 					newPulseLength = millis();			//slot in a new value for pulse length
 					//Serial.println("reading pulse");
@@ -88,19 +89,23 @@ void doPulseIn()
 				pulseStart = millis();						//reset timer incase skips while loop next time
 				//Serial.println("pulse complete");
 				//Serial.print("pulse length is");
+
+				if (pulseTime >= 500) { pulseTime = 0; }
+				if (pulseTime > 0) {							//only do math if pulse is not zero
+					//Serial.print("i try done math ");
+					freq = 500 / pulseTime;						// 500 because a pulse is 1/2 cycle
+				}
+				else {
+					freq = 0;
+				}
 				//Serial.println(pulseTime);
 			}
 		}
 	}
 	//Serial.print("pulse length final is ");
 	//Serial.println(pulseTime);
-	if (pulseTime > 0) {							//only do math if pulse is not zero
-		//Serial.print("i try done math ");
-		freq = 500 / pulseTime;						// 500 because a pulse is 1/2 cycle
-	}
-	else {
-		freq = 0;
-	}
+
+	
 	//Serial.print("frequency is ");
 	//Serial.println(freq);
 	//Serial.println("exiting pulseIn");

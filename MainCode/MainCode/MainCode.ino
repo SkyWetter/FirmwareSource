@@ -104,6 +104,10 @@ void checkSystemState()
 
 	case program:
 	{
+		if (freq != oldfreq) {
+			Serial.println(freq);
+			oldfreq = freq;
+		}
 		//Serial.println("main code program case");
 		getSerialData();
 
