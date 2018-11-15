@@ -22,7 +22,6 @@ void getSerialData()
 
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
-
 		char incomingChar;
 		
 		if (SerialBT.available())
@@ -122,12 +121,10 @@ void getSerialData()
 
 		parseInput();
 
-
 		break;
 
 	default:;
 	}
-
 }
 
 
@@ -136,7 +133,7 @@ void getSerialData()
 
 void parseInput()
 {
-	Serial.println("Entering case #");
+	Serial.print("Entering case # - header array: #");
 
 	int j = 11;
 	int length;
@@ -147,32 +144,33 @@ void parseInput()
 	for (int i = 1; i < 11; i++)
 	{
 		headerArray[i] = Serial.read();
+		Serial.print(headerArray[i]);
 	}
 
-	Serial.println("Fail 1");
+	Serial.println();
+	Serial.print("String length, array: ");
 
 	//pull out string length
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		charNumArray[i] = headerArray[i + 5];
+		charNumArray[i] = headerArray[i + 6];
+		Serial.print(charNumArray[i]);
 	}
 
-	length = charToInt(charNumArray, false);
+	length = charToInt(charNumArray, 4);
 
-	Serial.println("Fail 2");
+	Serial.println();
+	Serial.print("String length, conversion: ");
+	Serial.println(length);
 
 	//create new array to match
 	input2DArray[input2DArrayPosition] = new char[length + 1];
-
-	Serial.println("Fail 3");
 
 	//replace header chars
 	for (int i = 0; i < 11; i++)
 	{
 		input2DArray[input2DArrayPosition][i] = headerArray[i];
 	}
-
-	Serial.println("Fail 4");
 
 	//pull rest of data  --- replace Serial w/ Serial.BT
 	while (Serial.available())
@@ -181,8 +179,7 @@ void parseInput()
 		j++;
 	}
 
-	Serial.println("Fail 5");
-
+	//print entire string from array
 	for (int i = 0; i < length; i++)
 	{
 		Serial.print(input2DArray[input2DArrayPosition][i]);
@@ -193,7 +190,8 @@ void parseInput()
 
 	input2DArrayPosition++;
 
-	serialState = parseGarden;
+	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
+	//serialState = doNothing;
 }
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
