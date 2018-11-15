@@ -13,6 +13,41 @@
 #include "sys/time.h"
 #include "sdkconfig.h"
 
+#define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
+#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
+#define CCW -1
+#define CW  1
+
+// flow meter
+#define pulsePin 23
+#define SAMPLES 4096
+
+// dome stepper
+#define stepperDomeDirPin 19
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+// valve stepper
+#define stepperValveDirPin 5
+#define stepperValveStpPin 17
+#define stepperValveSlpPin 15
+#define hallSensorValve 4
+#define stepperValveCrntPin 12
+
+// wake-up push button
+#define wakeUpPushButton GPIO_NUM_13
+
+// rgb led
+#define rgbLedBlue 27
+#define rgbLedGreen 26
+#define rgbLedRed 25
+
+// solar panel
+#define currentSense A6
+#define solarPanelVoltage A7
+
 
 void solarPowerTracker()
 {

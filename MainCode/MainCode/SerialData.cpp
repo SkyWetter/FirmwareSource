@@ -24,6 +24,7 @@ void getSerialData()
 	{
 
 		char incomingChar;
+		
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
@@ -33,6 +34,7 @@ void getSerialData()
 			incomingChar = Serial.read();
 
 		}
+		
 		switch (incomingChar)
 		{
 		case '*':
@@ -45,8 +47,8 @@ void getSerialData()
 			//Grabs a 10-byte single square packet from the serial buffer
 			for (int i = 0; i < 9; i++)  //
 			{
-
 				incomingChar = SerialBT.read();
+				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
 					Serial.printf("incoming char was an illegal character \n");
@@ -62,8 +64,48 @@ void getSerialData()
 		case '&':
 			serialState = debugCommand;
 			break;
-		}
 
+
+		case '#':
+			//header #1234@3000!data
+
+			int j = 11;
+			int length;
+			char headerArray[10] = {'#'};
+			char *charNumArray[3];
+
+			for (int i = 1; i < 11; i++)
+			{
+				headerArray[i] = SerialBT.read();
+			}
+
+			for (int i = 0; i < 3; i++)
+			{
+				*charNumArray[i] = headerArray[i + 5];
+			}
+
+			length = charToInt(*charNumArray, false);
+
+			input2DArray[input2DArrayPosition] = new char[length + 1];
+
+			for (int i = 0; i < 11; i++)
+			{
+				input2DArray[input2DArrayPosition][i] = headerArray[i];
+			}
+
+			while (SerialBT.available())
+			{
+				input2DArray[input2DArrayPosition][j] = SerialBT.read();
+				j++;
+			}
+
+			input2DArrayPosition++;
+
+			serialState = parseGarden;
+
+			break;
+
+		}
 	}
 
 
@@ -105,6 +147,13 @@ void getSerialData()
 	case debugCommand:
 
 		debugInputParse(getDebugChar());
+
+		break;
+
+	case parseGarden:
+
+		//error checking?
+
 
 		break;
 
@@ -304,7 +353,7 @@ void debugInputParse(char debugCommand)
 
 	case 'i':
 		spiffsBegin();
-		spiffsSave();
+		//spiffsSave();
 		break;
 
 	case 'j':

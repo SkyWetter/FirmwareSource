@@ -61,7 +61,7 @@ extern int currentDomeDirection;
 
 
 
-enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand };   // State during getSerial fxn
+enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
 extern enum serialStates serialState;
 
 enum packetState { ok, ignore, resend };						// Used during serial error handling checks
@@ -86,3 +86,5 @@ extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
 
 extern int spiffsSize;
+extern char* input2DArray[];
+extern int input2DArrayPosition;

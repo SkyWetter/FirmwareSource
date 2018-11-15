@@ -17,8 +17,8 @@ void spiffsBegin()
 	}
 }
 
-//create the SPIFFS save file and populate with first 
-bool spiffsSave(char array[], int arraySize)
+//create the SPIFFS save file and populate with first array
+void spiffsSave(char array[], int arraySize)
 {
 	bool success = false;
 
@@ -48,10 +48,11 @@ bool spiffsSave(char array[], int arraySize)
 
 	file.close();
 
-	return success;
+	//return success;  wanted to have function as type bool to check for success, but wouldnt work
 }
 
-bool spiffsAppend(char array[], int arraySize)
+//add additional arrays to SPIFFS
+void spiffsAppend(char array[], int arraySize)
 {
 	bool success = false;
 
@@ -82,9 +83,10 @@ bool spiffsAppend(char array[], int arraySize)
 
 	file.close();
 
-	return success;
+	//return success;
 }
 
+//read SPIFFS data, eventually use to acts as a second "transmission"
 void spiffsRead()
 {
 	File file = SPIFFS.open("/garden.txt");
