@@ -69,38 +69,6 @@ void getSerialData()
 		case '#':
 			//header #1234@3000!data
 
-			int j = 11;
-			int length;
-			char headerArray[10] = {'#'};
-			char *charNumArray[3];
-
-			for (int i = 1; i < 11; i++)
-			{
-				headerArray[i] = SerialBT.read();
-			}
-
-			for (int i = 0; i < 3; i++)
-			{
-				*charNumArray[i] = headerArray[i + 5];
-			}
-
-			length = charToInt(*charNumArray, false);
-
-			input2DArray[input2DArrayPosition] = new char[length + 1];
-
-			for (int i = 0; i < 11; i++)
-			{
-				input2DArray[input2DArrayPosition][i] = headerArray[i];
-			}
-
-			while (SerialBT.available())
-			{
-				input2DArray[input2DArrayPosition][j] = SerialBT.read();
-				j++;
-			}
-
-			input2DArrayPosition++;
-
 			serialState = parseGarden;
 
 			break;
@@ -152,7 +120,7 @@ void getSerialData()
 
 	case parseGarden:
 
-		//error checking?
+		parseInput();
 
 
 		break;
@@ -165,6 +133,68 @@ void getSerialData()
 
 
 // S U B F U N C T I O N S -- getSerialData
+
+void parseInput()
+{
+	Serial.println("Entering case #");
+
+	int j = 11;
+	int length;
+	char headerArray[10] = { '#' };
+	char charNumArray[3];
+
+	//pull header array
+	for (int i = 1; i < 11; i++)
+	{
+		headerArray[i] = Serial.read();
+	}
+
+	Serial.println("Fail 1");
+
+	//pull out string length
+	for (int i = 0; i < 3; i++)
+	{
+		charNumArray[i] = headerArray[i + 5];
+	}
+
+	length = charToInt(charNumArray, false);
+
+	Serial.println("Fail 2");
+
+	//create new array to match
+	input2DArray[input2DArrayPosition] = new char[length + 1];
+
+	Serial.println("Fail 3");
+
+	//replace header chars
+	for (int i = 0; i < 11; i++)
+	{
+		input2DArray[input2DArrayPosition][i] = headerArray[i];
+	}
+
+	Serial.println("Fail 4");
+
+	//pull rest of data  --- replace Serial w/ Serial.BT
+	while (Serial.available())
+	{
+		input2DArray[input2DArrayPosition][j] = Serial.read();
+		j++;
+	}
+
+	Serial.println("Fail 5");
+
+	for (int i = 0; i < length; i++)
+	{
+		Serial.print(input2DArray[input2DArrayPosition][i]);
+	}
+
+	Serial.println();
+	Serial.println("Nice");
+
+	input2DArrayPosition++;
+
+	serialState = parseGarden;
+}
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
 int getSquareID(char singleSquaredata[])
@@ -354,6 +384,7 @@ void debugInputParse(char debugCommand)
 	case 'i':
 		spiffsBegin();
 		//spiffsSave();
+		Serial.println("test");
 		break;
 
 	case 'j':

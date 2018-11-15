@@ -20,7 +20,7 @@ void spiffsBegin()
 //create the SPIFFS save file and populate with first array
 void spiffsSave(char array[], int arraySize)
 {
-	bool success = false;
+	//bool success = false;
 
 	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
@@ -35,11 +35,12 @@ void spiffsSave(char array[], int arraySize)
 		file.print(array[i]);
 	}
 
+	//error check
 	if(file.size() == arraySize)
 	{
 		Serial.println("File content was saved");
 		spiffsSize = arraySize;
-		success = true;
+		//success = true;
 	}
 	else
 	{
@@ -54,7 +55,7 @@ void spiffsSave(char array[], int arraySize)
 //add additional arrays to SPIFFS
 void spiffsAppend(char array[], int arraySize)
 {
-	bool success = false;
+	//bool success = false;
 
 	File file = SPIFFS.open("/garden.txt", FILE_APPEND);
 
@@ -74,7 +75,7 @@ void spiffsAppend(char array[], int arraySize)
 	if (file.size() == arraySize)
 	{
 		Serial.println("File content was saved");
-		success = true;
+		//success = true;
 	}
 	else
 	{
