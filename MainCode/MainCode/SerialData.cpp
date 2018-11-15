@@ -359,20 +359,23 @@ void debugInputParse(char debugCommand)
 	case 'z':
 	{
 		char directionSteps[] = { '1','0','0','0',0x00 };
-		Serial.println("Here");
+		 
 		if (Serial.available())
 		{
 			for (int i = 0; i < 4; i++)
 			{
+				
 				directionSteps[i] = Serial.read();
 			}
+
+			
 			int direction = 0;
 			int steps = 0;
-			steps = charToInt(directionSteps, 3, 1);
-			printf("Steps to take: %d", steps);
+			
+			printf("Steps to take: %d", charToInt(directionSteps, 3, 1));/*
 			if (directionSteps[0] == 1) { direction = CW; }
 			else { direction = CCW; }
-			moveDome(charToInt(directionSteps, 3, 1), direction);
+			moveDome(charToInt(directionSteps, 3, 1), direction);*/
 		}
 		else if (SerialBT.available())
 		{

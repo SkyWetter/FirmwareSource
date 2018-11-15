@@ -198,15 +198,14 @@ void valveStepperOneStep()
 void moveDome(int targetPosition)
 {
 	
-	
-		int finalPosition = targetPosition - currentDomePosition;
-		Serial.printf("StprFxns: moveDome (Abs): preparing to move, CurPos: %d | TarPos: %d | PosChange: %d \n", currentDomePosition, targetPosition, finalPosition);
-		setDomeDirection(getSign(finalPosition));		//Sets dome direction CW or CCW
-		finalPosition = abs(finalPosition);					// Arduino recommends not performing calculations inside the abs function,  
-															// as you can a get strange results and errors
-		stepperMove(abs(finalPosition), domeDefaultSpeed);
+	int finalPosition = targetPosition - currentDomePosition;
+	Serial.printf("StprFxns: moveDome (Abs): preparing to move, CurPos: %d | TarPos: %d | PosChange: %d \n", currentDomePosition, targetPosition, finalPosition);
+	setDomeDirection(getSign(finalPosition));		//Sets dome direction CW or CCW
+	finalPosition = abs(finalPosition);					// Arduino recommends not performing calculations inside the abs function,  
+														// as you can a get strange results and errors
+	stepperMove(abs(finalPosition), domeDefaultSpeed);
 
-		Serial.printf("StprFxns: moveDome (Abs): Dome moved, current position is now %d \n", currentDomePosition);
+	Serial.printf("StprFxns: moveDome (Abs): Dome moved, current position is now %d \n", currentDomePosition);
 	
 }
 

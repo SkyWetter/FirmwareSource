@@ -40,13 +40,15 @@ int charToInt(char *thisChar, int thisCharLength)
 
 int charToInt(char *thisChar, int thisCharLength, int startingCharIndex)
 {
-
+	  
 	int intConversion = 0;
-	for (int i = startingCharIndex; i < thisCharLength; i++)
-	{
-		intConversion += ((thisChar[i] - '0') * pow(10, thisCharLength - 1 - i));
+	for (int i = startingCharIndex; i < (thisCharLength + startingCharIndex); i++)
+	{                  
+		intConversion += ((thisChar[i]) - '0') * pow(10, thisCharLength - startingCharIndex - i);
+	
 	}
 
+	
 	return intConversion;
 }
 
