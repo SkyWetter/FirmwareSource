@@ -60,11 +60,11 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initPins();
 	initSerial();
-	doPulseIn();
+	initPins();
+	
 	systemState = sleeping;
-	systemState_previous = water;
+	
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
 }

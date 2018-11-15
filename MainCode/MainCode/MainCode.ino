@@ -28,6 +28,7 @@
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
+#define TEST 45
 
 // flow meter
 #define pulsePin GPIO_NUM_23
@@ -70,7 +71,7 @@ void setup()
 
 
 void loop()
-{
+{	
 	checkSystemState();
 
 	//Serial.println(systemState);
@@ -98,9 +99,6 @@ void checkSystemState()
 
 		solarPowerTracker();
 
-
-		systemState = sleeping;
-
 		break;
 	}
 
@@ -108,10 +106,6 @@ void checkSystemState()
 	{
 		Serial.println("main code program case");
 		getSerialData();
-
-
-
-		systemState = sleeping;
 
 		break;
 	}
@@ -122,13 +116,6 @@ void checkSystemState()
 		//reference temperature and apply modfifier to watering durations
 		//open thread for flow sensor
 		//run spray program
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Watering Mode");
-		}
-
-
-		systemState_previous = systemState;
 
 		break;
 	}
@@ -140,13 +127,7 @@ void checkSystemState()
 		//allow solar
 		//prevent water until battery > 50%
 		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Low Power Mode");
-		}
-
-		systemState_previous = systemState;
-
+	
 		break;
 	}
 	}
