@@ -12,7 +12,7 @@
 #include "sys/time.h"
 #include "sdkconfig.h"
 #include "GeneralFunctions.h"
-
+#define pulsePin 23
 
 // M I S C   F U N C T I O N S
 

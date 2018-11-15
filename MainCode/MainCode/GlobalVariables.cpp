@@ -57,6 +57,7 @@ RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
 struct timeval now;
 
 
+
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
 bool firstSingleSquare = true;  //Used to allow any packet # for first square
