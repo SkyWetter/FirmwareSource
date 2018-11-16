@@ -107,6 +107,10 @@ void getSerialData()
 			}
 
 			break;
+
+		case '$': 
+			
+			break;
 		}
 	}
 

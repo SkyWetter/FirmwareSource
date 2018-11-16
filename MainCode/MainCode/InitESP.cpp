@@ -73,7 +73,7 @@ void initESP()
 
 void initSerial()
 {
-	SerialBT.begin("ESP_Bready");
+	SerialBT.begin("ESP_Branch");
 	Serial.begin(serialBaud);
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);

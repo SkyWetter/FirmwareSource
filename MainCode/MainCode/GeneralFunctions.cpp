@@ -49,16 +49,6 @@ int getSign(int x)
 	else { return 0; }
 }
 
-void doPulseIn()
-{
-	//Pulse IN shit
-	//changes for example
-	duration = float(pulseIn(pulsePin, HIGH));
-
-	//SerialBT.println(duration);
-
-}
-
 void printString(char charArray[],int charsPerLine)
 {
 	int length = getArrayLength(charArray, false);
