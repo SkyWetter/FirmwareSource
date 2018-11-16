@@ -156,8 +156,10 @@ void getSerialData()
 
 	case parseGarden:
 
-		parseInput();
-
+		if (input2DArrayPosition < 14)
+		{
+			parseInput();
+		}
 		break;
 
 	default:;
