@@ -31,8 +31,7 @@
 #define TEST 45
 
 // flow meter
-#define pulsePin 23
-#define SAMPLES 4096
+#define pulsePin GPIO_NUM_23
 
 // dome stepper
 #define stepperDomeDirPin 19
@@ -74,6 +73,8 @@ void setup()
 void loop()
 {	
 	checkSystemState();
+
+	//Serial.println(systemState);
 }
 
 
@@ -103,7 +104,12 @@ void checkSystemState()
 
 	case program:
 	{
-
+		if (freq != oldfreq) {
+			Serial.println(freq);
+			SerialBT.println(freq);
+			oldfreq = freq;
+		}
+		//Serial.println("main code program case");
 		getSerialData();
 
 		break;
