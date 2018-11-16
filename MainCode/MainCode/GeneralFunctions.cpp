@@ -49,6 +49,7 @@ int getSign(int x)
 	else { return 0; }
 }
 
+
 void printString(char charArray[],int charsPerLine)
 {
 	int length = getArrayLength(charArray, false);
