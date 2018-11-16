@@ -111,6 +111,8 @@ void spiffsRead()
 		Serial.print(file.readString());
 	}
 
+	Serial.println();
+
 	//printString((char*)file.read(), 20);  //try this
 
 	file.close();
