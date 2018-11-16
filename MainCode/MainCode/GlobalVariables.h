@@ -11,10 +11,10 @@
 #include "sys/time.h"
 #include "sdkconfig.h"
 
-
-
+// ************* U S E R   D E F I N E D   V A R I A B L E S
+// bluetooth
 extern BluetoothSerial SerialBT;
-
+extern byte stepperCase;
 
 // steppers
 extern int currentDomePosition;
@@ -33,7 +33,6 @@ extern byte hallSensorValveVal;
 extern double duration;
 extern float freq;
 extern float oldfreq;
-
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
@@ -64,12 +63,9 @@ extern char singleSquareData[11];
 
 
 
-
 /* Program State enums */
 
 
-
-/* Program State enums */
 
 enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
 extern enum serialStates serialState;
@@ -85,14 +81,12 @@ extern enum systemStates systemState_previous;
 
 extern bool quickOff;  //Used in debug to flag something off to avoid repeat serial prints
 extern bool message;
-extern const double metersPerSquare;
+
 extern const int SQUARES_PER_ROW;
 extern const int TOTAL_SQUARES; 
 extern const int STEPS_PER_FULL_TURN;
 
-
-extern int squareArray[625][6]; // [square id #][ {x,y,distance,angle} ]
-
+extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 
 
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
@@ -100,4 +94,3 @@ extern int squareArray[625][6]; // [square id #][ {x,y,distance,angle} ]
 extern int spiffsSize;
 extern char *input2DArray[];
 extern int input2DArrayPosition;
-
