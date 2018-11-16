@@ -64,14 +64,12 @@ void getSerialData()
 			serialState = debugCommand;
 			break;
 
-
 		case '#':
 			//header #1234@3000!data
 
 			serialState = parseGarden;
 
 			break;
-
 		}
 	}
 
@@ -133,14 +131,18 @@ void getSerialData()
 
 void parseInput()
 {
-	Serial.print("Entering case # - header array: #");
+	Serial.println("test");
+
 
 	int j = 11;
 	int length;
-	char headerArray[10] = { '#' };
-	char charNumArray[3];
+	char headerArray[11] = { '#' };
+	char charNumArray[4];
+
+	Serial.print("Entering case # - header array: #");
 
 	//pull header array
+
 	for (int i = 1; i < 11; i++)
 	{
 		headerArray[i] = Serial.read();
@@ -153,7 +155,7 @@ void parseInput()
 	//pull out string length
 	for (int i = 0; i < 4; i++)
 	{
-		charNumArray[i] = headerArray[i + 6];
+		charNumArray[i] = headerArray[(i + 6)];
 		Serial.print(charNumArray[i]);
 	}
 
@@ -164,7 +166,7 @@ void parseInput()
 	Serial.println(length);
 
 	//create new array to match
-	input2DArray[input2DArrayPosition] = new char[length + 1];
+	input2DArray[input2DArrayPosition] = new char[length];
 
 	//replace header chars
 	for (int i = 0; i < 11; i++)
@@ -191,7 +193,6 @@ void parseInput()
 	input2DArrayPosition++;
 
 	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
-	//serialState = doNothing;
 }
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
@@ -382,7 +383,6 @@ void debugInputParse(char debugCommand)
 	case 'i':
 		spiffsBegin();
 		//spiffsSave();
-		Serial.println("test");
 		break;
 
 	case 'j':

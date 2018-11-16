@@ -90,7 +90,6 @@ void printString(char charArray[],int charsPerLine)
 	{
 		printf("\n");
 	}
-	
 
 }
 
