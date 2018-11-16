@@ -1,6 +1,35 @@
+/* <<<<< G L O B A L  V A R I A B L E S . C P P / .H
+
+[ Instantiates and holds all global variables for the program ]
+ 
+
+-For a given variable, add in a protoype in the header file with type extern in front :
+
+extern int myInt;
+
+-Then define the variable in the.cpp file :
+
+int myInt = 12; < --note, you still need to declare the variable type, but no longer need the extern signifier
+
+	- Arrays can be externed as well, but must be given a real number initializer as an array size within the header file(no variables)
+
+	- enums also may be externed, but the steps are a little unusual :
+
+In the header file, first create the enum prototype :
+
+	enum week { mon, tues, weds, thur, fri, sat }; < -- - We haven't instantiated a weekDays object, just created the definition for the enum
+
+	Then create an extern for an instance of the enum (also in the header)
+
+	extern enum week weekFive; < --weekFive is the actual instance of a 'week' type enum
+
+	Finally, in the cpp file, repeated the instantiation of the weekFive enum, without the extern
+
+	enum week weekFive;
+
+*/
 #include "GlobalVariables.h"
 #include <BluetoothSerial.h> 
-
 
 
 // ************* U S E R   D E F I N E D   V A R I A B L E S
@@ -9,15 +38,29 @@ BluetoothSerial SerialBT;
 byte stepperCase;
 
 // steppers
-int stepCountDome = 0;
-int stepCountValve = 0;
+int currentDomePosition = 0;
+int currentDomeDirection = 0;
 
+int currentValvePosition = 0;
+int currentValveDirection = 0;
+/* stepper default values[5]
+{
+speed-[steps per second],
+acceleration-[steps per sec],
+current-[mA],step limit-[# of steps],
+direction of home
+}
+*/
+int valveStepperDefaults[5] = { 250,400,450,100,LOW };	//low on dir pin is close
+int domeStepperDefaults[5] = { 250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
+ 
 byte hallSensorDomeVal;
 byte hallSensorValveVal;
 
 // pulse counter
 double duration;
-int freq;
+float freq;
+float oldfreq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
@@ -26,6 +69,7 @@ float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR A
 // RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
 RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
 struct timeval now;
+
 
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
@@ -46,9 +90,6 @@ int squareIDInt = 998;
 char singleSquare_lastPacket[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 
-int currentDomePosition = 0;
-int currentDomeDirection = 0;
-
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
@@ -65,3 +106,12 @@ enum packetState squarePacketState;// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet																				// Resend -- request packet aga
 enum systemStates systemState;
 enum systemStates systemState_previous;
+
+
+//J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
+
+//string to write to SPIFFS, received from bluetooth
+
+int spiffsSize;		//size of total spiffs contents
+char *input2DArray[13];	//container for each of 14 input strings
+int input2DArrayPosition = 0;	//position in 2D array

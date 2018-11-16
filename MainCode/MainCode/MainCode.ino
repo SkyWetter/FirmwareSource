@@ -5,9 +5,10 @@
 
 
 // *********   P R E P R O C E S S O R S
+#include "SPIFFSFunctions.h"
+#include <SPIFFS.h>
 #include <Stepper.h>
 #include <BluetoothSerial.h>
-#include <Spiffs.h>
 #include <soc\rtc.h>
 #include "InitESP.h"
 #include <pthread.h>
@@ -23,6 +24,7 @@
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+//#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -30,8 +32,7 @@
 #define CW  1
 
 // flow meter
-#define pulsePin 23
-#define SAMPLES 4096
+#define pulsePin GPIO_NUM_23
 
 // dome stepper
 #define stepperDomeDirPin 19
@@ -73,6 +74,8 @@ void setup()
 void loop()
 {
 	checkSystemState();
+
+	//Serial.println(systemState);
 }
 
 
@@ -105,9 +108,13 @@ void checkSystemState()
 
 	case program:
 	{
-
+		if (freq != oldfreq) {
+			Serial.println(freq);
+			SerialBT.println(freq);
+			oldfreq = freq;
+		}
+		//Serial.println("main code program case");
 		getSerialData();
-
 
 
 		systemState = sleeping;
@@ -156,5 +163,4 @@ void shootSingleSquare()
 	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
 	int targetStep = squareArray[getSquareID(singleSquareData)][3];
 
-	
 }

@@ -13,15 +13,73 @@
 #include "sdkconfig.h"
 #include "StepperFunctions.h"
 #include "GeneralFunctions.h"
+#define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
+#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
+#define CCW -1
+#define CW  1
+#define TEST 45
 
+// flow meter
+#define pulsePin 23
+#define SAMPLES 4096
+
+// dome stepper
+#define stepperDomeDirPin 19
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+// valve stepper
+#define stepperValveDirPin 5
+#define stepperValveStpPin 17
+#define stepperValveSlpPin 15
+#define hallSensorValve 4
+#define stepperValveCrntPin 12
+
+// wake-up push button
+#define wakeUpPushButton GPIO_NUM_13
+
+#define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
+#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
+#define CCW -1
+#define CW  1
+#define TEST 45
+
+// flow meter
+#define pulsePin GPIO_NUM_23
+
+// dome stepper
+#define stepperDomeDirPin 19
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+// valve stepper
+#define stepperValveDirPin 5
+#define stepperValveStpPin 17
+#define stepperValveSlpPin 15
+#define hallSensorValve 4
+#define stepperValveCrntPin 12
+
+// wake-up push button
+#define wakeUpPushButton GPIO_NUM_13
+
+// rgb led
+#define rgbLedBlue 27
+#define rgbLedGreen 26
+#define rgbLedRed 25
+
+// solar panel
+#define currentSense A6
+#define solarPanelVoltage A7
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
 
-
-// ********* P I N   A S S I G N M E N T S
 // flow meter
 #define pulsePin 23
 #define SAMPLES 4096
@@ -92,24 +150,32 @@ void domeGoHome()
 																															//digitalWrite(stepperDomeDirPin, LOW);		
 	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
 	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
-	digitalWrite(stepperDomeSlpPin, LOW);
+	digitalWrite(stepperDomeSlpPin, LOW);		// low means sleep
 
-	stepCountDome = 0;
+	currentDomePosition = 0;
 	SerialBT.println("dome go home");                                           // LOW IS COUNTERCLOCKWISE
 }
 void valveGoHome()
 {
 
-	digitalWrite(stepperValveDirPin, HIGH);
+	digitalWrite(stepperValveDirPin, HIGH);		// high is counter clockwise
 
 	stepperGoHome(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, hallSensorValve);
 	//digitalWrite(stepperValveDirPin, HIGH);
-	stepCountValve = 0;
+	currentValvePosition = 0;
 	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
 	SerialBT.println("valve go home");
 }
 
+//Move valve to flow Function
 
+void moveValve() {
+
+}
+
+void makeRain() {
+
+}
 
 
 // M O V E  D O M E  F U N C T I O N S 
@@ -123,28 +189,97 @@ void moveDome(int targetPosition)
 
 }
 
-
-//Move dome to a given position with non-default speed, accel and current values
-void moveDome(int targetPosition, int speed, int accel, int current)
+//general move a gat dang shtepper
+void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, int current)
 {
-	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
-	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+	//Serial.println("entered moveToPositionCommand");
+	//targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
+	//setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
+	
+	switch (stepperpin)
+	{
+	case stepperDomeStpPin:
 
+		Serial.println("switch case for domeStepper");
+
+		digitalWrite(stepperDomeSlpPin, HIGH);
+
+		int stepsTaken = 0;
+		int stepsToGo = targetPosition - currentDomePosition;   //determines the number of steps from current position to target position
+		currentDomeDirection = (getSign(stepsToGo));		//1 is open or cw 0 is close or ccw
+		digitalWrite(stepperDomeDirPin, currentDomeDirection);
+		stepsToGo = abs(stepsToGo);
+
+
+		if (accel == 0) { accel = domeStepperDefaults[1]; }
+		//accel = 100 / accel;
+		int  decelUnit = 0;
+		int accelTimer = millis();
+
+		if (speed == 0) { speed = domeStepperDefaults[0]; }
+		int fastTime;
+		fastTime = 1000 / speed *1000;
+		int stepTime;
+		stepTime = fastTime * 3;
+
+		if (current == 0) { current = domeStepperDefaults[2]; }		//if it gets a passed 0 use default current
+		setCurrent(stepperDomeCrntPin, current);
+
+
+		Serial.println(targetPosition);
+		Serial.println(currentDomePosition);
+		Serial.println(accel);
+		Serial.println(fastTime);
+		Serial.println(stepTime);
+
+
+		while (currentDomePosition != targetPosition) {
+
+			Serial.println("entered while loop");
+			Serial.println(targetPosition);
+			Serial.println(currentDomePosition);
+			Serial.println(accel);
+			Serial.println(fastTime);
+			Serial.println(stepTime);
+
+			digitalWrite(stepperDomeStpPin, HIGH);
+			delayMicroseconds(stepTime);
+			//delay(100);
+			digitalWrite(stepperDomeStpPin, LOW);
+			delayMicroseconds(stepTime);
+			//delay(100);
+
+			if (currentDomeDirection == 1) { currentDomePosition += 1; stepsTaken += 1; }
+			else { currentDomePosition -= 1; stepsTaken += 1;}
+
+			if (stepTime != fastTime&& stepsToGo - stepsTaken >= decelUnit) {
+				accelTimer = millis();
+				Serial.println("accelerating");
+				stepTime -= accel;
+				if (stepTime < fastTime) {
+					stepTime = fastTime;
+					
+				}
+				decelUnit++;
+			}
+			Serial.println(decelUnit);
+
+			if  (stepsToGo - stepsTaken <= decelUnit) {
+				stepTime += accel;
+				Serial.println("decelerating");
+			}
+
+
+	}
+	
+	}
+
+	Serial.println("exiting moveToPosition");
 
 }
 
-// Move dome a given number of steps in a given direction (takes CW or CCW as second argument)
-void moveDome(int stepsToMove, int direction)
-{
-	;
-}
 
 
-// Move dome a given number of steps in a given direciton, with non-default speed, accel and current values)
-void moveDome(int stepsToMove, int direction, int speed, int accel, int current)
-{
-	;
-}
 
 
 
@@ -181,25 +316,34 @@ void stepperDomeOneStepHalfPeriod(int hf)
 {
 	digitalWrite(stepperDomeSlpPin, HIGH);
 	ledcWrite(stepperDomeCrntPin, 204);			//sets domestepper to 450mA of current(max)
-	stepperOneStepHalfPeriod(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, &stepCountDome, hf);
+	stepperOneStepHalfPeriod(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, &domeStepperDefaults[4], hf);
 }
 void stepperValveOneStepHalfPeriod(int hf)
 {
-	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &stepCountValve, hf);
+	stepperOneStepHalfPeriod(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, &valveStepperDefaults[4], hf);
 }
 
 void setDomeDirection(int direction)
 {
-	if (direction == CW)
+	if (direction == 1)
 	{
 		stepperDomeDirCW();
 	}
-	else if (direction == CCW)
+	else if (direction == 0)
 	{
 		stepperDomeDirCCW();
 	}
 
 }
+void setCurrent(int pin, int current) {
+
+		int dutyCycle;
+
+		dutyCycle = map(current, 1, 2000, 255, 1);	//high duty cycle = less current
+		ledcWrite(pin, dutyCycle);						//maps the dutycycle to the passed in pin
+
+}
+
 
 void stepperDomeDirCW()
 {
@@ -240,7 +384,7 @@ void toggleStepperValveDir()
 void valveStepperOneStep()
 {
 	stepperValveOneStepHalfPeriod(10);
-	Serial.println(stepCountValve);
-	SerialBT.println(stepCountValve);
+	Serial.println(currentValvePosition);
+	SerialBT.println(currentValvePosition);
 	//digitalWrite(stepperValveEnPin, LOW);
 }

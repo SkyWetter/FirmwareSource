@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MainCode.ino" />
+    <None Include="Read.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.MainCode.vsarduino.h">
@@ -39,6 +40,12 @@
     <ClInclude Include="SerialData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pulseIn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SPIFFSFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InitESP.cpp">
@@ -57,6 +64,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SerialData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pulseIn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SPIFFSFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

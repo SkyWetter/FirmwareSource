@@ -15,14 +15,50 @@
 #include "GeneralFunctions.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+
+#define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
+#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
+#define CCW -1
+#define CW  1
+#define TEST 45
+
+// flow meter
+#define pulsePin GPIO_NUM_23
+
+// dome stepper
+#define stepperDomeDirPin 19
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+// valve stepper
+#define stepperValveDirPin 5
+#define stepperValveStpPin 17
+#define stepperValveSlpPin 15
+#define hallSensorValve 4
+#define stepperValveCrntPin 12
+
+// wake-up push button
+#define wakeUpPushButton GPIO_NUM_13
+
+// rgb led
+#define rgbLedBlue 27
+#define rgbLedGreen 26
+#define rgbLedRed 25
+
+// solar panel
+#define currentSense A6
+#define solarPanelVoltage A7
+
 
 void getSerialData()
 {
-
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
-		
 		char incomingChar;
+		
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
@@ -30,8 +66,9 @@ void getSerialData()
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-			
+
 		}
+		
 		switch (incomingChar)
 		{
 		case '*':
@@ -44,8 +81,8 @@ void getSerialData()
 			//Grabs a 10-byte single square packet from the serial buffer
 			for (int i = 0; i < 9; i++)  //
 			{
-
 				incomingChar = SerialBT.read();
+				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
 					Serial.printf("incoming char was an illegal character \n");
@@ -61,11 +98,19 @@ void getSerialData()
 		case '&':
 			serialState = debugCommand;
 			break;
-		}
 
+		case '#':
+			//header #0001@0028!data
+			if (input2DArrayPosition < 14)
+			{
+				serialState = parseGarden;
+			}
+
+			break;
+		}
 	}
 
-	
+
 
 	// Check the serial state 
 
@@ -94,6 +139,8 @@ void getSerialData()
 			squarePacketState = ignore;
 			squareIDInt = charToInt(squareID, 3);
 
+
+
 			break;
 		case ignore: break;
 		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
@@ -102,19 +149,102 @@ void getSerialData()
 		break;
 
 	case debugCommand:
-
+		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
+
+		break;
+
+	case parseGarden:
+
+		parseInput();
 
 		break;
 
 	default:;
 	}
-
 }
 
 
 
 // S U B F U N C T I O N S -- getSerialData
+
+void parseInput()
+{
+	//Serial.println("test");
+
+
+	int j = 11;
+	int length;
+	char headerArray[11] = { '#' };
+	char charNumArray[4];
+
+	//Serial.print("Entering case # - header array: #");
+
+	//pull header array
+
+	for (int i = 1; i < 11; i++)
+	{
+		headerArray[i] = Serial.read();
+		//Serial.print(headerArray[i]);
+	}
+
+	//Serial.println();
+	//Serial.print("String length, array: ");
+
+	//pull out string length
+	for (int i = 0; i < 4; i++)
+	{
+		charNumArray[i] = headerArray[(i + 6)];
+		//Serial.print(charNumArray[i]);
+	}
+
+	length = charToInt(charNumArray, 4);
+
+	//Serial.println();
+	//Serial.print("String length, conversion: ");
+	//Serial.println(length);
+
+	//create new array to match
+	input2DArray[input2DArrayPosition] = new char[length];
+
+	//replace header chars
+	for (int i = 0; i < 11; i++)
+	{
+		input2DArray[input2DArrayPosition][i] = headerArray[i];
+	}
+
+	//pull rest of data  --- replace Serial w/ Serial.BT
+	while (Serial.available())
+	{
+		input2DArray[input2DArrayPosition][j] = Serial.read();
+		j++;
+	}
+
+	//print entire string from array
+	for (int i = 0; i < length; i++)
+	{
+		Serial.print(input2DArray[input2DArrayPosition][i]);
+	}
+
+	Serial.println();
+
+	if (input2DArrayPosition == 0)
+	{
+		spiffsSave(input2DArray[input2DArrayPosition], length);
+	}
+	else
+	{
+		spiffsAppend(input2DArray[input2DArrayPosition], length);
+	}
+
+	Serial.println();
+	Serial.printf("Length was %i, J count is %i \n", length, j);
+	Serial.println("Nice");
+
+	input2DArrayPosition++;
+
+	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
+}
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
 int getSquareID(char singleSquaredata[])
@@ -228,7 +358,7 @@ char getDebugChar()
 		return Serial.read();
 	}
 
-	else if(SerialBT.available())
+	else if (SerialBT.available())
 	{
 		return SerialBT.read();
 	}
@@ -257,14 +387,43 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'a':
-		//10 steps on dome stepper
-		for (int i = 0; i < 10; i++)
-		{
-			stepperDomeOneStepHalfPeriod(5);
-		}
-
-		Serial.println(stepCountDome);
-		SerialBT.println(stepCountDome);
+		
+		
+		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		//delay(500);		// if active dome count incorrect
+		//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
+		//delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		//delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
+		//delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
 		break;
 
 	case 'b':
@@ -273,7 +432,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'c':
-		// set dome stepper to CW ---> LOW IS COUNTER CLOCKWISE!!!
+		// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		stepperDomeDirCCW();
 		break;
 
@@ -298,7 +457,21 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'h':
-		doPulseIn();
+		//doPulseIn();
+		Serial.print("frequency is ");
+		Serial.println(freq);
+		Serial.println("exiting pulseIn");
+		SerialBT.println(freq);
+		break;
+
+	case 'i':
+		//spiffsBegin();
+		//spiffsSave();
+		Serial.println("test");
+		break;
+
+	case 'j':
+		spiffsRead();
 		break;
 
 	case 's':
