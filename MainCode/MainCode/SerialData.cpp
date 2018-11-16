@@ -221,17 +221,16 @@ void parseInput()
 	}
 
 	//pull rest of data  --- replace Serial w/ Serial.BT
-	while (Serial.available() || SerialBT.available())
+	while(Serial.available())
 	{
-		if (Serial.available())
-		{
-			input2DArray[input2DArrayPosition][j] = Serial.read();
-		}
-		else
-		{
-			input2DArray[input2DArrayPosition][j] = SerialBT.read();
-		}
+		input2DArray[input2DArrayPosition][j] = Serial.read();
+		j++;
+	}
 
+	while(SerialBT.available())
+	{
+		input2DArray[input2DArrayPosition][j] = SerialBT.read();
+		j++;
 	}
 
 	//print entire string from array
