@@ -38,8 +38,6 @@ void spiffsSave(char array[], int arraySize)
 		j++;
 	}
 
-	Serial.println(file.size());
-
 	//error check
 	if(j == arraySize)
 	{

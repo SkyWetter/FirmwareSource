@@ -19,7 +19,6 @@
 
 void getSerialData()
 {
-
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
 		char incomingChar;
@@ -65,7 +64,7 @@ void getSerialData()
 			break;
 
 		case '#':
-			//header #1234@3000!data
+			//header #0001@0028!data
 			if (input2DArrayPosition < 14)
 			{
 				serialState = parseGarden;
@@ -133,7 +132,7 @@ void getSerialData()
 
 void parseInput()
 {
-	Serial.println("test");
+	//Serial.println("test");
 
 
 	int j = 11;
@@ -141,31 +140,31 @@ void parseInput()
 	char headerArray[11] = { '#' };
 	char charNumArray[4];
 
-	Serial.print("Entering case # - header array: #");
+	//Serial.print("Entering case # - header array: #");
 
 	//pull header array
 
 	for (int i = 1; i < 11; i++)
 	{
 		headerArray[i] = Serial.read();
-		Serial.print(headerArray[i]);
+		//Serial.print(headerArray[i]);
 	}
 
-	Serial.println();
-	Serial.print("String length, array: ");
+	//Serial.println();
+	//Serial.print("String length, array: ");
 
 	//pull out string length
 	for (int i = 0; i < 4; i++)
 	{
 		charNumArray[i] = headerArray[(i + 6)];
-		Serial.print(charNumArray[i]);
+		//Serial.print(charNumArray[i]);
 	}
 
 	length = charToInt(charNumArray, 4);
 
-	Serial.println();
-	Serial.print("String length, conversion: ");
-	Serial.println(length);
+	//Serial.println();
+	//Serial.print("String length, conversion: ");
+	//Serial.println(length);
 
 	//create new array to match
 	input2DArray[input2DArrayPosition] = new char[length];
@@ -201,6 +200,7 @@ void parseInput()
 	}
 
 	Serial.println();
+	Serial.printf("Length was %i, J count is %i \n", length, j);
 	Serial.println("Nice");
 
 	input2DArrayPosition++;
