@@ -15,13 +15,24 @@
 
 extern BluetoothSerial SerialBT;
 
-extern int dome_maxPos_CW;
-extern int dome_minPos_CCW;
-extern int stepCountDome;
-extern int stepCountValve;
+
+// steppers
 extern int currentDomePosition;
 extern int currentDomeDirection;
-extern int domeDefaultSpeed;
+
+extern int currentValvePosition;
+extern int currentValveDirection;
+
+extern int valveStepperDefaults[5];
+extern int domeStepperDefaults[5];
+
+extern byte hallSensorDomeVal;
+extern byte hallSensorValveVal;
+
+// pulse counter
+extern double duration;
+extern float freq;
+extern float oldfreq;
 
 
 // power    
@@ -53,9 +64,14 @@ extern char singleSquareData[11];
 
 
 
+
 /* Program State enums */
 
-enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand };   // State during getSerial fxn
+
+
+/* Program State enums */
+
+enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
 extern enum serialStates serialState;
 
 enum packetState { ok, ignore, resend };						// Used during serial error handling checks
@@ -74,4 +90,14 @@ extern const int SQUARES_PER_ROW;
 extern const int TOTAL_SQUARES; 
 extern const int STEPS_PER_FULL_TURN;
 
+
 extern int squareArray[625][6]; // [square id #][ {x,y,distance,angle} ]
+
+
+
+//J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
+
+extern int spiffsSize;
+extern char *input2DArray[];
+extern int input2DArrayPosition;
+

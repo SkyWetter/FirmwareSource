@@ -12,17 +12,20 @@
 #include "sdkconfig.h"
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
+#include "SPIFFSFunctions.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 
-#define GPIO_INPUT_IO_TRIGGER 0  // There is the Button on GPIO 0
-#define GPIO_DEEP_SLEEP_DURATION 10  // sleep 30 seconds and then wake up
-#define CCW -1
-#define CW 1
 
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
-#define pulsePin 23
-#define SAMPLES 4096
+#define PCNT_TEST_UNIT      PCNT_UNIT_0
+#define PCNT_H_LIM_VAL      10
+#define PCNT_L_LIM_VAL     -10
+#define pulsePin GPIO_NUM_23  // Pulse Input GPIO
+
 
 // dome stepper
 #define stepperDomeDirPin 19
@@ -63,18 +66,26 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow);
 void initESP()
 {
 
+
 	initSerial();
 	initPins();
 	createSquareArray(SQUARES_PER_ROW);
+
+	initThreads();
+
+	spiffsBegin();
+
 	systemState = sleeping;
-	systemState_previous = water;
+	
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+
 }
+
 
 void initSerial()
 {
-	SerialBT.begin("ESP_Dave");
+	SerialBT.begin("ESP_Branch");
 	Serial.begin(serialBaud);
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
@@ -96,8 +107,9 @@ void initPins()
 
 
 	// pin assignments
-	pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
-
+	//pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
+	gpio_pad_select_gpio(pulsePin);
+	gpio_set_direction(pulsePin, GPIO_MODE_INPUT);
 
 	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
 	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
@@ -140,6 +152,34 @@ void initPins()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
+void initThreads()
+{
+	//multiple threads
+	TaskHandle_t Task1;				//creating the handle for Task1
+
+	xTaskCreatePinnedToCore(		//creating Task1 and pinning it to core 0
+		codeForTask1,
+		"Task1",
+		1000,
+		NULL,
+		1,
+		&Task1,                   /* Task handle to keep track of created task */
+		0);                       /* Core */
+}
+
+void codeForTask1(void * parameter)						//speecial code for task1
+{
+	while (1)
+	{
+
+
+		TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;		//feed the watchdoggy
+		TIMERG0.wdt_feed = 1;
+		TIMERG0.wdt_wprotect = 0;
+
+		doPulseIn();
+	}
+}
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
 * Initializes the array of squares on startup
