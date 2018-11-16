@@ -2,6 +2,12 @@
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
 //  october 31, 2018
+//
+// 
+//
+//
+//
+//
 
 
 // *********   P R E P R O C E S S O R S
@@ -64,7 +70,6 @@
 void setup()
 {
 	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
-				// starting systemState (see InitESP.cpp)
 	Serial.println("ESP Initialized...");
 	domeGoHome(); 
 
@@ -73,6 +78,7 @@ void setup()
 
 void loop()
 {
+	
 	checkSystemState();
 
 	//Serial.println(systemState);
@@ -84,21 +90,22 @@ void checkSystemState()
 {
 	switch (systemState)
 	{
-	case sleeping:
-	{
-
-		if (SerialBT.available() || Serial.available())
+		case sleeping:
 		{
-			systemState = program;
+
+			if (SerialBT.available() || Serial.available())
+			{
+				systemState = program;
+			}
+
+			break;
 		}
 
-		break;
-	}
 
-	case solar:
-	{
+		case solar:
+		{
 
-		solarPowerTracker();
+			solarPowerTracker();
 
 
 		systemState = sleeping;
@@ -119,48 +126,35 @@ void checkSystemState()
 
 		systemState = sleeping;
 
-		break;
-	}
 
-	case water:
-	{
-		//load correct instruction set for date and time
-		//reference temperature and apply modfifier to watering durations
-		//open thread for flow sensor
-		//run spray program
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Watering Mode");
+			break;
 		}
 
-
-		systemState_previous = systemState;
-
-		break;
-	}
-
-	case low_power:
-	{
-		//close the valve
-		//set LED to red
-		//allow solar
-		//prevent water until battery > 50%
-		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
+		case water:
 		{
-			Serial.printf("SystemState: Low Power Mode");
+			//load correct instruction set for date and time
+			//reference temperature and apply modfifier to watering durations
+			//open thread for flow sensor
+			//run spray program
+		
+
+			break;
 		}
 
-		systemState_previous = systemState;
+		case low_power:
+		{
+			//close the valve
+			//set LED to red
+			//allow solar
+			//prevent water until battery > 50%
+			  //>50% -> perform last spray cycle
 
-		break;
-	}
+			break;
+		}
 	}
 }
 
-void shootSingleSquare()
-{
-	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
-	int targetStep = squareArray[getSquareID(singleSquareData)][3];
+
 
 }
+

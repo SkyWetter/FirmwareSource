@@ -10,6 +10,7 @@
 */
 
 int charToInt(char *thisChar, int thisCharLength);
+int charToInt(char *thisChar, int thisCharLength, int startingCharIndex);
 int getSign(int x);
 void doPulseIn();
 int getArrayLength(char charArray[], bool lengthIncludesNull);

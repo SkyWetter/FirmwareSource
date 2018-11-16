@@ -53,6 +53,8 @@
 #define solarPanelVoltage A7
 
 
+#define CW 1
+#define CCW -1
 void getSerialData()
 {
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
@@ -490,6 +492,83 @@ void debugInputParse(char debugCommand)
 		SerialBT.println(last);
 
 		last = now.tv_sec;
+		break;
+	case 'u':
+		moveDome(30, CW);
+		break;
+	case 'v':
+		moveDome(15, CCW);
+		break;
+	case 'w':
+		moveDome(200);
+		break;
+	case 'x':
+		moveDome(120);
+		break;
+	case 'y':
+	{
+		char newDirection[] = { '0','0','0',0x00 };
+		if (Serial.available())
+		{
+			for (int i = 0; i < 3; i++)
+			{
+
+				newDirection[i] = Serial.read();
+
+			}
+
+			moveDome(charToInt(newDirection, 3));
+		}
+		else if (SerialBT.available())
+		{
+			for (int i = 0; i < 3; i++)
+			{
+
+				newDirection[i] = SerialBT.read();
+
+			}
+
+			moveDome(charToInt(newDirection, 3));
+		}
+	}
+	break;
+
+	case 'z':
+	{
+		char directionSteps[] = { '1','0','0','0',0x00 };
+		 
+		if (Serial.available())
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				
+				directionSteps[i] = Serial.read();
+			}
+
+			
+			int direction = 0;
+			int steps = 0;
+			
+			printf("Steps to take: %d", charToInt(directionSteps, 3, 1));/*
+			if (directionSteps[0] == 1) { direction = CW; }
+			else { direction = CCW; }
+			moveDome(charToInt(directionSteps, 3, 1), direction);*/
+		}
+		else if (SerialBT.available())
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				directionSteps[i] = SerialBT.read();
+			}
+			int direction = 0;
+			int steps = 0;
+			steps = charToInt(directionSteps, 3, 1);
+			printf("Steps to take: %d", steps);
+			if (directionSteps[0] == 1) { direction = CW; }
+			else { direction = CCW; }
+			moveDome(charToInt(directionSteps, 3, 1), direction);
+		}
+	}
 		break;
 
 	}
