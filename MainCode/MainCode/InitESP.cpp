@@ -12,6 +12,7 @@
 #include "sdkconfig.h"
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
+#include "SPIFFSFunctions.h"
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
@@ -63,6 +64,9 @@ void initESP()
 	initSerial();
 	initPins();
 	initThreads();
+
+	spiffsBegin();
+
 	systemState = sleeping;
 	
 	// power management
