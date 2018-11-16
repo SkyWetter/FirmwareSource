@@ -17,6 +17,42 @@
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
 
+#define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
+#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
+#define CCW -1
+#define CW  1
+#define TEST 45
+
+// flow meter
+#define pulsePin GPIO_NUM_23
+
+// dome stepper
+#define stepperDomeDirPin 19
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+// valve stepper
+#define stepperValveDirPin 5
+#define stepperValveStpPin 17
+#define stepperValveSlpPin 15
+#define hallSensorValve 4
+#define stepperValveCrntPin 12
+
+// wake-up push button
+#define wakeUpPushButton GPIO_NUM_13
+
+// rgb led
+#define rgbLedBlue 27
+#define rgbLedGreen 26
+#define rgbLedRed 25
+
+// solar panel
+#define currentSense A6
+#define solarPanelVoltage A7
+
+
 void getSerialData()
 {
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
@@ -103,6 +139,8 @@ void getSerialData()
 			squarePacketState = ignore;
 			squareIDInt = charToInt(squareID, 3);
 
+
+
 			break;
 		case ignore: break;
 		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
@@ -111,7 +149,7 @@ void getSerialData()
 		break;
 
 	case debugCommand:
-
+		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
 
 		break;
@@ -349,14 +387,43 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'a':
-		//10 steps on dome stepper
-		for (int i = 0; i < 10; i++)
-		{
-			stepperDomeOneStepHalfPeriod(5);
-		}
-
-		Serial.println(stepCountDome);
-		SerialBT.println(stepCountDome);
+		
+		
+		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		//delay(500);		// if active dome count incorrect
+		//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
+		//delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		//delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		domeGoHome();
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
+		//delay(500);		// if active dome count incorrect
+		//domeGoHome();
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		delay(500);		// if active dome count incorrect														// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
 		break;
 
 	case 'b':
@@ -365,7 +432,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'c':
-		// set dome stepper to CW ---> LOW IS COUNTER CLOCKWISE!!!
+		// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		stepperDomeDirCCW();
 		break;
 
@@ -390,7 +457,11 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'h':
-		doPulseIn();
+		//doPulseIn();
+		Serial.print("frequency is ");
+		Serial.println(freq);
+		Serial.println("exiting pulseIn");
+		SerialBT.println(freq);
 		break;
 
 	case 'i':

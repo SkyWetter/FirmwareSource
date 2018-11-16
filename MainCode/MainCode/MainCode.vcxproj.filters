@@ -40,7 +40,7 @@
     <ClInclude Include="SerialData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SPIFFSFunctions.h">
+    <ClInclude Include="pulseIn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,7 +63,7 @@
     <ClCompile Include="SerialData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SPIFFSFunctions.cpp">
+    <ClCompile Include="pulseIn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

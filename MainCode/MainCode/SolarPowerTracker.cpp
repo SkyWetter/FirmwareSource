@@ -17,10 +17,10 @@
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
+#define TEST 45
 
 // flow meter
-#define pulsePin 23
-#define SAMPLES 4096
+#define pulsePin GPIO_NUM_23
 
 // dome stepper
 #define stepperDomeDirPin 19
@@ -47,6 +47,7 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
+
 
 
 void solarPowerTracker()
