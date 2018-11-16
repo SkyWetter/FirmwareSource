@@ -66,8 +66,10 @@ void getSerialData()
 
 		case '#':
 			//header #1234@3000!data
-
-			serialState = parseGarden;
+			if (input2DArrayPosition < 14)
+			{
+				serialState = parseGarden;
+			}
 
 			break;
 		}
@@ -185,6 +187,17 @@ void parseInput()
 	for (int i = 0; i < length; i++)
 	{
 		Serial.print(input2DArray[input2DArrayPosition][i]);
+	}
+
+	Serial.println();
+
+	if (input2DArrayPosition == 0)
+	{
+		spiffsSave(input2DArray[input2DArrayPosition], length);
+	}
+	else
+	{
+		spiffsAppend(input2DArray[input2DArrayPosition], length);
 	}
 
 	Serial.println();
@@ -381,8 +394,9 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'i':
-		spiffsBegin();
+		//spiffsBegin();
 		//spiffsSave();
+		Serial.println("test");
 		break;
 
 	case 'j':

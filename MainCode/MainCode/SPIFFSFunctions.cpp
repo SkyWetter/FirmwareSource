@@ -22,6 +22,8 @@ void spiffsSave(char array[], int arraySize)
 {
 	//bool success = false;
 
+	int j;
+
 	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
 	if (!file)
@@ -33,10 +35,13 @@ void spiffsSave(char array[], int arraySize)
 	for (int i = 0; i < arraySize; i++)
 	{
 		file.print(array[i]);
+		j++;
 	}
 
+	Serial.println(file.size());
+
 	//error check
-	if(file.size() == arraySize)
+	if(j == arraySize)
 	{
 		Serial.println("File content was saved");
 		spiffsSize = arraySize;
@@ -57,6 +62,8 @@ void spiffsAppend(char array[], int arraySize)
 {
 	//bool success = false;
 
+	int j;
+
 	File file = SPIFFS.open("/garden.txt", FILE_APPEND);
 
 	if (!file)
@@ -68,11 +75,12 @@ void spiffsAppend(char array[], int arraySize)
 	for (int i = 0; i < arraySize; i++)
 	{
 		file.print(array[i]);
+		j++;
 	}
 
 	spiffsSize += arraySize;
 
-	if (file.size() == arraySize)
+	if (j == arraySize)
 	{
 		Serial.println("File content was saved");
 		//success = true;
