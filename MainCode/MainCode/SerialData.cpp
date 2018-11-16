@@ -184,7 +184,14 @@ void parseInput()
 
 	for (int i = 1; i < 11; i++)
 	{
-		headerArray[i] = Serial.read();
+		if (Serial.available())
+		{
+			headerArray[i] = Serial.read();
+		}
+		else if(SerialBT.available())
+		{
+			headerArray[i] = SerialBT.read();
+		}
 		//Serial.print(headerArray[i]);
 	}
 
@@ -214,10 +221,17 @@ void parseInput()
 	}
 
 	//pull rest of data  --- replace Serial w/ Serial.BT
-	while (Serial.available())
+	while (Serial.available() || SerialBT.available())
 	{
-		input2DArray[input2DArrayPosition][j] = Serial.read();
-		j++;
+		if (Serial.available())
+		{
+			input2DArray[input2DArrayPosition][j] = Serial.read();
+		}
+		else
+		{
+			input2DArray[input2DArrayPosition][j] = SerialBT.read();
+		}
+
 	}
 
 	//print entire string from array
