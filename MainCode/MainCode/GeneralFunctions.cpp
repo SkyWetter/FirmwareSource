@@ -16,9 +16,6 @@
 #define pulsePin 23 
 
 
-
-double duration;
-
 // M I S C   F U N C T I O N S
 
 // CHAR TO INT 
@@ -39,20 +36,6 @@ int charToInt(char *thisChar, int thisCharLength)
 	return intConversion;
 }
 
-int charToInt(char *thisChar, int thisCharLength, int startingCharIndex)
-{
-	  
-	int intConversion = 0;
-	for (int i = startingCharIndex; i < (thisCharLength + startingCharIndex); i++)
-	{                  
-		intConversion += ((thisChar[i]) - '0') * pow(10, thisCharLength - startingCharIndex - i);
-	
-	}
-
-	
-	return intConversion;
-}
-
 /* Get Sign
  *
  *  takes an int, returns sign (-1 = negative, 1 = positive, 0 = neither)
@@ -69,7 +52,6 @@ int getSign(int x)
 
 void printString(char charArray[],int charsPerLine)
 {
-
 	int length = getArrayLength(charArray, false);
 	int charsPrinted = 0;
 
@@ -129,4 +111,3 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 		return length + 1;
 	}
 }
-
