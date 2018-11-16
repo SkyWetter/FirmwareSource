@@ -24,6 +24,7 @@
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+#include "realTimeFunctions.h"
 //#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
