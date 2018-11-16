@@ -7,6 +7,8 @@ void moveDome(int targetPosition);
 void moveDome(int targetPosition, int speed, int accel, int current);
 void moveDome(int stepsToMove, int direction);
 void moveDome(int stepsToMove, int direction, int speed, int accel, int current);
+void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, int current);
+void setCurrent(int pin, int current);
 
 void stepperOneStepHalfPeriod(byte step, byte dir, byte enable, int *spcnt, int halfFreq);
 void stepperDomeOneStepHalfPeriod(int hf);

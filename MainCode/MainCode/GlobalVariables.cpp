@@ -38,8 +38,21 @@ BluetoothSerial SerialBT;
 byte stepperCase;
 
 // steppers
-int stepCountDome = 0;
-int stepCountValve = 0;
+int currentDomePosition = 0;
+int currentDomeDirection = 0;
+
+int currentValvePosition = 0;
+int currentValveDirection = 0;
+/* stepper default values[5]
+{
+speed-[steps per second],
+acceleration-[steps per sec],
+current-[mA],step limit-[# of steps],
+direction of home
+}
+*/
+int valveStepperDefaults[5] = { 250,400,450,100,LOW };	//low on dir pin is close
+int domeStepperDefaults[5] = { 250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
  
 byte hallSensorDomeVal;
 byte hallSensorValveVal;
@@ -75,9 +88,6 @@ int squareIDInt = 998;
 
 char singleSquare_lastPacket[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
 char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 0x00 };
-
-int currentDomePosition = 0;
-int currentDomeDirection = 0;
 
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;

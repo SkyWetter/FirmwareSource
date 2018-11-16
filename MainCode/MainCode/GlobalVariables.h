@@ -17,8 +17,14 @@ extern BluetoothSerial SerialBT;
 extern byte stepperCase;
 
 // steppers
-extern int stepCountDome;
-extern int stepCountValve;
+extern int currentDomePosition;
+extern int currentDomeDirection;
+
+extern int currentValvePosition;
+extern int currentValveDirection;
+
+extern int valveStepperDefaults[5];
+extern int domeStepperDefaults[5];
 
 extern byte hallSensorDomeVal;
 extern byte hallSensorValveVal;
@@ -55,8 +61,7 @@ extern int squareIDInt;
 extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
-extern int currentDomePosition;
-extern int currentDomeDirection;
+
 
 /* Program State enums */
 
