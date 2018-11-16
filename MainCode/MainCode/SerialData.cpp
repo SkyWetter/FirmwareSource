@@ -66,7 +66,6 @@ void getSerialData()
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-
 		}
 		
 		switch (incomingChar)
@@ -106,6 +105,11 @@ void getSerialData()
 				serialState = parseGarden;
 			}
 
+			break;
+
+		case '$':
+			//time is money
+			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
 			break;
 		}
 	}
@@ -480,12 +484,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 't':
-		gettimeofday(&now, NULL);
-
-		SerialBT.println(now.tv_sec);
-		SerialBT.println(last);
-
-		last = now.tv_sec;
+		printLocalTime();
 		break;
 
 	}

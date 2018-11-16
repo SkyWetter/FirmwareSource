@@ -16,17 +16,18 @@ void timeShift()
 	char buf1[4];
 	char buf2[2];
 
-	Serial.println("Enter TIME:  format --> YYYYMMDDhhmmss");
-
-	while (!Serial.available()) {}
+	//Serial.println("Enter TIME:  format --> $YYYYMMDDhhmmss");
+	//while (!Serial.available()) {}
 
 		if (Serial.available() > 0)
 		{
 
 			for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
 			{
+
 				incomingByte = Serial.read();
 				incomingTime[j] = incomingByte;
+				
 			}
 
 			for (int i = 0; i < 4; i++)
@@ -75,7 +76,6 @@ void timeShift()
 void print_wakeup_reason()
 {
 	esp_sleep_wakeup_cause_t wakeup_reason;
-
 	wakeup_reason = esp_sleep_get_wakeup_cause();
 
 	switch (wakeup_reason)
@@ -83,7 +83,10 @@ void print_wakeup_reason()
 
 		case 1:
 		Serial.println("Wakeup caused by external signal using RTC_IO");
-		timeShift();
+		// if we are here its because there was a wake-up push button event
+		// so we will want to enter program mode
+		// enable bluetooth
+		// goto to sleep when done
 		break;
 
 		case 2:
@@ -92,6 +95,9 @@ void print_wakeup_reason()
 
 		case 3: 
 		Serial.println("Wakeup caused by timer"); 
+		//timer should wakeup device every soo often...
+		//rainbow will check for solar power
+		//rainbow will check to see if it is time to water or not
 		break;
 
 		case 4: 
@@ -109,6 +115,7 @@ void print_wakeup_reason()
 
 void printLocalTime()
 {
+
 	char buf1[30];
 	char buf2[30];
 

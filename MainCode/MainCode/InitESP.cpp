@@ -64,46 +64,15 @@ void initESP()
 	initSerial();
 	initPins();
 	initThreads();
+
+	//print_wakeup_reason(); // andy -- add comment
 	initSleepClock();	/// andy -- add comment
 
 	spiffsBegin();
 
 	systemState = sleeping;
-	
-
 }
 
-void initSleepClock()
-{
-	if (bootCount == 0)
-	{
-		timeShift();
-	}
-	++bootCount;
-
-	printLocalTime();
-
-	//Print the wakeup reason for ESP32
-
-	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
-	Serial.print("# of seconds since last boot: ");
-	Serial.println(now.tv_sec);
-
-	print_wakeup_reason();
-	// sleep, rtc and power mangement
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-	//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-	//Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
-
-	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
-
-	Serial.println("Going to sleep now");
-	Serial.flush();
-	//esp_deep_sleep_start();
-	//Serial.println("This will never be printed");
-
-}
 void initSerial()
 {
 	SerialBT.begin("ESP_Bready");
@@ -124,8 +93,6 @@ void initPins()
 
 	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
 	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
-
-
 
 	// pin assignments
 	//pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
@@ -153,7 +120,6 @@ void initPins()
 	pinMode(rgbLedBlue, OUTPUT);
 	pinMode(rgbLedRed, OUTPUT);
 	pinMode(rgbLedGreen, OUTPUT);
-
 
 	// init pin states
 	digitalWrite(stepperDomeStpPin, LOW);
@@ -186,6 +152,36 @@ void initThreads()
 		1,
 		&Task1,                   /* Task handle to keep track of created task */
 		0);                       /* Core */
+}
+
+void initSleepClock()
+{
+	if (bootCount == 0)
+	{
+		timeShift();
+	}
+	++bootCount;
+
+	printLocalTime();
+
+	print_wakeup_reason();								//Print the wakeup reason for ESP32
+
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	Serial.println(now.tv_sec);
+
+	// sleep, rtc and power mangement
+	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+	//Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
+
+	//Serial.println("Going to sleep now");
+	//Serial.flush();
+	//esp_deep_sleep_start();
+	//Serial.println("This will never be printed");
 }
 
 void codeForTask1(void * parameter)						//speecial code for task1
@@ -316,7 +312,7 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow)
 	case 1: return (atan(temp) * 180) / PI; break;
 	case 2: return 180 - (atan(temp) * 180) / PI; break;
 	case 3: return 180 + (atan(temp) * 180) / PI; break;
-	case 4: return 360 - (atan(temp) * 180) / PI; break;
+	casse 4: return 360 - (atan(temp) * 180) / PI; break;
 	}
 }
 
