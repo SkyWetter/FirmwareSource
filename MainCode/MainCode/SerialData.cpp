@@ -52,7 +52,10 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
-char testHeader[] = "#0001@0000!";
+char testHeader[] = "#0001@0018!sejhfrp";
+char testPackageNum1[] = "0001";
+char testPackageNum2[] = "0002";
+char testPackageNum3[] = "0003";
 
 void getSerialData()
 {
@@ -467,13 +470,15 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'i':
-		spiffsParse(testHeader);
+		spiffsParse(testPackageNum1);
 		//spiffsSave();
 		//Serial.println("test");
 		break;
 
 	case 'j':
-		spiffsRead();
+		spiffsRead(testPackageNum1);
+		spiffsRead(testPackageNum2);
+		spiffsRead(testPackageNum3);
 		break;
 
 	case 's':

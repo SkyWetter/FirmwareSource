@@ -23,15 +23,17 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 	//bool success = false;
 
 	int j;
-	String fileName = "/";
+	char fileName[] = "/xxxx.txt";
 
-	fileName += packageNum;
-	fileName += ".txt";
+	for (int i = 0; i < 4; i++)
+	{
+		fileName[i + 1] = packageNum[i];
+	}
 
-	Serial.print(fileName);
+	Serial.println(fileName);
 
 
-	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
+	File file = SPIFFS.open(fileName, FILE_WRITE); 
 
 	if (!file)
 	{
@@ -101,9 +103,18 @@ void spiffsAppend(char array[], int arraySize)
 }
 
 //read SPIFFS data, eventually use to acts as a second "transmission"
-void spiffsRead()
+void spiffsRead(char fileNum[])
 {
-	File file = SPIFFS.open("/garden.txt");
+	char fileName[] = "/xxxx.txt";
+
+	for (int i = 0; i < 4; i++)
+	{
+		fileName[i + 1] = fileNum[i];
+	}
+
+	Serial.println(fileName);
+	
+	File file = SPIFFS.open(fileName);
 
 	if (!file)
 	{
@@ -123,11 +134,22 @@ void spiffsRead()
 	file.close();
 }
 
-void spiffsParse(char header[])
+void spiffsParse(char fileNum[])
 {
-	String packetNum;
+	char fileName[] = "/xxxx.txt";
+	char header[11];
+	char lengthArray[4];
+	int length;
+
+	for (int i = 0; i < 4; i++)
+	{
+		fileName[i + 1] = fileNum[i];
+	}
+
+	Serial.print("spiffsParse fileName: ");
+	Serial.println(fileName);
 	
-	File file = SPIFFS.open("/garden.txt");
+	File file = SPIFFS.open(fileName);
 
 	if (!file)
 	{
@@ -135,10 +157,35 @@ void spiffsParse(char header[])
 		return;
 	}
 
-	for (int i = 0; i < 5; i++)
+	for(int i = 0; i < 11; i++)
 	{
-		packetNum += header[i];
+		header[i] = file.read();
 	}
 
+	for (int i = 0; i < 4; i++)
+	{
+		lengthArray[i] = header[(i + 6)];
+	}
+
+	length = charToInt(lengthArray, 4);
+
+	Serial.print("spiffsParse length: ");
+	Serial.println(length);
+
+
+	for (int i = 0; i < 11; i++)
+	{
+		bedsToSpray[i] = header[i];
+	}
+
+	for (int i = 11; i < length; i++)
+	{
+		bedsToSpray[i] = file.read();
+	}
+
+	bedsToSprayLength = length;
+
+	Serial.print("spiffsParse file: ");
+	Serial.println(bedsToSpray);
 	
 }

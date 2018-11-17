@@ -113,5 +113,8 @@ enum systemStates systemState_previous;
 //string to write to SPIFFS, received from bluetooth
 
 int spiffsSize;		//size of total spiffs contents
-char *input2DArray[];	//container for each of 14 input strings
+char *input2DArray[13];	//container for each of 14 input strings
 int input2DArrayPosition = 0;	//position in 2D array
+
+char bedsToSpray[5000];
+int bedsToSprayLength;
