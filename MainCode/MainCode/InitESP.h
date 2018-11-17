@@ -5,3 +5,4 @@ void initSerial();
 void initESP();
 void initThreads();
 void codeForTask1(void * parameter);
+void createSquareArray(int squaresPerRow);

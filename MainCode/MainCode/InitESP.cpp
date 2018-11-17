@@ -62,9 +62,11 @@ void initESP()
 {
 	initSerial();
 	initPins();
+	createSquareArray(25);
 	initThreads();
 	systemState = sleeping;
 	
+
 	// power management
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
 
@@ -73,7 +75,7 @@ void initESP()
 
 void initSerial()
 {
-	SerialBT.begin("ESP_Bready");
+	SerialBT.begin("ESP_PCB Version");
 	Serial.begin(serialBaud);
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
