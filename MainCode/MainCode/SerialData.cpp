@@ -479,10 +479,9 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 's':
-		//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 		Serial.println("debug case: s -> going to sleep...");
 		SerialBT.println("debug case: s -> going to sleep...");
-		esp_deep_sleep_start();
+		initSleepClock();	/// andy -- add comment
 		break;
 
 	case 't':
