@@ -88,7 +88,7 @@ void initPins()
 
 	ledcSetup(stepperDomeCrntPin, 500, 8);
 	ledcSetup(stepperValveCrntPin, 500, 8);
-
+	
 	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
 	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
 
@@ -96,8 +96,6 @@ void initPins()
 
 	// pin assignments
 	pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
-
-
 	pinMode(stepperDomeDirPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper DIRECTION
 	pinMode(stepperDomeStpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper STEP
 	pinMode(stepperDomeSlpPin, OUTPUT);						// OUTPUT pin setup for MP6500 to control DOME stepper ENABLE
