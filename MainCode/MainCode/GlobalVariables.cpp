@@ -71,8 +71,7 @@ RTC_DATA_ATTR struct timeval tv;
 RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 RTC_DATA_ATTR struct tm tm1;
 RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-
-
+RTC_DATA_ATTR int waterHour, waterMin;
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 

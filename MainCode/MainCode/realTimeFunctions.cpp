@@ -1,12 +1,25 @@
-#include <esp_clk.h>
-#include <esp_sleep.h>
-#include <soc/rtc.h>
-#include <esp_timer.h>
-#include <time.h>
-#include <sys/time.h>
+// *********   P R E P R O C E S S O R S
+#include "SPIFFSFunctions.h"
+#include <SPIFFS.h>
+#include <Stepper.h>
+#include <BluetoothSerial.h>
+#include <soc\rtc.h>
+#include "InitESP.h"
+#include <pthread.h>
+#include "GlobalVariables.h"
+#include "GeneralFunctions.h"
+#include "StepperFunctions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include "sys/time.h"
+#include "SolarPowerTracker.h"
+#include "SerialData.h"
+#include "sdkconfig.h"
+#include <driver/adc.h>
+#include "realTimeFunctions.h"
+//#include <freertos/ringbuf.h>
 
 
 void timeShift()

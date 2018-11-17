@@ -16,6 +16,7 @@
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+#include "realTimeFunctions.h"
 
 
 
@@ -168,7 +169,7 @@ void initSleepClock()
 
 	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
 	Serial.print("# of seconds since last boot: ");
-	Serial.println(now.tv_sec);
+	//Serial.println(now.tv_sec);
 
 	// sleep, rtc and power mangement
 	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
@@ -312,7 +313,7 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow)
 	case 1: return (atan(temp) * 180) / PI; break;
 	case 2: return 180 - (atan(temp) * 180) / PI; break;
 	case 3: return 180 + (atan(temp) * 180) / PI; break;
-	casse 4: return 360 - (atan(temp) * 180) / PI; break;
+	case 4: return 360 - (atan(temp) * 180) / PI; break;
 	}
 }
 
