@@ -52,6 +52,7 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
+char testHeader[] = "#0001@0000!";
 
 void getSerialData()
 {
@@ -172,18 +173,14 @@ void getSerialData()
 
 void parseInput()
 {
-	//Serial.println("test");
-
-
 	int j = 11;
 	int length;
+	int packageNum;
 	char headerArray[11] = { '#' };
-	char charNumArray[4];
-
-	//Serial.print("Entering case # - header array: #");
+	char lengthArray[4];
+	char packageNumArray[4];
 
 	//pull header array
-
 	for (int i = 1; i < 11; i++)
 	{
 		if (Serial.available())
@@ -194,24 +191,19 @@ void parseInput()
 		{
 			headerArray[i] = SerialBT.read();
 		}
-		//Serial.print(headerArray[i]);
 	}
-
-	//Serial.println();
-	//Serial.print("String length, array: ");
 
 	//pull out string length
 	for (int i = 0; i < 4; i++)
 	{
-		charNumArray[i] = headerArray[(i + 6)];
-		//Serial.print(charNumArray[i]);
+		lengthArray[i] = headerArray[(i + 6)];
+		packageNumArray[i] = headerArray[(i + 1)];
 	}
 
-	length = charToInt(charNumArray, 4);
+	length = charToInt(lengthArray, 4);
+	packageNum = charToInt(packageNumArray, 4);
 
-	//Serial.println();
-	//Serial.print("String length, conversion: ");
-	//Serial.println(length);
+	Serial.printf("packageNumArray = %i \n", packageNum);
 
 	//create new array to match
 	input2DArray[input2DArrayPosition] = new char[length];
@@ -222,13 +214,14 @@ void parseInput()
 		input2DArray[input2DArrayPosition][i] = headerArray[i];
 	}
 
-	//pull rest of data  --- replace Serial w/ Serial.BT
+	//pull rest of data - Serial
 	while(Serial.available())
 	{
 		input2DArray[input2DArrayPosition][j] = Serial.read();
 		j++;
 	}
 
+	//pull rest of data - Serial.BT
 	while(SerialBT.available())
 	{
 		input2DArray[input2DArrayPosition][j] = SerialBT.read();
@@ -243,14 +236,8 @@ void parseInput()
 
 	Serial.println();
 
-	if (input2DArrayPosition == 0)
-	{
-		spiffsSave(input2DArray[input2DArrayPosition], length);
-	}
-	else
-	{
-		spiffsAppend(input2DArray[input2DArrayPosition], length);
-	}
+	spiffsSave(input2DArray[input2DArrayPosition], length, packageNumArray);
+
 
 	Serial.println();
 	Serial.printf("Length was %i, J count is %i \n", length, j);
@@ -480,9 +467,9 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'i':
-		//spiffsBegin();
+		spiffsParse(testHeader);
 		//spiffsSave();
-		Serial.println("test");
+		//Serial.println("test");
 		break;
 
 	case 'j':

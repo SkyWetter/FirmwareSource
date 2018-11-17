@@ -18,11 +18,18 @@ void spiffsBegin()
 }
 
 //create the SPIFFS save file and populate with first array
-void spiffsSave(char array[], int arraySize)
+void spiffsSave(char array[], int arraySize, char packageNum[])
 {
 	//bool success = false;
 
 	int j;
+	String fileName = "/";
+
+	fileName += packageNum;
+	fileName += ".txt";
+
+	Serial.print(fileName);
+
 
 	File file = SPIFFS.open("/garden.txt", FILE_WRITE); 
 
@@ -114,4 +121,24 @@ void spiffsRead()
 	//printString((char*)file.read(), 20);  //try this
 
 	file.close();
+}
+
+void spiffsParse(char header[])
+{
+	String packetNum;
+	
+	File file = SPIFFS.open("/garden.txt");
+
+	if (!file)
+	{
+		Serial.println("There was an error opening the file for reading");
+		return;
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		packetNum += header[i];
+	}
+
+	
 }
