@@ -76,14 +76,6 @@ void timeShift()
 		buf2[i] = incomingTime[i + 11];
 		usrSec = charToInt(buf2, 2);
 	}
-
-	Serial.println(usrYear);
-	Serial.println(usrMon);
-	Serial.println(usrDay);
-	Serial.println(usrHour);
-	Serial.println(usrMin);
-	Serial.println(usrSec);
-
 	printLocalTime();
 }
 

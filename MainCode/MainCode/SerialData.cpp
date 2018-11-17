@@ -155,8 +155,7 @@ void getSerialData()
 		}
 
 		break;
-
-	case debugCommand:
+		 
 		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
 
