@@ -15,6 +15,7 @@
 #include "GeneralFunctions.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -54,11 +55,10 @@
 
 void getSerialData()
 {
-
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
-		
 		char incomingChar;
+		
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
@@ -66,8 +66,9 @@ void getSerialData()
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-			
+
 		}
+		
 		switch (incomingChar)
 		{
 		case '*':
@@ -80,8 +81,8 @@ void getSerialData()
 			//Grabs a 10-byte single square packet from the serial buffer
 			for (int i = 0; i < 9; i++)  //
 			{
-
 				incomingChar = SerialBT.read();
+				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
 					Serial.printf("incoming char was an illegal character \n");
@@ -97,11 +98,23 @@ void getSerialData()
 		case '&':
 			serialState = debugCommand;
 			break;
-		}
 
+		case '#':
+			//header #0001@0028!data
+			if (input2DArrayPosition < 14)
+			{
+				serialState = parseGarden;
+			}
+
+			break;
+
+		case '$': 
+			
+			break;
+		}
 	}
 
-	
+
 
 	// Check the serial state 
 
@@ -146,14 +159,97 @@ void getSerialData()
 
 		break;
 
+	case parseGarden:
+
+		parseInput();
+
+		break;
+
 	default:;
 	}
-
 }
 
 
 
 // S U B F U N C T I O N S -- getSerialData
+
+void parseInput()
+{
+	//Serial.println("test");
+
+
+	int j = 11;
+	int length;
+	char headerArray[11] = { '#' };
+	char charNumArray[4];
+
+	//Serial.print("Entering case # - header array: #");
+
+	//pull header array
+
+	for (int i = 1; i < 11; i++)
+	{
+		headerArray[i] = Serial.read();
+		//Serial.print(headerArray[i]);
+	}
+
+	//Serial.println();
+	//Serial.print("String length, array: ");
+
+	//pull out string length
+	for (int i = 0; i < 4; i++)
+	{
+		charNumArray[i] = headerArray[(i + 6)];
+		//Serial.print(charNumArray[i]);
+	}
+
+	length = charToInt(charNumArray, 4);
+
+	//Serial.println();
+	//Serial.print("String length, conversion: ");
+	//Serial.println(length);
+
+	//create new array to match
+	input2DArray[input2DArrayPosition] = new char[length];
+
+	//replace header chars
+	for (int i = 0; i < 11; i++)
+	{
+		input2DArray[input2DArrayPosition][i] = headerArray[i];
+	}
+
+	//pull rest of data  --- replace Serial w/ Serial.BT
+	while (Serial.available())
+	{
+		input2DArray[input2DArrayPosition][j] = Serial.read();
+		j++;
+	}
+
+	//print entire string from array
+	for (int i = 0; i < length; i++)
+	{
+		Serial.print(input2DArray[input2DArrayPosition][i]);
+	}
+
+	Serial.println();
+
+	if (input2DArrayPosition == 0)
+	{
+		spiffsSave(input2DArray[input2DArrayPosition], length);
+	}
+	else
+	{
+		spiffsAppend(input2DArray[input2DArrayPosition], length);
+	}
+
+	Serial.println();
+	Serial.printf("Length was %i, J count is %i \n", length, j);
+	Serial.println("Nice");
+
+	input2DArrayPosition++;
+
+	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
+}
 
 // GET SQUARE ID -- gets the id of a single square from 10-byte packet
 int getSquareID(char singleSquaredata[])
@@ -267,7 +363,7 @@ char getDebugChar()
 		return Serial.read();
 	}
 
-	else if(SerialBT.available())
+	else if (SerialBT.available())
 	{
 		return SerialBT.read();
 	}
@@ -341,6 +437,16 @@ void debugInputParse(char debugCommand)
 		SerialBT.println(freq);
 		break;
 
+	case 'i':
+		//spiffsBegin();
+		//spiffsSave();
+		Serial.println("test");
+		break;
+
+	case 'j':
+		spiffsRead();
+		break;
+
 	case 's':
 		//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 		esp_deep_sleep_start();
@@ -357,4 +463,3 @@ void debugInputParse(char debugCommand)
 
 	}
 }
-

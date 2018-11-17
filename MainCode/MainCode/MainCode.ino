@@ -5,9 +5,10 @@
 
 
 // *********   P R E P R O C E S S O R S
+#include "SPIFFSFunctions.h"
+#include <SPIFFS.h>
 #include <Stepper.h>
 #include <BluetoothSerial.h>
-#include <Spiffs.h>
 #include <soc\rtc.h>
 #include "InitESP.h"
 #include <pthread.h>
@@ -23,12 +24,12 @@
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+//#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
-#define TEST 45
 
 // flow meter
 #define pulsePin GPIO_NUM_23
@@ -71,7 +72,7 @@ void setup()
 
 
 void loop()
-{	
+{
 	checkSystemState();
 
 	//Serial.println(systemState);
@@ -100,6 +101,9 @@ void checkSystemState()
 
 		solarPowerTracker();
 
+
+		systemState = sleeping;
+
 		break;
 	}
 
@@ -113,6 +117,9 @@ void checkSystemState()
 		//Serial.println("main code program case");
 		getSerialData();
 
+
+		systemState = sleeping;
+
 		break;
 	}
 
@@ -122,6 +129,13 @@ void checkSystemState()
 		//reference temperature and apply modfifier to watering durations
 		//open thread for flow sensor
 		//run spray program
+		if (systemState_previous != systemState)
+		{
+			Serial.printf("SystemState: Watering Mode");
+		}
+
+
+		systemState_previous = systemState;
 
 		break;
 	}
@@ -133,7 +147,13 @@ void checkSystemState()
 		//allow solar
 		//prevent water until battery > 50%
 		  //>50% -> perform last spray cycle
-	
+		if (systemState_previous != systemState)
+		{
+			Serial.printf("SystemState: Low Power Mode");
+		}
+
+		systemState_previous = systemState;
+
 		break;
 	}
 	}
@@ -144,5 +164,4 @@ void shootSingleSquare()
 	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
 	int targetStep = squareArray[getSquareID(singleSquareData)][3];
 
-	
 }

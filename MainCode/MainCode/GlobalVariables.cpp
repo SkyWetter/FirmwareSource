@@ -71,6 +71,7 @@ RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
 struct timeval now;
 
 
+
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
 bool firstSingleSquare = true;  //Used to allow any packet # for first square
@@ -105,3 +106,12 @@ enum packetState squarePacketState;// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet																				// Resend -- request packet aga
 enum systemStates systemState;
 enum systemStates systemState_previous;
+
+
+//J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
+
+//string to write to SPIFFS, received from bluetooth
+
+int spiffsSize;		//size of total spiffs contents
+char *input2DArray[13];	//container for each of 14 input strings
+int input2DArrayPosition = 0;	//position in 2D array

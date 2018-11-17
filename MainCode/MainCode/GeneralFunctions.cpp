@@ -13,8 +13,8 @@
 #include "sdkconfig.h"
 #include "GeneralFunctions.h"
 
+#define pulsePin 23 
 
-//#define pulsePin GPIO_NUM_23
 
 // M I S C   F U N C T I O N S
 
@@ -45,9 +45,10 @@ int charToInt(char *thisChar, int thisCharLength)
 int getSign(int x)
 {
 	if (x > 0) { return 1; }
-	else if (x < 0) { return 0; }
+	else if (x < 0) { return -1; }
 	else { return 0; }
 }
+
 
 void printString(char charArray[],int charsPerLine)
 {
@@ -80,7 +81,6 @@ void printString(char charArray[],int charsPerLine)
 	{
 		printf("\n");
 	}
-	
 
 }
 
