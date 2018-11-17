@@ -62,6 +62,7 @@ void getSerialData()
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
+			
 		}
 		else if (Serial.available())
 		{
@@ -85,6 +86,7 @@ void getSerialData()
 				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
+					Serial.println(incomingChar);
 					Serial.printf("incoming char was an illegal character \n");
 					singleSquareData[i + 1] = '@';
 				}
@@ -142,7 +144,10 @@ void getSerialData()
 			squareChecksumState = ignore;
 			squarePacketState = ignore;
 			squareIDInt = charToInt(squareID, 3);
+
 			executeSquare(getSquareID(&singleSquareData[0]));
+			delay(1000);
+			valveGoHome();
 
 
 
@@ -384,7 +389,7 @@ void debugInputParse(char debugCommand)
 	{
 
 	case '0':                             // send dome stepper to home posistion
-		domeGoHome();
+		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
 	case '1':                             // send vavle stepper to home posisiton
@@ -394,8 +399,12 @@ void debugInputParse(char debugCommand)
 	case 'a':
 		
 		
-		//moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
-		//delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
+		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
+		delay(500);		// if active dome count incorrect
 
 		executeSquare(0);
 
@@ -430,11 +439,8 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'h':
-		//doPulseIn();
-		Serial.print("frequency is ");
-		Serial.println(freq);
-		Serial.println("exiting pulseIn");
-		SerialBT.println(freq);
+		executeSquare(100);
+
 		break;
 
 	case 'i':

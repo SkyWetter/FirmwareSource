@@ -115,22 +115,45 @@
 void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
 {
 	// SET stepper CW
-	digitalWrite(z, HIGH);																	// ENSURE STEPPER IS NOT IN SLEEP MODE
+	digitalWrite(z, HIGH);		//makesure sleep mode is off
+	int stepcount = 0;
+	int limit;
 
+	if (x == 17) { limit = 125; }
+	else { limit = 500; }
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 
-	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(s) == 1 && stepcount <= limit)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(5);
+		delay(4);
 		digitalWrite(x, LOW);
-		delay(5);
+		delay(4);
+		stepcount++;
 	}
+	Serial.print("current dome position");
+	Serial.println(currentDomePosition);
+	Serial.print("current valve position");
+	Serial.println(currentValvePosition);
+	Serial.print("step count back to home was");
+	Serial.println(stepcount);
 
+	if (stepcount >= limit) {
+		Serial.print("Help! I'm stuck and I cant get up");
+
+		digitalWrite(y, !digitalRead(y));		//change direction and try other way		
+		for (int i = 0; i < (limit/5); i++) {
+			digitalWrite(x, HIGH);
+			delay(4);
+			digitalWrite(x, LOW);
+			delay(4);
+		}
+	}
 	//digitalWrite(z, HIGH);																	// put stepper back to sleep
-	//digitalWrite(y, LOW);																	// SET STEOPP BACK TO CCW
+	//digitalWrite(y, LOW);	
+	// SET STEOPP BACK TO CCW
 
 }
 // S U B   F U N C T I O N S --- dome and valve go home
@@ -157,6 +180,7 @@ void domeGoHome()
 }
 void valveGoHome()
 {
+	
 
 	digitalWrite(stepperValveDirPin, HIGH);		// low is home direction
 
@@ -171,18 +195,6 @@ void valveGoHome()
 
 void moveValve(int targetPosition, int speed, int accel,int current) 
 {
-	if (accel == 0) { accel = valveStepperDefaults[1]; }
-
-	if (speed == 0) { speed = valveStepperDefaults[0]; }
-	int fastTime;
-	fastTime = 1000 / speed * 1000;
-	int stepTime;
-	stepTime = fastTime * 3;
-
-	if (current == 0) { current = valveStepperDefaults[2]; }		//if it gets a passed 0 use default current
-	setCurrent(stepperValveCrntPin, current);
-
-
 
 }
 
@@ -193,20 +205,20 @@ void makeRain(int desiredFlow)
 
 	Serial.println("entered makeRain");
 	//double desiredFreq = 30;
-	//double desiredFreq = 1000000.0 / (double)desiredFlow;
+	double desiredFreq = 1000000.0 / (double)desiredFlow;
 	digitalWrite(stepperValveSlpPin, HIGH);
+
+
+	int fastTime;
+	int stepTime;
+
+	int accel = valveStepperDefaults[1];
+	int speed = valveStepperDefaults[0];
+	fastTime = 1000 / speed * 1000;
+	stepTime = fastTime * 2;
 
 	while (desiredFreq >= freq && currentValvePosition != 100) 
 	{
-		int stepsTaken;
-		int fastTime;
-		int stepTime;
-
-		int accel = valveStepperDefaults[1]; 
-		int speed = valveStepperDefaults[0]; 
-		fastTime = 1000 / speed * 1000;		
-		stepTime = fastTime * 3;
- 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 
 		if (freq <= desiredFreq) { currentValveDirection = LOW; }
@@ -223,17 +235,17 @@ void makeRain(int desiredFlow)
 
 			if (currentValveDirection == LOW) { currentValvePosition += 1;}
 			else { currentValvePosition -= 1;}
-
+			//Serial.println(accel);
 			if (stepTime != fastTime) {
-				Serial.println("accelerating");
+				//Serial.println("accelerating");
 				stepTime -= accel;
 				if (stepTime < fastTime) {
 					stepTime = fastTime;
 				}		
 			}
 
-			printf("desiredFreq is %f \n", desiredFreq);
-Serial.println(desiredFreq);
+			//printf("desiredFreq is %f \n", desiredFreq);
+//Serial.println(desiredFreq);
 Serial.println(currentValvePosition);
 Serial.println(fastTime);
 	Serial.println(stepTime);
@@ -241,6 +253,7 @@ Serial.println(fastTime);
 
 	if (currentValvePosition == 100) 
 	{ 
+		delay(1000);
 		valveGoHome();
 		Serial.println("valve overrun went home");
 	
@@ -283,10 +296,10 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					Serial.println("taking corrective steps home");
 
 					digitalWrite(stepperDomeStpPin, HIGH);
-					delay(10);
+					delay(5);
 
 					digitalWrite(stepperDomeStpPin, LOW);
-					delay(10);
+					delay(5);
 				}
 
 				digitalWrite(stepperDomeStpPin, HIGH);		//extra step to hit home
@@ -301,7 +314,9 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 			int stepsTaken = 0;
 			int stepsToGo = targetPosition - currentDomePosition;   //determines the number of steps from current position to target position
-			currentDomeDirection = (getSign(stepsToGo));		//1 is open or cw 0 is close or ccw
+			if (getSign(stepsToGo) == 1) { currentDomeDirection = 1; }
+			else { currentDomeDirection = 0; }
+
 			digitalWrite(stepperDomeDirPin, currentDomeDirection);
 			stepsToGo = abs(stepsToGo);
 
@@ -325,9 +340,10 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			while (currentDomePosition != targetPosition) {
 
 
-				//Serial.println("entered while loop");
-				//Serial.println(targetPosition);
-				//Serial.println(currentDomePosition);
+				Serial.println("entered while loop");
+				Serial.println(targetPosition);
+				Serial.print("current dome position is");
+				Serial.println(currentDomePosition);
 				//Serial.println(accel);
 				//Serial.println(fastTime);
 			//	Serial.println(stepTime);
@@ -366,7 +382,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				}
 
 			}
-
+			digitalWrite(stepperDomeSlpPin, LOW);	//flush the toilet AFTER YOUVE HAD A SHET
 		}
 	}
 
@@ -385,9 +401,8 @@ void executeSquare(int mysquare) {
 
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
-	Serial.println("back in execute square about to enter makeRain");
+	delay(100);
 	makeRain(squareArray[mysquare][2]);
-	delay(1000);
 
 }
 

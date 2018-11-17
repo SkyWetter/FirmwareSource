@@ -123,6 +123,7 @@
     <ClInclude Include="pulseIn.h" />
     <ClInclude Include="SerialData.h" />
     <ClInclude Include="SolarPowerTracker.h" />
+    <ClInclude Include="SPIFFSFunctions.h" />
     <ClInclude Include="StepperFunctions.h" />
     <ClInclude Include="__vm\.MainCode.vsarduino.h" />
   </ItemGroup>
@@ -133,6 +134,7 @@
     <ClCompile Include="pulseIn.cpp" />
     <ClCompile Include="SerialData.cpp" />
     <ClCompile Include="SolarPowerTracker.cpp" />
+    <ClCompile Include="SPIFFSFunctions.cpp" />
     <ClCompile Include="StepperFunctions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

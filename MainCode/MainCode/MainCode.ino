@@ -66,7 +66,7 @@ void setup()
 	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
 				// starting systemState (see InitESP.cpp)
 	Serial.println("ESP Initialized...");
-	domeGoHome(); 
+	moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 
 }
 
