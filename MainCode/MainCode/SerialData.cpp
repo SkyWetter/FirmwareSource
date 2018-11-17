@@ -173,7 +173,7 @@ void getSerialData()
 
 
 
-// S U B F U N C T I O N S -- getSerialData
+// S U B F U N C  T I O N S -- getSerialData
 
 void parseInput()
 {
@@ -265,7 +265,6 @@ int getSquareID(char singleSquaredata[])
 	}
 
 	return charToInt(thisSquareChar, 3);
-
 
 }
 
@@ -391,8 +390,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'a':
-		
-		
 		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
 		delay(500);		// if active dome count incorrect
 		domeGoHome();
