@@ -96,10 +96,12 @@ void getSerialData()
 			break;
 
 		case '&':
+			Serial.println("debug command");
+			SerialBT.println("debug command");
 			serialState = debugCommand;
 			break;
 
-		case '#':
+		case '#': 
 			//header #0001@0028!data
 			if (input2DArrayPosition < 14)
 			{
@@ -109,7 +111,8 @@ void getSerialData()
 			break;
 
 		case '$':
-			//time is money
+			Serial.println("time is money");
+			SerialBT.println("time is money");	
 			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
 			break;
 		}
@@ -268,7 +271,6 @@ int getSquareID(char singleSquaredata[])
 }
 
 //CHECK PACKET NUMBER
-
 //Check packet number, changes packetState
 
 void checkPacketNumber(char singleSquareData[])
@@ -323,8 +325,6 @@ void checkPacketNumber(char singleSquareData[])
 	}
 
 }
-
-
 
 //CHECK CHECKSUM
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
@@ -451,7 +451,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'f':
-
 		// panel shit
 		displaySolarCurrent();
 		displaySolarVoltage();
@@ -481,6 +480,8 @@ void debugInputParse(char debugCommand)
 
 	case 's':
 		//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+		Serial.println("debug case: s -> going to sleep...");
+		SerialBT.println("debug case: s -> going to sleep...");
 		esp_deep_sleep_start();
 		break;
 

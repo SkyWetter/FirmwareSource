@@ -20,6 +20,12 @@
 #include <driver/adc.h>
 #include "realTimeFunctions.h"
 //#include <freertos/ringbuf.h>
+#include <time.h>
+#include <esp_clk.h>
+#include <esp_sleep.h>
+#include <esp_timer.h>
+
+
 
 
 void timeShift()
@@ -29,101 +35,56 @@ void timeShift()
 	char buf1[4];
 	char buf2[2];
 
-	//Serial.println("Enter TIME:  format --> $YYYYMMDDhhmmss");
-	//while (!Serial.available()) {}
-
-		if (Serial.available() > 0)
-		{
-
-			for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
-			{
-
-				incomingByte = Serial.read();
-				incomingTime[j] = incomingByte;
-				
-			}
-
-			for (int i = 0; i < 4; i++)
-			{
-				buf1[i] = incomingTime[i];
-				usrYear = charToInt(buf1, 4);
-			}
-
-			for (int i = 0; i < 2; i++)
-			{
-				buf2[i] = incomingTime[i + 4];
-				usrMon = charToInt(buf2, 2);
-			}
-
-			for (int i = 0; i < 2; i++)
-			{
-				buf2[i] = incomingTime[i + 6];
-				usrDay = charToInt(buf2, 2);
-			}
-
-			for (int i = 0; i < 2; i++)
-			{
-				buf2[i] = incomingTime[i + 8];
-				usrHour = charToInt(buf2, 2);
-			}
-
-			for (int i = 0; i < 2; i++)
-			{
-				buf2[i] = incomingTime[i + 10];
-				usrMin = charToInt(buf2, 2);
-			}
-
-			for (int i = 0; i < 2; i++)
-			{
-				buf2[i] = incomingTime[i + 11];
-				usrSec = charToInt(buf2, 2);
-			}
-
-		//secsLastBootOffset = (now.tv_sec);
+	for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
+	{
+		incomingByte = SerialBT.read();
+		incomingTime[j] = incomingByte;
 	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		buf1[i] = incomingTime[i];
+		usrYear = charToInt(buf1, 4);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		buf2[i] = incomingTime[i + 4];
+		usrMon = charToInt(buf2, 2);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		buf2[i] = incomingTime[i + 6];
+		usrDay = charToInt(buf2, 2);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		buf2[i] = incomingTime[i + 8];
+		usrHour = charToInt(buf2, 2);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		buf2[i] = incomingTime[i + 10];
+		usrMin = charToInt(buf2, 2);
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		buf2[i] = incomingTime[i + 11];
+		usrSec = charToInt(buf2, 2);
+	}
+
+	Serial.println(usrYear);
+	Serial.println(usrMon);
+	Serial.println(usrDay);
+	Serial.println(usrHour);
+	Serial.println(usrMin);
+	Serial.println(usrSec);
 
 	printLocalTime();
-
-}
-
-void print_wakeup_reason()
-{
-	esp_sleep_wakeup_cause_t wakeup_reason;
-	wakeup_reason = esp_sleep_get_wakeup_cause();
-
-	switch (wakeup_reason)
-	{
-
-		case 1:
-		Serial.println("Wakeup caused by external signal using RTC_IO");
-		// if we are here its because there was a wake-up push button event
-		// so we will want to enter program mode
-		// enable bluetooth
-		// goto to sleep when done
-		break;
-
-		case 2:
-		Serial.println("Wakeup caused by external signal using RTC_CNTL");
-		break;
-
-		case 3: 
-		Serial.println("Wakeup caused by timer"); 
-		//timer should wakeup device every soo often...
-		//rainbow will check for solar power
-		//rainbow will check to see if it is time to water or not
-		break;
-
-		case 4: 
-		Serial.println("Wakeup caused by touchpad"); 
-		break;
-
-		case 5:
-		Serial.println("Wakeup caused by ULP program"); 
-		break;
-
-		default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
-
-	}
 }
 
 void printLocalTime()

@@ -76,7 +76,7 @@ void initESP()
 
 void initSerial()
 {
-	SerialBT.begin("ESP_Bready");
+	SerialBT.begin("ESP_AVready");
 	Serial.begin(serialBaud);
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
@@ -159,12 +159,11 @@ void initSleepClock()
 {
 	if (bootCount == 0)
 	{
-		timeShift();
+		//timeShift();
 	}
 	++bootCount;
 
 	printLocalTime();
-
 	print_wakeup_reason();								//Print the wakeup reason for ESP32
 
 	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
@@ -183,6 +182,46 @@ void initSleepClock()
 	//Serial.flush();
 	//esp_deep_sleep_start();
 	//Serial.println("This will never be printed");
+}
+
+void print_wakeup_reason()
+{
+	esp_sleep_wakeup_cause_t wakeup_reason;
+	wakeup_reason = esp_sleep_get_wakeup_cause();
+
+	switch (wakeup_reason)
+	{
+
+	case 1:
+		Serial.println("Wakeup caused by external signal using RTC_IO");
+		// if we are here its because there was a wake-up push button event
+		systemState = program;// so we will want to enter program mode
+		// enable bluetooth
+		// goto to sleep when done
+		break;
+
+	case 2:
+		Serial.println("Wakeup caused by external signal using RTC_CNTL");
+		break;
+
+	case 3:
+		Serial.println("Wakeup caused by timer");
+		//timer should wakeup device every soo often...
+		//rainbow will check for solar power
+		//rainbow will check to see if it is time to water or not
+		break;
+
+	case 4:
+		Serial.println("Wakeup caused by touchpad");
+		break;
+
+	case 5:
+		Serial.println("Wakeup caused by ULP program");
+		break;
+
+	default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
+
+	}
 }
 
 void codeForTask1(void * parameter)						//speecial code for task1

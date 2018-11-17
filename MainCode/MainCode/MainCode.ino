@@ -75,11 +75,8 @@ void setup()
 void loop()
 {
 	checkSystemState();
-
 	//Serial.println(systemState);
 }
-
-
 
 void checkSystemState()
 {
@@ -92,7 +89,6 @@ void checkSystemState()
 		{
 			systemState = program;
 		}
-
 		break;
 	}
 
@@ -100,10 +96,7 @@ void checkSystemState()
 	{
 
 		solarPowerTracker();
-
-
 		systemState = sleeping;
-
 		break;
 	}
 
@@ -114,7 +107,7 @@ void checkSystemState()
 			SerialBT.println(freq);
 			oldfreq = freq;
 		}
-		//Serial.println("main code program case");
+		Serial.println("main code program case");
 		getSerialData();
 
 
