@@ -51,7 +51,7 @@ current-[mA],step limit-[# of steps],
 direction of home
 }
 */
-int valveStepperDefaults[5] = { 250,400,450,100,LOW };	//low on dir pin is close
+int valveStepperDefaults[5] = { 150,400,1500,100,LOW };	//low on dir pin is close
 int domeStepperDefaults[5] = { 250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
  
 byte hallSensorDomeVal;
@@ -95,7 +95,7 @@ char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
-const int SQUARES_PER_ROW = 7;
+const int SQUARES_PER_ROW = 25;
 const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
 const int STEPS_PER_FULL_TURN = 400;
 

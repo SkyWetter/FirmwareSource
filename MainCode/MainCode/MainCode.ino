@@ -87,6 +87,7 @@ void checkSystemState()
 
 		if (SerialBT.available() || Serial.available())
 		{
+			
 			systemState = program;
 		}
 		break;
