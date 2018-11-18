@@ -26,7 +26,6 @@
 
 int charToInt(char *thisChar, int thisCharLength)
 {
-
 	int intConversion = 0;
 	for (int i = 0; i < thisCharLength; i++)
 	{

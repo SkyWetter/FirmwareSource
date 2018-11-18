@@ -73,7 +73,6 @@ RTC_DATA_ATTR struct tm tm1;
 RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
 RTC_DATA_ATTR int waterHour, waterMin;
 
-
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
 bool firstSingleSquare = true;  //Used to allow any packet # for first square

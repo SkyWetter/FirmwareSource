@@ -69,7 +69,6 @@ void initESP()
 
 	print_wakeup_reason(); // andy -- add comment
 	
-
 	spiffsBegin();
 
 	systemState = sleeping;
