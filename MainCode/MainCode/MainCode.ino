@@ -53,9 +53,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -113,6 +113,7 @@ void checkSystemState()
 
 
 		systemState = sleeping;
+		
 
 		break;
 	}

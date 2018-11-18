@@ -67,9 +67,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -102,9 +102,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -208,6 +208,8 @@ void makeRain(int desiredFlow)
 	double desiredFreq = 1000000.0 / (double)desiredFlow;
 	digitalWrite(stepperValveSlpPin, HIGH);
 
+	Serial.println(desiredFreq);
+
 
 	int fastTime;
 	int stepTime;
@@ -247,9 +249,14 @@ void makeRain(int desiredFlow)
 			//printf("desiredFreq is %f \n", desiredFreq);
 //Serial.println(desiredFreq);
 Serial.println(currentValvePosition);
-Serial.println(fastTime);
-	Serial.println(stepTime);
+//Serial.println(fastTime);
+	//Serial.println(stepTime);
 	}
+
+	Serial.println("the frequency at end of makeRain was");
+	Serial.println(freq);
+	Serial.println("the desired frequency at end of makeRain was");
+	Serial.println(desiredFreq);
 
 	if (currentValvePosition == 100) 
 	{ 
@@ -277,12 +284,17 @@ void moveDome(int targetPosition)
 //general move a gat dang shtepper
 void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, int current)
 {
+	digitalWrite(rgbLedGreen, HIGH);
 	if (396 > targetPosition) {
 		switch (stepperpin)
 		{
 		case stepperDomeStpPin:
 
 			Serial.println("switch case for domeStepper");
+			Serial.println(targetPosition);
+			Serial.println(currentDomePosition);
+
+
 
 			digitalWrite(stepperDomeSlpPin, HIGH);
 
@@ -293,7 +305,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 				while (digitalRead(hallSensorDome) == 1) {
 
-					Serial.println("taking corrective steps home");
+					
 
 					digitalWrite(stepperDomeStpPin, HIGH);
 					delay(5);
@@ -309,6 +321,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				delay(10);
 
 				delay(100);
+				Serial.println("taking corrective steps home");
 			}
 
 
@@ -340,10 +353,10 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			while (currentDomePosition != targetPosition) {
 
 
-				Serial.println("entered while loop");
-				Serial.println(targetPosition);
-				Serial.print("current dome position is");
-				Serial.println(currentDomePosition);
+				//Serial.println("entered while loop");
+				//Serial.println(targetPosition);
+				//Serial.print("current dome position is");
+				//Serial.println(currentDomePosition);
 				//Serial.println(accel);
 				//Serial.println(fastTime);
 			//	Serial.println(stepTime);
@@ -359,7 +372,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				else { currentDomePosition -= 1; stepsTaken += 1; }
 
 				if (stepTime != fastTime && stepsToGo - stepsTaken >= decelUnit) {
-					Serial.println("accelerating");
+					//Serial.println("accelerating");
 					stepTime -= accel;
 					if (stepTime < fastTime) {
 						stepTime = fastTime;
@@ -367,11 +380,11 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					}
 					decelUnit++;
 				}
-				Serial.println(decelUnit);
+				//Serial.println(decelUnit);
 
 				if (stepsToGo - stepsTaken <= decelUnit) {
 					stepTime += accel;
-					Serial.println("decelerating");
+					//Serial.println("decelerating");
 				}
 
 				if (currentDomeDirection == 0) {
@@ -388,15 +401,21 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 
 	Serial.println("exiting moveToPosition");
+	digitalWrite(rgbLedGreen, LOW);
 
 }
 
 void executeSquare(int mysquare) {
 
-	//int steps2go = squareArray[mysquare][3];
-	//int targtFlow = squareArray[mysquare][2];
+	Serial.println("Target flow pulse length is");
 
+	int steps2go = squareArray[mysquare][3];
+
+	int targtFlow = squareArray[mysquare][2];
+
+	Serial.println("target angle is");
 	Serial.println(squareArray[mysquare][3]);
+	Serial.println("Target flow pulse length is");
 	Serial.println(squareArray[mysquare][2]);
 
 

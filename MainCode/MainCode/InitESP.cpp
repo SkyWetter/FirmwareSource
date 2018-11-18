@@ -47,9 +47,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -63,10 +63,11 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initSerial();
+	
 	initPins();
+	initSerial();
 	initThreads();
-
+	createSquareArray(25);
 	print_wakeup_reason(); // andy -- add comment
 	
 
@@ -77,10 +78,33 @@ void initESP()
 
 void initSerial()
 {
-	SerialBT.begin("ESP_AVready");
 	Serial.begin(serialBaud);
+	int chipid = ESP.getEfuseMac();
+
+	//switch (chipid) 
+	switch (chipid)
+	{
+		case 163842596:
+			SerialBT.begin("PCB Version sick name bro");
+			break;
+	
+
+
+
+
+
+
+
+		default:
+			SerialBT.begin("Read init serial name me");
+	}
+
+	
+	digitalWrite(rgbLedBlue, HIGH);
+
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
+	Serial.println(chipid);
 }
 
 void initPins()

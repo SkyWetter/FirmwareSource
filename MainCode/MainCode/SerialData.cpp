@@ -45,9 +45,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -88,12 +88,13 @@ void getSerialData()
 				{
 					Serial.println(incomingChar);
 					Serial.printf("incoming char was an illegal character \n");
-					singleSquareData[i + 1] = '@';
+					singleSquareData[i+1] = '@';
 				}
 				else
 				{
-					singleSquareData[i + 1] = incomingChar;
+					singleSquareData[i+1] = incomingChar;
 				}
+				//ignore
 			}
 			break;
 
@@ -117,7 +118,13 @@ void getSerialData()
 			SerialBT.println("time is money");	
 			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
 			break;
+		
+		default:
+
+			//do nothing i guess
+			break;	
 		}
+		
 	}
 
 
