@@ -100,7 +100,7 @@ const int SQUARES_PER_ROW = 25;
 const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
 const int STEPS_PER_FULL_TURN = 400;
 
-int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+float squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 
 enum serialStates serialState;
 				// Used during serial error handling checks

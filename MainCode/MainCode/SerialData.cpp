@@ -59,8 +59,7 @@ void getSerialData()
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
 		char incomingChar;
-		Serial.println("incoming leading char is");
-		Serial.println((uint8_t)incomingChar);
+		
 
 		if (SerialBT.available())
 		{
@@ -72,6 +71,9 @@ void getSerialData()
 			incomingChar = Serial.read();
 		}
 		
+		//Serial.println("incoming leading char is");
+		//Serial.println((uint8_t)incomingChar);
+
 		switch (incomingChar)
 		{
 		case '*':
@@ -124,6 +126,7 @@ void getSerialData()
 		default:
 
 			Serial.println("IM IN DEFAULTED SERIAL CASE");
+			
 			//do nothing i guess
 			break;	
 		}
@@ -146,7 +149,13 @@ void getSerialData()
 		{
 		case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
 		case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
-		case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
+		case resend:
+
+			Serial.println("Asking for resend packet in square PacketState");
+			
+			SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
+			
+			break; //Request a missed packet
 		}
 
 		//Check checksum state
@@ -167,7 +176,10 @@ void getSerialData()
 
 			break;
 		case ignore: break;
-		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+		case resend: 
+			
+			
+			SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 		}
 
 		break;
@@ -299,6 +311,7 @@ void checkPacketNumber(char singleSquareData[])
 		if (singleSquareData[i] == '@')
 		{
 			Serial.println("received @ in check packet number");
+	
 			return;
 		}
 	}
@@ -310,10 +323,20 @@ void checkPacketNumber(char singleSquareData[])
 	}
 
 	squarePacketNumberInt = charToInt(squarePacketNumberChar, 3);
+	Serial.println("packet number received is");
+	Serial.println(squarePacketNumberInt);
+	Serial.println("last packet number received is");
+	Serial.println(lastSquarePacketNumber);
+
 
 
 	//If this is the first square rx'd, assume its the right packet number, or an inc of last packet (including rollover)
-	if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+	
+	
+	//if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+	//the line below is a temporary fix for what happens when a packet comes out of sequence
+	if (squarePacketNumberInt != lastSquarePacketNumber  || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+
 	{
 		//Set this packet to last packet number and set packetState
 		lastSquarePacketNumber = squarePacketNumberInt;
@@ -326,9 +349,14 @@ void checkPacketNumber(char singleSquareData[])
 	//If this packet is old (already received) or the same as the last packet, ignore it
 	else if (squarePacketNumberInt <= lastSquarePacketNumber)
 	{
+
+		//Serial.println("packet is old and already received");
+		lastSquarePacketNumber = squarePacketNumberInt;     //If the phone app restarts and restarts packet count this will accept the new count
+
 		//Ignore this packet
 		if (!repeatPacketReceived)
 		{
+			Serial.println("ignore this packet");
 			repeatPacketReceived = true;
 		}
 
@@ -338,6 +366,9 @@ void checkPacketNumber(char singleSquareData[])
 	//If packet received is out of sequence, request resend
 	else if (lastSquarePacketNumber == 999 && squarePacketNumberInt != 0 || squarePacketNumberInt > lastSquarePacketNumber + 1)
 	{
+		lastSquarePacketNumber = squarePacketNumberInt -1;		//this was put here to debug single square
+	
+		Serial.println("packet out of sequence");
 		repeatPacketReceived = false;
 		squarePacketState = resend;
 	}

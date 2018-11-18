@@ -57,7 +57,7 @@
 
 int serialBaud = 115200;
 
-int getFlow(int column, int row, int turretColumn, int turretRow);
+float getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
@@ -265,7 +265,8 @@ void codeForTask1(void * parameter)						//speecial code for task1
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
 * Initializes the array of squares on startup
-* squareArray[squareID][{x,y,distance,angle}]
+* squareArray[squareID][{x,y,
+,angle}]
 * Each position in the first dimension of array is a given square id
 *
 */
@@ -286,13 +287,14 @@ void createSquareArray(int squaresPerRow)
 
 			// Calculates flow needed to reach this square, stores it in array
 			squareArray[squareID][2] = getFlow(column, row, turretColumn, turretRow);
+			//printf("flow requred to hit target %f\n", squareArray[squareID][2]);
 
 			// Calculates # of steps taken from home needed to make turret face square
 			squareArray[squareID][3] = convertAngleToStep(angleToSquare(column, row, turretColumn, turretRow));
-			Serial.println(squareArray[squareID][3]);
+			//Serial.println(squareArray[squareID][3]);
 
 			squareID += 1;
-			printf("Square id: %d\n", squareID);
+			//printf("Square id: %d\n", squareID);
 		}
 	}
 }
@@ -307,10 +309,27 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 {
 	int x = sqCol - turCol;
 	int y = sqRow - turRow;
+	// one square is equal to 0.5 meters and our flow data is measured in meters so 2x one suare = 1 meter
+	x = x / 2;					
+	y = y / 2;
+
+	//printf(" in DistanceToSquare column number is %i\n", sqCol);
+	//printf(" in DistanceToSquare turret column number is %i\n", turCol);
+	//printf(" in DistanceToSquare row number is %i\n", sqRow);
+	//printf(" in DistanceToSquare urent row number is %i\n", turRow);
+
+	//printf(" in DistanceToSquare int x is %i\n", x);
+	//printf(" in DistanceToSquareint y number is %i\n", y);
+
 
 	int squareCoords = (x * x) + (y * y);
 
-	return sqrt((double)squareCoords);
+	//printf(" in DistanceToSquaresquare coords are %i\n", squareCoords);
+
+	float squareDistance = sqrt(squareCoords);
+	//printf(" in DistanceToSquare square distance is%f\n", squareDistance);
+
+	return squareDistance;
 }
 
 // S U B   F U N C T I O N -- angleToSquare
@@ -399,7 +418,7 @@ int convertAngleToStep(double angle)
 	else
 	{
 		double stepsDouble = angle / anglePerStep;   //Get number of steps to reach this angle starting from home)
-		Serial.println(stepsDouble);
+		//Serial.println(stepsDouble);
 		int steps = stepsDouble * 1000;
 
 		for (int i = 0; i < 3; i++)   //Rounds the number (including 3 sigfigs after the decimal point)
@@ -426,13 +445,22 @@ int convertAngleToStep(double angle)
 */
 
 
-int getFlow(int column, int row, int turretColumn, int turretRow)
+float getFlow(int column, int row, int turretColumn, int turretRow)
 {
 
-	double squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
-	double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
 
-	return (int)flow;
+	float squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
+	//double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
+	
+	//printf(" in getFlow square distance prew math is are %f\n", squareDistance);
+	
+	float flow = squareDistance * 4.54 + 1.69;
+
+	//printf(" in getFlow calculated distance is %f\n", squareDistance);
+	//printf(" in getFlow calculated flow is %f\n", flow);
+
+
+	return flow;
 
 	// ** Other equations describing our curve **
 	// 4PL has the best R^2 value, but might be difficult to tweak.

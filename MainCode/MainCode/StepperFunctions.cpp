@@ -292,11 +292,11 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 		{
 		case stepperDomeStpPin:
 
-			Serial.println("switch case for domeStepper");
-			Serial.println(targetPosition);
-			Serial.println(currentDomePosition);
-
-
+			//Serial.println("switch case for domeStepper");
+			//Serial.println(targetPosition);
+			//Serial.println(currentDomePosition);
+			printf("move starting at %i", currentDomePosition);
+			
 
 			digitalWrite(stepperDomeSlpPin, HIGH);
 
@@ -323,7 +323,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				delay(10);
 
 				delay(100);
-				Serial.println("taking corrective steps home");
+				Serial.println("taking corrective steps home\n");
 			}
 
 
@@ -398,26 +398,26 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 			}
 			if (digitalRead(hallSensorDome) == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
+		printf("and took %i steps", stepsTaken);
 		}
 	}
 
-
-	Serial.println("exiting moveToPosition");
+	printf(" ending at %i\n", targetPosition);
+	
 	digitalWrite(rgbLedGreen, LOW);
 
 }
 
 void executeSquare(int mysquare) {
 
-	Serial.println("Target flow pulse length is");
+
 
 	int steps2go = squareArray[mysquare][3];
 
-	int targtFlow = squareArray[mysquare][2];
+	float targtFlow = squareArray[mysquare][2];
 
-	Serial.println("target angle is");
-	Serial.println(squareArray[mysquare][3]);
-	Serial.println("Target flow pulse length is");
+
+	Serial.println("Target flow frequency is");
 	Serial.println(squareArray[mysquare][2]);
 
 
