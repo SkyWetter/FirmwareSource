@@ -59,7 +59,9 @@ void getSerialData()
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
 		char incomingChar;
-		
+		Serial.println("incoming leading char is");
+		Serial.println((uint8_t)incomingChar);
+
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
@@ -86,7 +88,7 @@ void getSerialData()
 				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
-					Serial.println(incomingChar);
+					Serial.print((uint8_t)incomingChar);
 					Serial.printf("incoming char was an illegal character \n");
 					singleSquareData[i+1] = '@';
 				}
@@ -121,6 +123,7 @@ void getSerialData()
 		
 		default:
 
+			Serial.println("IM IN DEFAULTED SERIAL CASE");
 			//do nothing i guess
 			break;	
 		}
@@ -295,6 +298,7 @@ void checkPacketNumber(char singleSquareData[])
 	{
 		if (singleSquareData[i] == '@')
 		{
+			Serial.println("received @ in check packet number");
 			return;
 		}
 	}

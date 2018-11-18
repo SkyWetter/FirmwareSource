@@ -248,10 +248,12 @@ void makeRain(int desiredFlow)
 
 			//printf("desiredFreq is %f \n", desiredFreq);
 //Serial.println(desiredFreq);
-Serial.println(currentValvePosition);
+//Serial.println(currentValvePosition);
 //Serial.println(fastTime);
 	//Serial.println(stepTime);
 	}
+	Serial.println("Steps taken to satisfy flow");
+	Serial.println(currentValvePosition);
 
 	Serial.println("the frequency at end of makeRain was");
 	Serial.println(freq);
@@ -395,7 +397,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				}
 
 			}
-			digitalWrite(stepperDomeSlpPin, LOW);	//flush the toilet AFTER YOUVE HAD A SHET
+			if (digitalRead(hallSensorDome) == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
 		}
 	}
 
@@ -421,7 +423,7 @@ void executeSquare(int mysquare) {
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	delay(100);
-	makeRain(squareArray[mysquare][2]);
+	//makeRain(squareArray[mysquare][2]);
 
 }
 

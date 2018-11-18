@@ -177,7 +177,7 @@ void initThreads()
 		NULL,
 		1,
 		&Task1,                   /* Task handle to keep track of created task */
-		0);                       /* Core */
+		1);                       /* Core */
 }
 
 void initSleepClock()
