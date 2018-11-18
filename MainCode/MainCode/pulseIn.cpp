@@ -77,7 +77,7 @@ void doPulseIn()
 				pulseStart = millis();					//set pulse start time
 				newPulseLength = pulseStart;			//set new pulse time
 				waitTime = millis();					//set wait timer
-				delay(4);								//this delay is only needed for button debugging	
+				//delay(4);								//this delay is only needed for button debugging	
 				//Serial.println("pulse detected");
 				while (pulseState == gpio_get_level(pulsePin) && waitTime + 500 >= millis()) {			//while the pin is still high and timer is avail
 
