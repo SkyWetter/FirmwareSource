@@ -63,8 +63,8 @@ double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initSerial();
 	initPins();
+	initSerial();
 	initThreads();
 
 	print_wakeup_reason(); // andy -- add comment
@@ -366,18 +366,18 @@ int convertAngleToStep(double angle)
 {
 	double anglePerStep = 360.0 / STEPS_PER_FULL_TURN;  //Gets degrees of movement per step 
 
-	if (angle > 400)   //If the turret angle of 999 is found, return same number
+	if (angle > 400)									//If the turret angle of 999 is found, return same number
 	{
 		return 999;
 	}
 
 	else
 	{
-		double stepsDouble = angle / anglePerStep;   //Get number of steps to reach this angle starting from home)
+		double stepsDouble = angle / anglePerStep;		 //Get number of steps to reach this angle starting from home)
 		Serial.println(stepsDouble);
 		int steps = stepsDouble * 1000;
 
-		for (int i = 0; i < 3; i++)   //Rounds the number (including 3 sigfigs after the decimal point)
+		for (int i = 0; i < 3; i++)						 //Rounds the number (including 3 sigfigs after the decimal point)
 		{
 			if (steps % 10 > 4)
 			{
@@ -399,7 +399,6 @@ int convertAngleToStep(double angle)
 * Currently truncates flow value, but shouldn't be a problem as the system
 * isn't capable with that granular of a number in this case
 */
-
 
 int getFlow(int column, int row, int turretColumn, int turretRow)
 {

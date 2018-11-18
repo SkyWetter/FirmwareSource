@@ -388,3 +388,42 @@ void valveStepperOneStep()
 	SerialBT.println(currentValvePosition);
 	//digitalWrite(stepperValveEnPin, LOW);
 }
+
+void crazyDomeStepperFromDebugA()
+{
+	moveToPosition(stepperDomeStpPin, 10, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	//delay(500);		// if active dome count incorrect
+	//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
+	//delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	//delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
+	//delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+}

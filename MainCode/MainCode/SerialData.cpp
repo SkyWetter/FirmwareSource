@@ -111,75 +111,63 @@ void getSerialData()
 			break;
 
 		case '$':
-			Serial.println("time is money");
-			SerialBT.println("time is money");	
-			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
+			//Serial.println("time is money");SerialBT.println("time is money");	
+			timeShift();		//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+			serialState = doNothing;
 			break;
 		}
 	}
 
-
-
 	// Check the serial state 
-
 	switch (serialState)
 	{
-	case doNothing: break;
+	case doNothing: 
+	break;
 
-	case singleSquare:       //If in singleSquare mode
-		checkPacketNumber(&singleSquareData[0]); //Check the packet number
+	case singleSquare:											 //If in singleSquare mode
+		checkPacketNumber(&singleSquareData[0]);				 //Check the packet number
 
 		// Check Packet State
 		switch (squarePacketState)
 		{
-		case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
-		case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
-		case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
+			case ok: checkChecksum(&singleSquareData[0]); break;	 //if packet is ok, check the checksum
+			case ignore: break;										 //do nothing if packet number is old or same as previous successful rx        
+			case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
 		}
 
 		//Check checksum state
 		switch (squareChecksumState)
 		{
-		case ok: getSquareID(&singleSquareData[0]); //If checksum is fine, move turret
-			message = false;;
-			serialState = doNothing;
-			squareChecksumState = ignore;
-			squarePacketState = ignore;
-			squareIDInt = charToInt(squareID, 3);
-
-
-
-			break;
-		case ignore: break;
-		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+			case ok: getSquareID(&singleSquareData[0]);					//If checksum is fine, move turret
+				message = false;;
+				serialState = doNothing;
+				squareChecksumState = ignore;
+				squarePacketState = ignore;
+				squareIDInt = charToInt(squareID, 3);
+				break;
+			case ignore: break;
+			case resend: SerialBT.write(lastSquarePacketNumber);		 //If checksum is incorrect, request the same packet from the app
 		}
+	break;
 
-		break;
-		 
+	case debugCommand:
 		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
-
-		break;
+	break;
 
 	case parseGarden:
-
 		parseInput();
-
-		break;
+	break;
 
 	default:;
 	}
 }
 
 
-
 // S U B F U N C  T I O N S -- getSerialData
-
 void parseInput()
 {
 	//Serial.println("test");
-
-
 	int j = 11;
 	int length;
 	char headerArray[11] = { '#' };
@@ -268,9 +256,7 @@ int getSquareID(char singleSquaredata[])
 
 }
 
-//CHECK PACKET NUMBER
-//Check packet number, changes packetState
-
+//CHECK PACKET NUMBER --- changes packetState
 void checkPacketNumber(char singleSquareData[])
 {
 
@@ -326,25 +312,22 @@ void checkPacketNumber(char singleSquareData[])
 
 //CHECK CHECKSUM
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
-
 void checkChecksum(char singleSquareData[])
 {
-	int espChecksum = 0;      //Value of checksum calculated on esp side
-	int androidChecksum = 0;  //Value of checksum sent by android
+	int espChecksum = 0;								//Value of checksum calculated on esp side
+	int androidChecksum = 0;							//Value of checksum sent by android
 
 	for (int i = 0; i < 3; i++)
 	{
 		squareChecksumChar[i] = singleSquareData[i + 7]; //Get checksum substring from data packet
-		espChecksum += singleSquareData[i + 4];     //Esp calculate checksum  
-
+		espChecksum += singleSquareData[i + 4];			 //Esp calculate checksum  
 	}
 
-	androidChecksum = charToInt(squareChecksumChar, 3);// Convert checksum substring to int
+	androidChecksum = charToInt(squareChecksumChar, 3);	 // Convert checksum substring to int
 
-	if (androidChecksum == espChecksum) //If they match, allow the packet data to be used
+	if (androidChecksum == espChecksum)					 //If they match, allow the packet data to be used
 	{
 		squareChecksumState = ok;
-
 	}
 
 	else
@@ -373,115 +356,78 @@ char getDebugChar()
 }
 
 // M A I N   F U N C T I O N --- inputCase statement
-
-
 void debugInputParse(char debugCommand)
 {     // read the incoming byte:
 
 	switch (debugCommand)
 	{
 
-	case '0':                             // send dome stepper to home posistion
-		domeGoHome();
+		case '0':                             // send dome stepper to home posistion
+			domeGoHome();
 		break;
 
-	case '1':                             // send vavle stepper to home posisiton
-		valveGoHome();
+		case '1':                             // send vavle stepper to home posisiton
+			valveGoHome();
 		break;
 
-	case 'a':
-		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		domeGoHome();
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		//delay(500);		// if active dome count incorrect
-		//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
-		//delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		//delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		domeGoHome();
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		domeGoHome();
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
-		//delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+		case 'a':
+			crazyDomeStepperFromDebugA();
 		break;
 
-	case 'b':
-		// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
-		stepperDomeDirCW();
+		case 'b':
+			// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
+			stepperDomeDirCW();
 		break;
 
-	case 'c':
-		// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
-		stepperDomeDirCCW();
+		case 'c':
+			// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
+			stepperDomeDirCCW();
 		break;
 
-	case 'd':
-		//one step on valveStepper
-		valveStepperOneStep();
+		case 'd':
+			//one step on valveStepper
+			valveStepperOneStep();
 		break;
 
-	case 'e':
-		toggleStepperValveDir();
+		case 'e':
+			toggleStepperValveDir();
 		break;
 
-	case 'f':
-		// panel shit
-		displaySolarCurrent();
-		displaySolarVoltage();
+		case 'f':
+			// panel shit
+			displaySolarCurrent();
+			displaySolarVoltage();
 		break;
 
-	case 'g':
-		solarPowerTracker();
+		case 'g':
+			solarPowerTracker();
 		break;
 
-	case 'h':
-		//doPulseIn();
-		Serial.print("frequency is ");
-		Serial.println(freq);
-		Serial.println("exiting pulseIn");
-		SerialBT.println(freq);
+		case 'h':
+			//doPulseIn();
+			Serial.print("frequency is ");
+			Serial.println(freq);
+			Serial.println("exiting pulseIn");
+			SerialBT.println(freq);
 		break;
 
-	case 'i':
-		//spiffsBegin();
-		//spiffsSave();
-		Serial.println("test");
+		case 'i':
+			//spiffsBegin();
+			//spiffsSave();
+			Serial.println("test");
 		break;
 
-	case 'j':
-		spiffsRead();
+		case 'j':
+			spiffsRead();
 		break;
 
-	case 's':
-		Serial.println("debug case: s -> going to sleep...");
-		SerialBT.println("debug case: s -> going to sleep...");
-		initSleepClock();	/// andy -- add comment
+		case 's':
+			//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
+			initSleepClock();			// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
 		break;
 
-	case 't':
-		printLocalTime();
+		case 't':
+			printLocalTime();			// display time
 		break;
 
 	}
