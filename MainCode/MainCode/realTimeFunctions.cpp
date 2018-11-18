@@ -108,6 +108,11 @@ void printLocalTime()
 
 	time1 = mktime(&tm1);
 
-	Serial.printf("%.24s \n", asctime(&tm1));				// %A = full weekday name, %B full month name,  %d = day of the month, %Y = year with century, %H = hour (24hr),  %M = minute 900-59), %S= second (00-61)
+	Serial.printf("%.24s \n", asctime(&tm1));										// %A = full weekday name, %B full month name,  %d = day of the month, %Y = year with century, %H = hour (24hr),  %M = minute 900-59), %S= second (00-61)
+
+}
+
+void wateringWakeUp()
+{
 
 }

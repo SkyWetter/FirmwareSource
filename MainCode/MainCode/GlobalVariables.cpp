@@ -64,6 +64,7 @@ float oldfreq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
+long currentSenseVal1;
 
 // sleep, realtimeclock, power management 
 RTC_DATA_ATTR int bootCount = 0;

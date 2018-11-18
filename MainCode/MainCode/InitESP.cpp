@@ -18,8 +18,7 @@
 #include "soc/timer_group_reg.h"
 #include "realTimeFunctions.h"
 
-#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
+
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -71,13 +70,15 @@ void initESP()
 	
 	spiffsBegin();
 
-	systemState = sleeping;
+	systemState = idle;
 }
 
 void initSerial()
 {
 	SerialBT.begin("ESP_AVready");
+
 	Serial.begin(serialBaud);
+
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
 }
@@ -159,29 +160,19 @@ void initSleepClock()
 {
 	if (bootCount == 0)
 	{
+		// get time
 		//timeShift();
 	}
 	++bootCount;
 
-	printLocalTime();
 	print_wakeup_reason();								//Print the wakeup reason for ESP32
 
 	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
 	Serial.print("# of seconds since last boot: ");
 	//Serial.println(now.tv_sec);
 
-	// sleep, rtc and power mangement
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+	deepSleep();
 
-	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
-
-	Serial.println("Going to sleep now");
-	Serial.flush();
-	esp_deep_sleep_start();
-	Serial.println("This will never be printed");
 }
 
 void print_wakeup_reason()
@@ -195,7 +186,9 @@ void print_wakeup_reason()
 	case 1:
 		Serial.println("Wakeup caused by external signal using RTC_IO");
 		// if we are here its because there was a wake-up push button event
-		systemState = program;// so we will want to enter program mode
+
+		//systemState = program;// so we will want to enter program mode
+
 		// enable bluetooth
 		// goto to sleep when done
 		break;
@@ -228,8 +221,6 @@ void codeForTask1(void * parameter)						//speecial code for task1
 {
 	while (1)
 	{
-
-
 		TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;		//feed the watchdoggy
 		TIMERG0.wdt_feed = 1;
 		TIMERG0.wdt_wprotect = 0;

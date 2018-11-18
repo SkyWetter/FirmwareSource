@@ -36,6 +36,7 @@ extern float oldfreq;
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
+extern long currentSenseVal1;
 
 // sleep, realtimeclock, power management 
 extern RTC_DATA_ATTR int bootCount;
@@ -64,21 +65,16 @@ extern int squareIDInt;
 extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
-
-
 /* Program State enums */
-
-
-
 enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
 extern enum serialStates serialState;
 
-enum packetState { ok, ignore, resend };						// Used during serial error handling checks
+enum packetState { ok, ignore, resend };										// Used during serial error handling checks
 extern enum packetState squareChecksumState;			
-extern enum packetState squarePacketState;// Ok -- proceed with serial packet handling
+extern enum packetState squarePacketState;										// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
-enum systemStates { sleeping, solar, program, water, low_power };
+enum systemStates { idle, solar, program, water, low_power };
 extern enum systemStates systemState;
 extern enum systemStates systemState_previous;
 

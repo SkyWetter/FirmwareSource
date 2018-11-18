@@ -71,9 +71,10 @@ void getSerialData()
 		
 		switch (incomingChar)
 		{
+
 		case '*':
 			Serial.println("Resent from android");  //Debug message to alert through serial monitor that data has been resent on ESP request
-			break;
+		break;
 
 		case '%':
 			serialState = singleSquare;  //Puts serialState in singleSquare mode 
@@ -93,13 +94,12 @@ void getSerialData()
 					singleSquareData[i + 1] = incomingChar;
 				}
 			}
-			break;
+		break;
 
 		case '&':
-			Serial.println("debug command");
-			SerialBT.println("debug command");
+			//Serial.println("debug command"); SerialBT.println("debug command");
 			serialState = debugCommand;
-			break;
+		break;
 
 		case '#': 
 			//header #0001@0028!data
@@ -107,14 +107,13 @@ void getSerialData()
 			{
 				serialState = parseGarden;
 			}
-
-			break;
+		break;
 
 		case '$':
 			//Serial.println("time is money");SerialBT.println("time is money");	
 			timeShift();		//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			serialState = doNothing;
-			break;
+		break;
 		}
 	}
 
@@ -176,7 +175,6 @@ void parseInput()
 	//Serial.print("Entering case # - header array: #");
 
 	//pull header array
-
 	for (int i = 1; i < 11; i++)
 	{
 		headerArray[i] = Serial.read();
@@ -375,18 +373,15 @@ void debugInputParse(char debugCommand)
 		break;
 
 		case 'b':
-			// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
-			stepperDomeDirCW();
+			stepperDomeDirCW();					// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
 		break;
 
 		case 'c':
-			// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
-			stepperDomeDirCCW();
+			stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
 		case 'd':
-			//one step on valveStepper
-			valveStepperOneStep();
+			valveStepperOneStep();				//one step on valveStepper
 		break;
 
 		case 'e':
@@ -394,7 +389,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 		case 'f':
-			// panel shit
 			displaySolarCurrent();
 			displaySolarVoltage();
 		break;
@@ -423,11 +417,11 @@ void debugInputParse(char debugCommand)
 
 		case 's':
 			//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
-			initSleepClock();			// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
+			initSleepClock();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
 		break;
 
 		case 't':
-			printLocalTime();			// display time
+			printLocalTime();					// display time
 		break;
 
 	}

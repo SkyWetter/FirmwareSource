@@ -1,10 +1,12 @@
 // **********   S * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
-//  october 31, 2018
+//  november 20, 2018
 
 
 // *********   P R E P R O C E S S O R S
+#include "bigStateMachine.h"
+#include "deepSleep.h"
 #include "SPIFFSFunctions.h"
 #include <SPIFFS.h>
 #include <Stepper.h>
@@ -28,7 +30,6 @@
 //#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
-#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
 
@@ -64,11 +65,9 @@
 
 void setup()
 {
-	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
-				// starting systemState (see InitESP.cpp)
-	Serial.println("ESP Initialized...");
+	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate, starting systemState (see InitESP.cpp)
+	Serial.println("ESP Initialized..."); SerialBT.println("ESP Initialized...");
 	domeGoHome(); 
-
 }
 
 
@@ -82,7 +81,7 @@ void checkSystemState()
 {
 	switch (systemState)
 	{
-	case sleeping:
+	case idle:
 	{
 
 		if (SerialBT.available() || Serial.available())
@@ -94,25 +93,24 @@ void checkSystemState()
 
 	case solar:
 	{
-
 		solarPowerTracker();
-		systemState = sleeping;
+		systemState = idle;
 		break;
 	}
 
 	case program:
 	{
-		if (freq != oldfreq) {
+		// throw flag here to reset automatic sleep timer
+
+		if (freq != oldfreq) 
+		{
 			Serial.println(freq);
 			SerialBT.println(freq);
 			oldfreq = freq;
 		}
-		Serial.println("main code program case");
+		//Serial.println("main code program case");
 		getSerialData();
-
-
-		systemState = sleeping;
-
+		systemState = idle;
 		break;
 	}
 
@@ -126,10 +124,7 @@ void checkSystemState()
 		{
 			Serial.printf("SystemState: Watering Mode");
 		}
-
-
 		systemState_previous = systemState;
-
 		break;
 	}
 
@@ -146,7 +141,6 @@ void checkSystemState()
 		}
 
 		systemState_previous = systemState;
-
 		break;
 	}
 	}
@@ -156,5 +150,4 @@ void shootSingleSquare()
 {
 	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
 	int targetStep = squareArray[getSquareID(singleSquareData)][3];
-
 }
