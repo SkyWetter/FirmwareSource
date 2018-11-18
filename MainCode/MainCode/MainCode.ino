@@ -24,6 +24,7 @@
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+#include "realTimeFunctions.h"
 //#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
@@ -74,11 +75,8 @@ void setup()
 void loop()
 {
 	checkSystemState();
-
 	//Serial.println(systemState);
 }
-
-
 
 void checkSystemState()
 {
@@ -92,7 +90,6 @@ void checkSystemState()
 			
 			systemState = program;
 		}
-
 		break;
 	}
 
@@ -100,10 +97,7 @@ void checkSystemState()
 	{
 
 		solarPowerTracker();
-
-
 		systemState = sleeping;
-
 		break;
 	}
 
@@ -114,7 +108,7 @@ void checkSystemState()
 			SerialBT.println(freq);
 			oldfreq = freq;
 		}
-		//Serial.println("main code program case");
+		Serial.println("main code program case");
 		getSerialData();
 
 

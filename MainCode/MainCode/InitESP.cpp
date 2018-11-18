@@ -12,11 +12,14 @@
 #include "sdkconfig.h"
 #include "driver\adc.h"
 #include "GeneralFunctions.h"
+#include "SPIFFSFunctions.h"
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+#include "realTimeFunctions.h"
 
-
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -62,20 +65,19 @@ void initESP()
 {
 	initSerial();
 	initPins();
-	createSquareArray(25);
 	initThreads();
-	systemState = sleeping;
+
+	print_wakeup_reason(); // andy -- add comment
 	
 
-	// power management
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	spiffsBegin();
 
+	systemState = sleeping;
 }
-
 
 void initSerial()
 {
-	SerialBT.begin("ESP_PCB Version");
+	SerialBT.begin("ESP_AVready");
 	Serial.begin(serialBaud);
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
@@ -93,8 +95,6 @@ void initPins()
 
 	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
 	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
-
-
 
 	// pin assignments
 	//pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
@@ -122,7 +122,6 @@ void initPins()
 	pinMode(rgbLedBlue, OUTPUT);
 	pinMode(rgbLedRed, OUTPUT);
 	pinMode(rgbLedGreen, OUTPUT);
-
 
 	// init pin states
 	digitalWrite(stepperDomeStpPin, LOW);
@@ -155,6 +154,75 @@ void initThreads()
 		1,
 		&Task1,                   /* Task handle to keep track of created task */
 		0);                       /* Core */
+}
+
+void initSleepClock()
+{
+	if (bootCount == 0)
+	{
+		//timeShift();
+	}
+	++bootCount;
+
+	printLocalTime();
+	print_wakeup_reason();								//Print the wakeup reason for ESP32
+
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	//Serial.println(now.tv_sec);
+
+	// sleep, rtc and power mangement
+	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
+
+	Serial.println("Going to sleep now");
+	Serial.flush();
+	esp_deep_sleep_start();
+	Serial.println("This will never be printed");
+}
+
+void print_wakeup_reason()
+{
+	esp_sleep_wakeup_cause_t wakeup_reason;
+	wakeup_reason = esp_sleep_get_wakeup_cause();
+
+	switch (wakeup_reason)
+	{
+
+	case 1:
+		Serial.println("Wakeup caused by external signal using RTC_IO");
+		// if we are here its because there was a wake-up push button event
+		systemState = program;// so we will want to enter program mode
+		// enable bluetooth
+		// goto to sleep when done
+		break;
+
+	case 2:
+		Serial.println("Wakeup caused by external signal using RTC_CNTL");
+		break;
+
+	case 3:
+		Serial.println("Wakeup caused by timer");
+		//timer should wakeup device every soo often...
+		//rainbow will check for solar power
+		//rainbow will check to see if it is time to water or not
+		break;
+
+	case 4:
+		Serial.println("Wakeup caused by touchpad");
+		break;
+
+	case 5:
+		Serial.println("Wakeup caused by ULP program");
+		break;
+
+	default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
+
+	}
 }
 
 void codeForTask1(void * parameter)						//speecial code for task1

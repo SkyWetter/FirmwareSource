@@ -37,11 +37,14 @@ extern float oldfreq;
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
 
-// power management
-// RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
-extern RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
-extern struct timeval now;
+// sleep, realtimeclock, power management 
+extern RTC_DATA_ATTR int bootCount;
+extern RTC_DATA_ATTR struct timeval tv;
+extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
+extern RTC_DATA_ATTR struct tm tm1;
+extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
 
+extern RTC_DATA_ATTR int waterHour, waterMin;
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 

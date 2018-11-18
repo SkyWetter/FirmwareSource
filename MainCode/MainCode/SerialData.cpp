@@ -16,6 +16,7 @@
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
+#include "realTimeFunctions.h"
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -67,7 +68,6 @@ void getSerialData()
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-
 		}
 		
 		switch (incomingChar)
@@ -98,10 +98,12 @@ void getSerialData()
 			break;
 
 		case '&':
+			Serial.println("debug command");
+			SerialBT.println("debug command");
 			serialState = debugCommand;
 			break;
 
-		case '#':
+		case '#': 
 			//header #0001@0028!data
 			if (input2DArrayPosition < 14)
 			{
@@ -110,8 +112,10 @@ void getSerialData()
 
 			break;
 
-		case '$': 
-			
+		case '$':
+			Serial.println("time is money");
+			SerialBT.println("time is money");	
+			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
 			break;
 		}
 	}
@@ -329,8 +333,6 @@ void checkPacketNumber(char singleSquareData[])
 
 }
 
-
-
 //CHECK CHECKSUM
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
 
@@ -428,7 +430,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'f':
-
 		// panel shit
 		displaySolarCurrent();
 		displaySolarVoltage();
@@ -454,17 +455,13 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 's':
-		//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-		esp_deep_sleep_start();
+		Serial.println("debug case: s -> going to sleep...");
+		SerialBT.println("debug case: s -> going to sleep...");
+		initSleepClock();	/// andy -- add comment
 		break;
 
 	case 't':
-		gettimeofday(&now, NULL);
-
-		SerialBT.println(now.tv_sec);
-		SerialBT.println(last);
-
-		last = now.tv_sec;
+		printLocalTime();
 		break;
 
 	}
