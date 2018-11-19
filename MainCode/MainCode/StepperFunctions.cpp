@@ -176,7 +176,7 @@ void domeGoHome()
 	digitalWrite(stepperDomeSlpPin, LOW);		// low means sleep
 
 	currentDomePosition = 0;
-	SerialBT.println("dome go home");                                           // LOW IS COUNTERCLOCKWISE
+	//SerialBT.println("dome go home");                                           // LOW IS COUNTERCLOCKWISE
 }
 void valveGoHome()
 {
@@ -188,7 +188,7 @@ void valveGoHome()
 	//digitalWrite(stepperValveDirPin, HIGH);
 	currentValvePosition = 0;
 	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
-	SerialBT.println("valve go home");
+	//SerialBT.println("valve go home");
 }
 
 //Move valve to flow Function
@@ -426,7 +426,7 @@ void executeSquare(int mysquare) {
 
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
-	delay(100);
+	//delay(100);
 	makeRain(targetFlow);
 
 }

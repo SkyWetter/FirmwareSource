@@ -50,61 +50,53 @@
 
 void doPulseIn()
 {
-	//Serial.println("pulseIn begin");
-
-	//gets set when the pulse pin goes high
-			//the current pulse state of the pin starts unknown
-	// = millis();	// a counter for the entire loop. If no flow then timeout
+	
 	float pulseTime;	// time of pulse for math
 	int counter1;
 	int counter2;
-
-	int currentMillis = millis();
+	int lastMicros = micros();
 
 	if (gpio_get_level(pulsePin) == 1)
 	{
+		//Serial.println("while loop for pin = 1");
 		while (gpio_get_level(pulsePin) == 1)
 		{
-			counter1 = millis();
-			if (counter1 - currentMillis > 501) { Serial.println("broken from pulse = 1"); break;  }
+			
+			counter1 = micros();
+			if (counter1 - lastMicros > 500000) {  break;  }
 		}
-		pulseTime = millis() - counter1;
+		pulseTime = counter1 - lastMicros;
 
-		if (500 > pulseTime > 0)
+		if (500000 > pulseTime && pulseTime > 0)
 		{
-			pulseTime = millis() - counter2;
-			freq = 500 / pulseTime;
+			freq = 500000 / pulseTime;
 		}
 		else { freq = 0; }
-		
-
 	}
-
-	currentMillis = millis();
+	//Serial.println("frequency is ");
+	//Serial.println(freq);
+	lastMicros = micros();
 
 	if (gpio_get_level(pulsePin) == 0)
 	{
+		//Serial.println("while loop for pin = 0");
 		while (gpio_get_level(pulsePin) == 0)
 		{
-			counter2 = millis();
-			if (counter2 - currentMillis > 501) { Serial.println("broken from pulse = 0"); break; }
+			
+			counter2 = micros();
+			if (counter2 - lastMicros > 500000) {  break; }
 		}
 		
-		pulseTime = counter2 - currentMillis;
+		pulseTime = counter2 - lastMicros;
 
-		Serial.println(pulseTime);
-
-		if (500 > pulseTime > 0)
+		if (500000 > pulseTime && pulseTime > 0)
 		{
-			pulseTime = millis() - counter2;
-			freq = 500 / pulseTime;
+			freq = 500000 / pulseTime;
 		}
 		else { freq = 0; }
 	}
-
-	delay(100);
-	Serial.println("frequency is ");
-	Serial.println(freq);
-	Serial.println(gpio_get_level(pulsePin));
-
+	//delay(100);
+	//Serial.println("frequency is ");
+	//Serial.println(freq);
+	//Serial.println(gpio_get_level(pulsePin));
 }

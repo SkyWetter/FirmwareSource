@@ -30,11 +30,10 @@ extern byte hallSensorDomeVal;
 extern byte hallSensorValveVal;
 
 // pulse counter
-extern double duration;
+
 extern float freq;
 extern float oldfreq;
-extern bool pulseState;
-extern int begin;
+
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7

@@ -168,8 +168,6 @@ void initPins()
 void initThreads()
 {
 
-	pulseState = gpio_get_level(pulsePin);
-	freq = 0.0;
 
 	//multiple threads
 	TaskHandle_t Task1;				//creating the handle for Task1
