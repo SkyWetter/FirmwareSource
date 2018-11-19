@@ -52,7 +52,7 @@ direction of home
 }
 */
 
-int valveStepperDefaults[5] = {450,300,1500,100,LOW };	//low on dir pin is close
+int valveStepperDefaults[5] = {15,300,1500,100,LOW };	//low on dir pin is close
 int domeStepperDefaults[5] = {250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
  
 byte hallSensorDomeVal;
@@ -62,6 +62,8 @@ byte hallSensorValveVal;
 double duration;
 float freq;
 float oldfreq;
+bool pulseState;
+int begin;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7

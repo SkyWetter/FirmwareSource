@@ -198,17 +198,19 @@ void moveValve(int targetPosition, int speed, int accel,int current)
 
 }
 
-void makeRain(int desiredFlow)
+void makeRain(float desiredFlow)
 {
 
 	valveGoHome();
 
 	Serial.println("entered makeRain");
 	//double desiredFreq = 30;
-	double desiredFreq = 1000000.0 / (double)desiredFlow;
+	//double desiredFreq = 1000000.0 / (double)desiredFlow;
+	float desiredFreq = desiredFlow;
 	digitalWrite(stepperValveSlpPin, HIGH);
 
-	Serial.println(desiredFreq);
+	//Serial.println(desiredFreq);
+	//Serial.println(desiredFreq);
 
 
 	int fastTime;
@@ -219,8 +221,10 @@ void makeRain(int desiredFlow)
 	fastTime = 1000 / speed * 1000;
 	stepTime = fastTime * 2;
 
-	while (desiredFreq >= freq && currentValvePosition != 100) 
+	while (desiredFreq > freq && currentValvePosition != 100) 
 	{
+		Serial.println(freq);
+
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 
 		if (freq <= desiredFreq) { currentValveDirection = LOW; }
@@ -344,7 +348,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			int fastTime;
 			fastTime = 1000 / speed * 1000;
 			int stepTime;
-			stepTime = fastTime * 3;
+			stepTime = fastTime * 2;
 
 			if (current == 0) { current = domeStepperDefaults[2]; }		//if it gets a passed 0 use default current
 			setCurrent(stepperDomeCrntPin, current);
@@ -414,16 +418,16 @@ void executeSquare(int mysquare) {
 
 	int steps2go = squareArray[mysquare][3];
 
-	float targtFlow = squareArray[mysquare][2];
+	float targetFlow = squareArray[mysquare][2];
 
 
 	Serial.println("Target flow frequency is");
-	Serial.println(squareArray[mysquare][2]);
+	Serial.println(targetFlow);
 
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	delay(100);
-	makeRain(squareArray[mysquare][2]);
+	makeRain(targetFlow);
 
 }
 

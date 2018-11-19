@@ -153,7 +153,7 @@ void getSerialData()
 
 			Serial.println("Asking for resend packet in square PacketState");
 			
-			SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
+			//SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
 			
 			break; //Request a missed packet
 		}
@@ -178,8 +178,8 @@ void getSerialData()
 		case ignore: break;
 		case resend: 
 			
-			
-			SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+			;
+			//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 		}
 
 		break;
@@ -483,6 +483,8 @@ void debugInputParse(char debugCommand)
 
 	case 'h':
 		executeSquare(100);
+		delay(1000);
+		valveGoHome();
 
 		break;
 
