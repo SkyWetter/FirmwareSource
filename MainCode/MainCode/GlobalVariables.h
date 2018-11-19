@@ -94,5 +94,6 @@ extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 extern int spiffsSize;
 extern char *input2DArray[];
 extern int input2DArrayPosition;
-extern char bedsToSpray[];
+extern char bedsToSprayFile[];
 extern int bedsToSprayLength;
+extern char bedsToSprayInstructions[];

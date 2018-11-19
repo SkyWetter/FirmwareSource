@@ -52,7 +52,7 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
-char testHeader[] = "#0001@0018!sejhfrp";
+char testHeader[] = "#0001@0029!3,123,124,125!2,12";
 char testPackageNum1[] = "0001";
 char testPackageNum2[] = "0002";
 char testPackageNum3[] = "0003";
@@ -239,6 +239,7 @@ void parseInput()
 
 	Serial.println();
 
+	//
 	spiffsSave(input2DArray[input2DArrayPosition], length, packageNumArray);
 
 
@@ -471,8 +472,6 @@ void debugInputParse(char debugCommand)
 
 	case 'i':
 		spiffsParse(testPackageNum1);
-		//spiffsSave();
-		//Serial.println("test");
 		break;
 
 	case 'j':

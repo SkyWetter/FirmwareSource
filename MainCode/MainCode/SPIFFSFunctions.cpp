@@ -25,6 +25,7 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 	int j;
 	char fileName[] = "/xxxx.txt";
 
+	//pull out packet number for save file name
 	for (int i = 0; i < 4; i++)
 	{
 		fileName[i + 1] = packageNum[i];
@@ -32,7 +33,7 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 
 	Serial.println(fileName);
 
-
+	//create new file with packet number name
 	File file = SPIFFS.open(fileName, FILE_WRITE); 
 
 	if (!file)
@@ -41,6 +42,7 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 		return;
 	}
 
+	//save packet data under file name
 	for (int i = 0; i < arraySize; i++)
 	{
 		file.print(array[i]);
@@ -64,7 +66,7 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 	//return success;  wanted to have function as type bool to check for success, but wouldnt work
 }
 
-//add additional arrays to SPIFFS
+//add additional arrays to SPIFFS - not used currently
 void spiffsAppend(char array[], int arraySize)
 {
 	//bool success = false;
@@ -102,7 +104,7 @@ void spiffsAppend(char array[], int arraySize)
 	//return success;
 }
 
-//read SPIFFS data, eventually use to acts as a second "transmission"
+//read SPIFFS data, good for testing
 void spiffsRead(char fileNum[])
 {
 	char fileName[] = "/xxxx.txt";
@@ -134,6 +136,9 @@ void spiffsRead(char fileNum[])
 	file.close();
 }
 
+//parse spiffs data -> pull out data in format approipriate for spraying.
+//input is the packet number desired
+//Mon AM is 0001, Mon PM is 0002, Tues AM is 0003, etc <- enumerate this
 void spiffsParse(char fileNum[])
 {
 	char fileName[] = "/xxxx.txt";
@@ -141,6 +146,7 @@ void spiffsParse(char fileNum[])
 	char lengthArray[4];
 	int length;
 
+	//desired packet number is file name
 	for (int i = 0; i < 4; i++)
 	{
 		fileName[i + 1] = fileNum[i];
@@ -149,6 +155,7 @@ void spiffsParse(char fileNum[])
 	Serial.print("spiffsParse fileName: ");
 	Serial.println(fileName);
 	
+	//open file for reading only
 	File file = SPIFFS.open(fileName);
 
 	if (!file)
@@ -157,11 +164,13 @@ void spiffsParse(char fileNum[])
 		return;
 	}
 
+	//rebuild header file
 	for(int i = 0; i < 11; i++)
 	{
 		header[i] = file.read();
 	}
 
+	//determine length for for loop
 	for (int i = 0; i < 4; i++)
 	{
 		lengthArray[i] = header[(i + 6)];
@@ -172,20 +181,68 @@ void spiffsParse(char fileNum[])
 	Serial.print("spiffsParse length: ");
 	Serial.println(length);
 
-
+	//pull out full file in to global variable for spraying
 	for (int i = 0; i < 11; i++)
 	{
-		bedsToSpray[i] = header[i];
+		bedsToSprayFile[i] = header[i];
 	}
 
 	for (int i = 11; i < length; i++)
 	{
-		bedsToSpray[i] = file.read();
+		bedsToSprayFile[i] = file.read();
 	}
 
 	bedsToSprayLength = length;
 
 	Serial.print("spiffsParse file: ");
-	Serial.println(bedsToSpray);
+	Serial.println(bedsToSprayFile);	
+}
+
+//pass in bedsToSprayFile[]
+//format: !3,123,124,124,!2,12,13
+void parseBedData(char array[])
+{
+	int j = 0;	//bedsToSprayFile incrementer
+	int k = 0;	//bedsToSprayInstructions incrementer
 	
+	while (j <= bedsToSprayLength)
+	{
+		if (array[j] == '!')
+		{
+			int timesToWrite;
+			int bedNum;
+			char bedNumArray[3];
+
+			j++;	//step to number of repeats
+
+			timesToWrite = array[j];	
+
+			j++;	//step to comma
+
+			while (array[j] == ',')
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					j++;
+					bedNumArray[i] = array[j];
+				}
+
+				bedNum = charToInt(bedNumArray, 3);
+
+				for (int i = 0; i < timesToWrite; i++)
+				{
+					bedsToSprayInstructions[k] = bedNum;
+					k++;
+				}
+
+				if (array[(j + 1)] == ',')
+				{
+					j++;
+				}
+			}
+		}
+
+		j++;
+
+	}
 }
