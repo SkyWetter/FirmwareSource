@@ -200,14 +200,29 @@ void moveValve(int targetPosition, int speed, int accel,int current)
 
 void makeRain(float desiredFlow)
 {
-
+	
 	valveGoHome();
+
+	digitalWrite(stepperValveSlpPin, HIGH);
+	digitalWrite(stepperValveDirPin, LOW);
+
+	for(int i=0; i < 30; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
+	{
+		//Serial.println("taking extra steps");
+		digitalWrite(stepperValveStpPin, HIGH);
+		delay(4);
+		//delay(100);
+		digitalWrite(stepperValveStpPin, LOW);
+		delay(4);
+	}
+
+	
 
 	Serial.println("entered makeRain");
 	//double desiredFreq = 30;
 	//double desiredFreq = 1000000.0 / (double)desiredFlow;
 	float desiredFreq = desiredFlow;
-	digitalWrite(stepperValveSlpPin, HIGH);
+	
 
 	//Serial.println(desiredFreq);
 	//Serial.println(desiredFreq);
@@ -218,8 +233,13 @@ void makeRain(float desiredFlow)
 
 	int accel = valveStepperDefaults[1];
 	int speed = valveStepperDefaults[0];
-	fastTime = 1000 / speed * 1000;
+
+	speed = map(desiredFreq, 1, 50, 10, speed);
+
+	fastTime = 1000 /speed * 1000;			//multipy because now using microseconds
 	stepTime = fastTime * 2;
+	////Serial.println("compensated speed is");
+	Serial.println(fastTime);
 
 	while (desiredFreq > freq && currentValvePosition != 100) 
 	{
@@ -234,10 +254,15 @@ void makeRain(float desiredFlow)
 
 			digitalWrite(stepperValveStpPin, HIGH);
 			delayMicroseconds(stepTime);
+			digitalWrite(rgbLedRed, HIGH);
 			//delay(100);
 			digitalWrite(stepperValveStpPin, LOW);
 			delayMicroseconds(stepTime);
+			digitalWrite(rgbLedRed, LOW);
 			//delay(100);
+
+			//Serial.println("compensated speed iin stepping else is");
+			//Serial.println(stepTime);
 
 			if (currentValveDirection == LOW) { currentValvePosition += 1;}
 			else { currentValvePosition -= 1;}
@@ -427,7 +452,7 @@ void executeSquare(int mysquare) {
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	//delay(100);
-	makeRain(targetFlow);
+	//makeRain(targetFlow);
 
 }
 
@@ -535,7 +560,7 @@ void toggleStepperValveDir()
 void valveStepperOneStep()
 {
 	stepperValveOneStepHalfPeriod(10);
-	Serial.println(currentValvePosition);
-	SerialBT.println(currentValvePosition);
+	//Serial.println(currentValvePosition);
+	//SerialBT.println(currentValvePosition);
 	//digitalWrite(stepperValveEnPin, LOW);
 }

@@ -323,10 +323,10 @@ void checkPacketNumber(char singleSquareData[])
 	}
 
 	squarePacketNumberInt = charToInt(squarePacketNumberChar, 3);
-	Serial.println("packet number received is");
-	Serial.println(squarePacketNumberInt);
-	Serial.println("last packet number received is");
-	Serial.println(lastSquarePacketNumber);
+	//Serial.println("packet number received is");
+	//Serial.println(squarePacketNumberInt);
+	//Serial.println("last packet number received is");
+	//Serial.println(lastSquarePacketNumber);
 
 
 
@@ -343,7 +343,7 @@ void checkPacketNumber(char singleSquareData[])
 		squarePacketState = ok;
 		repeatPacketReceived = false;
 		firstSingleSquare = false; //First single square no longer in effect
-		printf("checkPacketNumber: state ok: lastpacket = %d \n", lastSquarePacketNumber);
+		//printf("checkPacketNumber: state ok: lastpacket = %d \n", lastSquarePacketNumber);
 	}
 
 	//If this packet is old (already received) or the same as the last packet, ignore it
@@ -356,7 +356,7 @@ void checkPacketNumber(char singleSquareData[])
 		//Ignore this packet
 		if (!repeatPacketReceived)
 		{
-			Serial.println("ignore this packet");
+			//Serial.println("ignore this packet");
 			repeatPacketReceived = true;
 		}
 
@@ -507,6 +507,11 @@ void debugInputParse(char debugCommand)
 	case 't':
 		printLocalTime();
 		break;
-
+	case 'o':
+		valveStepperOneStep();
+		break;
+	case 'x':
+		valveGoHome();
+		break;
 	}
 }
