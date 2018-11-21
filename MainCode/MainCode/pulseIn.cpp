@@ -40,9 +40,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -50,65 +50,53 @@
 
 void doPulseIn()
 {
-	//Serial.println("pulseIn begin");
-
-	int pulseStart;			//gets set when the pulse pin goes high
-	bool pulseState;		//the current pulse state of the pin starts unknown
-	int begin = millis();	// a counter for the entire loop. If no flow then timeout
-	int waitTime = 0;		//time spent waiting for pulse to go low
-	float pulseTime = 0;	// time of pulse for math
-	int newPulseLength = 0;	// continous pulse time
 	
+	float pulseTime;	// time of pulse for math
+	int counter1;
+	int counter2;
+	int lastMicros = micros();
 
-	while (begin + 500 >= millis()) {					//if time is available do the things
-		//while(1){
-
-			//delay(1);
-		//initpinState = gpio_get_level(pulsePin);
-
-		if (gpio_get_level(pulsePin) == 0) {				//first we wait for the pin to go low
-
-			delay(4);									//delays are for debouncing. Shouldnt need to actual sensor
-			pulseState = 0;								//set pulse state to match pin
-
-			if (gpio_get_level(pulsePin) == 1) {		//when pin goes from low to high
-
-				pulseState = 1;							//set pulse state
-				pulseStart = millis();					//set pulse start time
-				newPulseLength = pulseStart;			//set new pulse time
-				waitTime = millis();					//set wait timer
-				delay(4);								//this delay is only needed for button debugging	
-				//Serial.println("pulse detected");
-				while (pulseState == gpio_get_level(pulsePin) && waitTime + 500 >= millis()) {			//while the pin is still high and timer is avail
-
-					newPulseLength = millis();			//slot in a new value for pulse length
-					//Serial.println("reading pulse");
-				}
-
-				pulseTime = newPulseLength - pulseStart;	//math to figure out pulse time float
-				pulseStart = millis();						//reset timer incase skips while loop next time
-				//Serial.println("pulse complete");
-				//Serial.print("pulse length is");
-
-				if (pulseTime >= 500) { pulseTime = 0; }
-				if (pulseTime > 0) {							//only do math if pulse is not zero
-					//Serial.print("i try done math ");
-					freq = 500 / pulseTime;						// 500 because a pulse is 1/2 cycle
-				}
-				else {
-					freq = 0;
-				}
-				//Serial.println(pulseTime);
-			}
+	if (gpio_get_level(pulsePin) == 1)
+	{
+		//Serial.println("while loop for pin = 1");
+		while (gpio_get_level(pulsePin) == 1)
+		{
+			
+			counter1 = micros();
+			if (counter1 - lastMicros > 500000) {  break;  }
 		}
+		pulseTime = counter1 - lastMicros;
+
+		if (500000 > pulseTime && pulseTime > 0)
+		{
+			freq = 500000 / pulseTime;
+		}
+		else { freq = 0; }
 	}
-	//Serial.print("pulse length final is ");
-	//Serial.println(pulseTime);
-
-	
-	//Serial.print("frequency is ");
+	//Serial.println("frequency is ");
 	//Serial.println(freq);
-	//Serial.println("exiting pulseIn");
+	lastMicros = micros();
 
+	if (gpio_get_level(pulsePin) == 0)
+	{
+		//Serial.println("while loop for pin = 0");
+		while (gpio_get_level(pulsePin) == 0)
+		{
+			
+			counter2 = micros();
+			if (counter2 - lastMicros > 500000) {  break; }
+		}
+		
+		pulseTime = counter2 - lastMicros;
 
+		if (500000 > pulseTime && pulseTime > 0)
+		{
+			freq = 500000 / pulseTime;
+		}
+		else { freq = 0; }
+	}
+	//delay(100);
+	//Serial.println("frequency is ");
+	//Serial.println(freq);
+	//Serial.println(gpio_get_level(pulsePin));
 }

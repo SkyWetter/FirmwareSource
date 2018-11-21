@@ -17,7 +17,9 @@
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 #include "realTimeFunctions.h"
-#include "deepSleep.h"
+
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -45,9 +47,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -55,18 +57,56 @@
 
 int serialBaud = 115200;
 
-int getFlow(int column, int row, int turretColumn, int turretRow);
+float getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
-void initRainBow()
+void initESP()
 {
+	
 	initPins();
-	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
+	initSerial();
 	initThreads();
+	createSquareArray(25);
+	print_wakeup_reason(); // andy -- add comment
+	
+
 	spiffsBegin();
-	Serial.println("RainBow Initialized...");
+
+	systemState = sleeping;
 }
+
+void initSerial()
+{
+	Serial.begin(serialBaud);
+	int chipid = ESP.getEfuseMac();
+
+	//switch (chipid) 
+	switch (chipid)
+	{
+		case 163842596:
+			SerialBT.begin("PCB Version sick name bro");
+			break;
+	
+
+
+
+
+
+
+
+		default:
+			SerialBT.begin("Read init serial name me");
+	}
+
+	
+	digitalWrite(rgbLedBlue, HIGH);
+
+	
+	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
+	Serial.println(chipid);
+}
+
 void initPins()
 {
 	adc1_config_width(ADC_WIDTH_BIT_12);
@@ -125,14 +165,10 @@ void initPins()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
-void initSerial()
-{
-	Serial.begin(serialBaud);
-	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
-}
-
 void initThreads()
 {
+
+
 	//multiple threads
 	TaskHandle_t Task1;				//creating the handle for Task1
 
@@ -143,26 +179,39 @@ void initThreads()
 		NULL,
 		1,
 		&Task1,                   /* Task handle to keep track of created task */
-		0);                       /* Core */
+		1);                       /* Core */
 }
 
-void initSerialBT()
+void initSleepClock()
 {
-	SerialBT.begin("ESP_BustOut");
-
-	while (!SerialBT.hasClient) // wait here while Serial Bluetooth establishes
+	if (bootCount == 0)
 	{
-		Serial.print(".");
-		delay(100);
+		//timeShift();
 	}
-	Serial.println("");
+	++bootCount;
 
-	Serial.println("RainBow Bluetooth Serial Initialized...");
-	SerialBT.println("RainBow Bluetooth Serial Initialized...");
+	printLocalTime();
+	print_wakeup_reason();								//Print the wakeup reason for ESP32
 
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	//Serial.println(now.tv_sec);
+
+	// sleep, rtc and power mangement
+	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
+
+	Serial.println("Going to sleep now");
+	Serial.flush();
+	esp_deep_sleep_start();
+	Serial.println("This will never be printed");
 }
 
-void checkWakeUpReason()
+void print_wakeup_reason()
 {
 	esp_sleep_wakeup_cause_t wakeup_reason;
 	wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -173,8 +222,8 @@ void checkWakeUpReason()
 	case 1:
 		Serial.println("Wakeup caused by external signal using RTC_IO");
 		// if we are here its because there was a wake-up push button event
-		// init programstate.. thats BT.. 
-		programState();
+		systemState = program;// so we will want to enter program mode
+		// enable bluetooth
 		// goto to sleep when done
 		break;
 
@@ -184,12 +233,9 @@ void checkWakeUpReason()
 
 	case 3:
 		Serial.println("Wakeup caused by timer");
-		//timer event wakeup happens every 60s
-		// run wakeUpTimerStateMachine
-		// case 0: low battery ?
-		// case 1: watering time ?
-		// case 2: currentSense ?
-		checkSystemStateWakeUpByTimer();
+		//timer should wakeup device every soo often...
+		//rainbow will check for solar power
+		//rainbow will check to see if it is time to water or not
 		break;
 
 	case 4:
@@ -205,20 +251,12 @@ void checkWakeUpReason()
 	}
 }
 
-void initSleepClock()
-{
-	//Print the wakeup reason for ESP32
-	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
-	Serial.print("# of seconds since last boot: ");
-	//Serial.println(now.tv_sec);
-	deepSleep();
-}
-
-
 void codeForTask1(void * parameter)						//speecial code for task1
 {
 	while (1)
 	{
+
+
 		TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;		//feed the watchdoggy
 		TIMERG0.wdt_feed = 1;
 		TIMERG0.wdt_wprotect = 0;
@@ -229,7 +267,8 @@ void codeForTask1(void * parameter)						//speecial code for task1
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
 * Initializes the array of squares on startup
-* squareArray[squareID][{x,y,distance,angle}]
+* squareArray[squareID][{x,y,
+,angle}]
 * Each position in the first dimension of array is a given square id
 *
 */
@@ -250,13 +289,14 @@ void createSquareArray(int squaresPerRow)
 
 			// Calculates flow needed to reach this square, stores it in array
 			squareArray[squareID][2] = getFlow(column, row, turretColumn, turretRow);
+			//printf("flow requred to hit target %f\n", squareArray[squareID][2]);
 
 			// Calculates # of steps taken from home needed to make turret face square
 			squareArray[squareID][3] = convertAngleToStep(angleToSquare(column, row, turretColumn, turretRow));
-			Serial.println(squareArray[squareID][3]);
+			//Serial.println(squareArray[squareID][3]);
 
 			squareID += 1;
-			printf("Square id: %d\n", squareID);
+			//printf("Square id: %d\n", squareID);
 		}
 	}
 }
@@ -271,10 +311,27 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 {
 	int x = sqCol - turCol;
 	int y = sqRow - turRow;
+	// one square is equal to 0.5 meters and our flow data is measured in meters so 2x one suare = 1 meter
+	x = x / 2;					
+	y = y / 2;
+
+	//printf(" in DistanceToSquare column number is %i\n", sqCol);
+	//printf(" in DistanceToSquare turret column number is %i\n", turCol);
+	//printf(" in DistanceToSquare row number is %i\n", sqRow);
+	//printf(" in DistanceToSquare urent row number is %i\n", turRow);
+
+	//printf(" in DistanceToSquare int x is %i\n", x);
+	//printf(" in DistanceToSquareint y number is %i\n", y);
+
 
 	int squareCoords = (x * x) + (y * y);
 
-	return sqrt((double)squareCoords);
+	//printf(" in DistanceToSquaresquare coords are %i\n", squareCoords);
+
+	float squareDistance = sqrt(squareCoords);
+	//printf(" in DistanceToSquare square distance is%f\n", squareDistance);
+
+	return squareDistance;
 }
 
 // S U B   F U N C T I O N -- angleToSquare
@@ -355,18 +412,18 @@ int convertAngleToStep(double angle)
 {
 	double anglePerStep = 360.0 / STEPS_PER_FULL_TURN;  //Gets degrees of movement per step 
 
-	if (angle > 400)									//If the turret angle of 999 is found, return same number
+	if (angle > 400)   //If the turret angle of 999 is found, return same number
 	{
 		return 999;
 	}
 
 	else
 	{
-		double stepsDouble = angle / anglePerStep;		 //Get number of steps to reach this angle starting from home)
-		Serial.println(stepsDouble);
+		double stepsDouble = angle / anglePerStep;   //Get number of steps to reach this angle starting from home)
+		//Serial.println(stepsDouble);
 		int steps = stepsDouble * 1000;
 
-		for (int i = 0; i < 3; i++)						 //Rounds the number (including 3 sigfigs after the decimal point)
+		for (int i = 0; i < 3; i++)   //Rounds the number (including 3 sigfigs after the decimal point)
 		{
 			if (steps % 10 > 4)
 			{
@@ -389,13 +446,23 @@ int convertAngleToStep(double angle)
 * isn't capable with that granular of a number in this case
 */
 
-int getFlow(int column, int row, int turretColumn, int turretRow)
+
+float getFlow(int column, int row, int turretColumn, int turretRow)
 {
 
-	double squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
-	double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
 
-	return (int)flow;
+	float squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
+	//double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
+	
+	//printf(" in getFlow square distance prew math is are %f\n", squareDistance);
+	
+	float flow = squareDistance * 4.54 + 1.69;
+
+	//printf(" in getFlow calculated distance is %f\n", squareDistance);
+	//printf(" in getFlow calculated flow is %f\n", flow);
+
+
+	return flow;
 
 	// ** Other equations describing our curve **
 	// 4PL has the best R^2 value, but might be difficult to tweak.
