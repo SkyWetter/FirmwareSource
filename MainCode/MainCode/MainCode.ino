@@ -69,12 +69,6 @@ void setup()
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
 	initSleepClock();
-{
-	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
-				// starting systemState (see InitESP.cpp)
-	Serial.println("ESP Initialized...");
-	moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
-
 }
 
 
