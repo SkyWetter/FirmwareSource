@@ -62,7 +62,15 @@ void programState()
 		//Serial.println("main code program case");
 		getSerialData();
 	}
-	programDeepSleep();
+
+	//PLUS TURN OFF THE OTHER STUFF..??
+	// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
+	if (SerialBT.hasClient) // wait here while Serial Bluetooth establishes
+	{
+		SerialBT.end;
+	}
+
+	deepSleep();
 }
 
 
