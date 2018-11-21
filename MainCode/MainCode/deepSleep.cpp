@@ -52,8 +52,8 @@ void deepSleep()
 void programDeepSleep()
 {
 	//PLUS TURN OFF THE OTHER STUFF..
-		// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
-	if (SerialBT.hasClient) // wait here while Serial Bluetooth establishes
+	// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
+	if (SerialBT.hasClient)
 	{
 		SerialBT.end;
 	}

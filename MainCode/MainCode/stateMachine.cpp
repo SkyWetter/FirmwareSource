@@ -64,6 +64,7 @@ void programState()
 	}
 
 	//PLUS TURN OFF THE OTHER STUFF..??
+
 	// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
 	if (SerialBT.hasClient) // wait here while Serial Bluetooth establishes
 	{
