@@ -110,9 +110,3 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 		return length + 1;
 	}
 }
-
-void serialPrintAll(char stringToHoldOutputMessage[]) // not done yet
-{
-	Serial.println(stringToHoldOutputMessage);
-	SerialBT.println(stringToHoldOutputMessage);
-}

@@ -117,7 +117,6 @@
     <None Include="Read.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bigStateMachine.h" />
     <ClInclude Include="cpp.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -130,6 +129,7 @@
     <ClInclude Include="SerialData.h" />
     <ClInclude Include="SolarPowerTracker.h" />
     <ClInclude Include="SPIFFSFunctions.h" />
+    <ClInclude Include="stateMachine.h" />
     <ClInclude Include="StepperFunctions.h" />
     <ClInclude Include="UnorganizedFunctions.h">
       <FileType>CppCode</FileType>
@@ -137,7 +137,6 @@
     <ClInclude Include="__vm\.MainCode.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bigStateMachine.cpp" />
     <ClCompile Include="cpp.cpp" />
     <ClCompile Include="deepSleep.cpp" />
     <ClCompile Include="GlobalVariables.cpp" />
@@ -148,6 +147,7 @@
     <ClCompile Include="SerialData.cpp" />
     <ClCompile Include="SolarPowerTracker.cpp" />
     <ClCompile Include="SPIFFSFunctions.cpp" />
+    <ClCompile Include="stateMachine.cpp" />
     <ClCompile Include="StepperFunctions.cpp" />
     <ClCompile Include="UnorganizedFunctions.cpp" />
   </ItemGroup>

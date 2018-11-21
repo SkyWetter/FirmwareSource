@@ -1,8 +1,37 @@
 
+// **********   S * K * Y  |)  W * E * T *
+//  -=-=-=-=-=-=-=-=-=-=-=-=-
+// turret control firmware for esp32 dev kit C
+// november 20, 2018
+// Make A variable timeeToSleep . so time to sleep => timeToSleep = ( 60s - (timeToSleep))
+
+
+// *********   P R E P R O C E S S O R S
 #include "deepSleep.h"
+#include "SPIFFSFunctions.h"
+#include <SPIFFS.h>
+#include <Stepper.h>
+#include <BluetoothSerial.h>
+#include <soc\rtc.h>
+#include "InitESP.h"
+#include <pthread.h>
+#include "GlobalVariables.h"
+#include "GeneralFunctions.h"
+#include "StepperFunctions.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include "sys/time.h"
+#include "SolarPowerTracker.h"
+#include "SerialData.h"
+#include "sdkconfig.h"
+#include <driver/adc.h>
+#include "realTimeFunctions.h"
+//#include <freertos/ringbuf.h>
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP  60        /* Time ESP32 will go to sleep (in seconds) */
 
 void deepSleep()
 {
@@ -18,4 +47,16 @@ void deepSleep()
 	Serial.flush();
 	esp_deep_sleep_start();
 	Serial.println("This will never be printed");
+}
+
+void programDeepSleep()
+{
+	//PLUS TURN OFF THE OTHER STUFF..
+		// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
+	if (SerialBT.hasClient) // wait here while Serial Bluetooth establishes
+	{
+		SerialBT.end;
+	}
+
+	deepSleep();
 }

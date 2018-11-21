@@ -17,8 +17,7 @@
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 #include "realTimeFunctions.h"
-
-
+#include "deepSleep.h"
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -60,29 +59,14 @@ int getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
-void initESP()
+void initRainBow()
 {
 	initPins();
-	initSerial();
+	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
 	initThreads();
-
-	print_wakeup_reason(); // andy -- add comment
-	
 	spiffsBegin();
-
-	systemState = idle;
+	Serial.println("RainBow Initialized...");
 }
-
-void initSerial()
-{
-	SerialBT.begin("ESP_AVready");
-
-	Serial.begin(serialBaud);
-
-	
-	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
-}
-
 void initPins()
 {
 	adc1_config_width(ADC_WIDTH_BIT_12);
@@ -141,6 +125,12 @@ void initPins()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
+void initSerial()
+{
+	Serial.begin(serialBaud);
+	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
+}
+
 void initThreads()
 {
 	//multiple threads
@@ -156,26 +146,23 @@ void initThreads()
 		0);                       /* Core */
 }
 
-void initSleepClock()
+void initSerialBT()
 {
-	if (bootCount == 0)
+	SerialBT.begin("ESP_BustOut");
+
+	while (!SerialBT.hasClient) // wait here while Serial Bluetooth establishes
 	{
-		// get time
-		//timeShift();
+		Serial.print(".");
+		delay(100);
 	}
-	++bootCount;
+	Serial.println("");
 
-	print_wakeup_reason();								//Print the wakeup reason for ESP32
-
-	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
-	Serial.print("# of seconds since last boot: ");
-	//Serial.println(now.tv_sec);
-
-	deepSleep();
+	Serial.println("RainBow Bluetooth Serial Initialized...");
+	SerialBT.println("RainBow Bluetooth Serial Initialized...");
 
 }
 
-void print_wakeup_reason()
+void checkWakeUpReason()
 {
 	esp_sleep_wakeup_cause_t wakeup_reason;
 	wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -186,10 +173,8 @@ void print_wakeup_reason()
 	case 1:
 		Serial.println("Wakeup caused by external signal using RTC_IO");
 		// if we are here its because there was a wake-up push button event
-
-		//systemState = program;// so we will want to enter program mode
-
-		// enable bluetooth
+		// init programstate.. thats BT.. 
+		programState();
 		// goto to sleep when done
 		break;
 
@@ -199,9 +184,12 @@ void print_wakeup_reason()
 
 	case 3:
 		Serial.println("Wakeup caused by timer");
-		//timer should wakeup device every soo often...
-		//rainbow will check for solar power
-		//rainbow will check to see if it is time to water or not
+		//timer event wakeup happens every 60s
+		// run wakeUpTimerStateMachine
+		// case 0: low battery ?
+		// case 1: watering time ?
+		// case 2: currentSense ?
+		checkSystemStateWakeUpByTimer();
 		break;
 
 	case 4:
@@ -216,6 +204,16 @@ void print_wakeup_reason()
 
 	}
 }
+
+void initSleepClock()
+{
+	//Print the wakeup reason for ESP32
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	//Serial.println(now.tv_sec);
+	deepSleep();
+}
+
 
 void codeForTask1(void * parameter)						//speecial code for task1
 {

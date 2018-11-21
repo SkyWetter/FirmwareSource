@@ -110,8 +110,15 @@ void getSerialData()
 		break;
 
 		case '$':
+			if (bootCount == 0)
+			{
+				// get time
+				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+				// maybe confirm that it has a good time???
+			}
+			++bootCount;
 			//Serial.println("time is money");SerialBT.println("time is money");	
-			timeShift();		//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			serialState = doNothing;
 		break;
 		}

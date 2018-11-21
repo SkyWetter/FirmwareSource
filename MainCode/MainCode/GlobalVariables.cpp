@@ -71,7 +71,7 @@ RTC_DATA_ATTR int bootCount = 0;
 RTC_DATA_ATTR struct timeval tv;
 RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 RTC_DATA_ATTR struct tm tm1;
-RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+RTC_DATA_ATTR int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
 RTC_DATA_ATTR int waterHour, waterMin;
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
@@ -106,8 +106,8 @@ enum serialStates serialState;
 enum packetState squareChecksumState;
 enum packetState squarePacketState;// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet																				// Resend -- request packet aga
-enum systemStates systemState;
-enum systemStates systemState_previous;
+enum systemStatesTimerWakeUp sysStateTimerWakeUp;
+enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
 

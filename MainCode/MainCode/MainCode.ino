@@ -5,7 +5,7 @@
 
 
 // *********   P R E P R O C E S S O R S
-#include "bigStateMachine.h"
+#include "stateMachine.h"
 #include "deepSleep.h"
 #include "SPIFFSFunctions.h"
 #include <SPIFFS.h>
@@ -64,87 +64,19 @@
 
 
 void setup()
-{
-	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate, starting systemState (see InitESP.cpp)
-	Serial.println("ESP Initialized..."); SerialBT.println("ESP Initialized...");
-	domeGoHome(); 
+{	
+	initRainBow();
+	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
+	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
+	initSleepClock();
 }
 
 
 void loop()
 {
-	checkSystemState();
-	//Serial.println(systemState);
+	Serial.println("wont ever be here??? Should not be here");
 }
 
-void checkSystemState()
-{
-	switch (systemState)
-	{
-	case idle:
-	{
-
-		if (SerialBT.available() || Serial.available())
-		{
-			systemState = program;
-		}
-		break;
-	}
-
-	case solar:
-	{
-		solarPowerTracker();
-		systemState = idle;
-		break;
-	}
-
-	case program:
-	{
-		// throw flag here to reset automatic sleep timer
-
-		if (freq != oldfreq) 
-		{
-			Serial.println(freq);
-			SerialBT.println(freq);
-			oldfreq = freq;
-		}
-		//Serial.println("main code program case");
-		getSerialData();
-		systemState = idle;
-		break;
-	}
-
-	case water:
-	{
-		//load correct instruction set for date and time
-		//reference temperature and apply modfifier to watering durations
-		//open thread for flow sensor
-		//run spray program
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Watering Mode");
-		}
-		systemState_previous = systemState;
-		break;
-	}
-
-	case low_power:
-	{
-		//close the valve
-		//set LED to red
-		//allow solar
-		//prevent water until battery > 50%
-		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Low Power Mode");
-		}
-
-		systemState_previous = systemState;
-		break;
-	}
-	}
-}
 
 void shootSingleSquare()
 {

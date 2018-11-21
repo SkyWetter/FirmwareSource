@@ -389,7 +389,7 @@ void valveStepperOneStep()
 	//digitalWrite(stepperValveEnPin, LOW);
 }
 
-void crazyDomeStepperFromDebugA()
+void crazyDomeStepperFromDebugA() // F!Y!I! I TOOK A FUNCTION FROM THE SerialData.CPP debug case statement and moved it here
 {
 	moveToPosition(stepperDomeStpPin, 10, 0, 0, 0);
 	delay(500);		// if active dome count incorrect

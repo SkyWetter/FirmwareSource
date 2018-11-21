@@ -74,9 +74,9 @@ extern enum packetState squareChecksumState;
 extern enum packetState squarePacketState;										// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
-enum systemStates { idle, solar, program, water, low_power };
-extern enum systemStates systemState;
-extern enum systemStates systemState_previous;
+enum systemStatesTimerWakeUp { low_power, water, solar, sleep };
+extern enum systemStatesTimerWakeUp sysStateTimerWakeUp;
+extern enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 
 extern bool quickOff;  //Used in debug to flag something off to avoid repeat serial prints
 extern bool message;
