@@ -199,7 +199,7 @@ void spiffsParse(char fileNum[])
 }
 
 //pass in bedsToSprayFile[]
-//format: !3,123,124,124,!2,12,13
+//format: !3,123,124,124!2,12,13
 void parseBedData(char array[])
 {
 	int j = 0;	//bedsToSprayFile incrementer
