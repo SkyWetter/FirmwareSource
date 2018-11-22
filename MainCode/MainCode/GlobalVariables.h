@@ -30,10 +30,8 @@ extern byte hallSensorDomeVal;
 extern byte hallSensorValveVal;
 
 // pulse counter
-
 extern float freq;
 extern float oldfreq;
-
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
@@ -75,7 +73,7 @@ extern enum packetState squareChecksumState;
 extern enum packetState squarePacketState;										// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
-enum systemStatesTimerWakeUp { low_power, water, solar, sleep };
+enum systemStatesTimerWakeUp { low_power, water, solar, sleepy };
 extern enum systemStatesTimerWakeUp sysStateTimerWakeUp;
 extern enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 

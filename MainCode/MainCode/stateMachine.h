@@ -13,4 +13,4 @@
 #endif
 
 void programState();
-void checkSystemStateWakeUpByTimer():
+void timerState();

@@ -14,4 +14,3 @@ int getSign(int x);
 void doPulseIn();
 int getArrayLength(char charArray[], bool lengthIncludesNull);
 void printString(char charArray[], int charsPerLine);
-void serialPrintAll(char stringToHoldOutputMessage[]);

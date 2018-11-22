@@ -1,22 +1,34 @@
-#include <Stepper.h>
-#include <BluetoothSerial.h> 
-#include <soc\rtc.h>
-#include "InitESP.h"
-#include <pthread.h>
-#include "GlobalVariables.h"
+
+// *********   P R E P R O C E S S O R S
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+// local includes
 #include "sys/time.h"
 #include "sdkconfig.h"
 #include "driver\adc.h"
-#include "GeneralFunctions.h"
-#include "SPIFFSFunctions.h"
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+// custom includes
+#include  "deepSleep.h"
+#include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
 #include "realTimeFunctions.h"
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
+
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
@@ -61,50 +73,16 @@ float getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
-void initESP()
+void initRainBow()
 {
-	
 	initPins();
-	initSerial();
+	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
 	initThreads();
-	createSquareArray(25);
-	print_wakeup_reason(); // andy -- add comment
-	
 
+	createSquareArray(25);
 	spiffsBegin();
 
-	systemState = sleeping;
-}
-
-void initSerial()
-{
-	Serial.begin(serialBaud);
-	int chipid = ESP.getEfuseMac();
-
-	//switch (chipid) 
-	switch (chipid)
-	{
-		case 163842596:
-			SerialBT.begin("PCB Version sick name bro");
-			break;
-	
-
-
-
-
-
-
-
-		default:
-			SerialBT.begin("Read init serial name me");
-	}
-
-	
-	digitalWrite(rgbLedBlue, HIGH);
-
-	
-	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
-	Serial.println(chipid);
+	Serial.println("RainBow Initialized...");
 }
 
 void initPins()
@@ -165,10 +143,14 @@ void initPins()
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
+void initSerial()
+{
+	Serial.begin(serialBaud);
+	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
+}
+
 void initThreads()
 {
-
-
 	//multiple threads
 	TaskHandle_t Task1;				//creating the handle for Task1
 
@@ -182,36 +164,34 @@ void initThreads()
 		1);                       /* Core */
 }
 
-void initSleepClock()
+void initSerialBT()
 {
-	if (bootCount == 0)
+	int chipid = ESP.getEfuseMac();
+
+	//switch (chipid) 
+	switch (chipid)
 	{
-		//timeShift();
+	case 163842596:
+		SerialBT.begin("PCB Version sick name bro");
+		break;
+
+	default:
+		SerialBT.begin("Read init serial name me");
 	}
-	++bootCount;
 
-	printLocalTime();
-	print_wakeup_reason();								//Print the wakeup reason for ESP32
+	digitalWrite(rgbLedBlue, HIGH);
 
-	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
-	Serial.print("# of seconds since last boot: ");
-	//Serial.println(now.tv_sec);
+	delay(100);
 
-	// sleep, rtc and power mangement
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+	Serial.println("");
 
-	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
-
-	Serial.println("Going to sleep now");
-	Serial.flush();
-	esp_deep_sleep_start();
-	Serial.println("This will never be printed");
+	Serial.print("RainBow Bluetooth Serial Initialized...");
+	Serial.println(chipid);
+	SerialBT.println("RainBow Bluetooth Serial Initialized...");
+	SerialBT.println(chipid);
 }
 
-void print_wakeup_reason()
+void checkWakeUpReason()
 {
 	esp_sleep_wakeup_cause_t wakeup_reason;
 	wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -222,8 +202,8 @@ void print_wakeup_reason()
 	case 1:
 		Serial.println("Wakeup caused by external signal using RTC_IO");
 		// if we are here its because there was a wake-up push button event
-		systemState = program;// so we will want to enter program mode
-		// enable bluetooth
+		// init programstate.. thats BT.. 
+		programState();
 		// goto to sleep when done
 		break;
 
@@ -233,9 +213,12 @@ void print_wakeup_reason()
 
 	case 3:
 		Serial.println("Wakeup caused by timer");
-		//timer should wakeup device every soo often...
-		//rainbow will check for solar power
-		//rainbow will check to see if it is time to water or not
+		//timer event wakeup happens every 60s
+		// run wakeUpTimerStateMachine
+		// case 0: low battery ?
+		// case 1: watering time ?
+		// case 2: currentSense ?
+		timerState();
 		break;
 
 	case 4:
@@ -251,12 +234,19 @@ void print_wakeup_reason()
 	}
 }
 
+void initSleepClock()
+{
+	//Print the wakeup reason for ESP32
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	//Serial.println(now.tv_sec);
+	deepSleep();
+}
+
 void codeForTask1(void * parameter)						//speecial code for task1
 {
 	while (1)
 	{
-
-
 		TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;		//feed the watchdoggy
 		TIMERG0.wdt_feed = 1;
 		TIMERG0.wdt_wprotect = 0;

@@ -1,38 +1,34 @@
-// 
-// 
-// 
 // *********   P R E P R O C E S S O R S
-#include "stateMachine.h"
-#include "SPIFFSFunctions.h"
-#include "deepSleep.h"
-
-#include <SPIFFS.h>
-#include <Stepper.h>
-#include <BluetoothSerial.h>
-#include <soc\rtc.h>
-#include "InitESP.h"
-#include <pthread.h>
-
-#include "GlobalVariables.h"
-#include "GeneralFunctions.h"
-#include "StepperFunctions.h"
-
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
-
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
-#include "SolarPowerTracker.h"
-#include "SerialData.h"
 #include "sdkconfig.h"
-
-#include <driver/adc.h>
-
-#include "realTimeFunctions.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 //#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
+#include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
 #include "stateMachine.h"
-#include "deepSleep.h"
+#include "StepperFunctions.h"
 
 
 // power on rainbow
@@ -64,62 +60,70 @@ void programState()
 	}
 
 	//PLUS TURN OFF THE OTHER STUFF..??
-
 	// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
-	if (SerialBT.hasClient) // wait here while Serial Bluetooth establishes
-	{
-		SerialBT.end;
-	}
+
+	//SerialBT.end;
 
 	deepSleep();
 }
 
 
-void checkSystemStateWakeUpByTimer()
+void timerState()
 {
-	bool wakeUpTimerStateNotDoneFlag =  1; 
+	bool wakeUpTimerStateNotDoneFlag = 1;
 
-	while(wakeUpTimerStateNotDoneFlag)
+	while (wakeUpTimerStateNotDoneFlag)
 	{
 
 		switch (sysStateTimerWakeUp)
 		{
 
-		case low_power:
-		{
-			//close the valve
-			//set LED to red
-			//allow solar
-			//prevent water until battery > 50%
-			//>50% -> perform last spray cycle
-			sysStateTimerWakeUp = water;
-			break;
-		}
+			case low_power:
+			{
+				//close the valve
+				//set LED to red
+				//allow solar
+				//prevent water until battery > 50%
+				//>50% -> perform last spray cycle
 
-		case water:
-		{
-			//load correct instruction set for date and time
-			//reference temperature and apply modfifier to watering durations
-			//open thread for flow sensor
-			//run spray program
-			sysStateTimerWakeUp = solar;
-			break;
-		}
+				//checkBatteryCap();
+				//if (checkBatteryCap())
+				//{
+					//powerDownEverything();
+					//sysStateTimerWakeUp = solar;
+				//}
+				//else
+				//{
+				sysStateTimerWakeUp = water;
+				//}
+				break;
+			}
 
-		case solar:
-		{
-			solarPowerTracker();
-			sysStateTimerWakeUp = sleep;
-			break;
-		}
+			case water:
+			{
+				//load correct instruction set for date and time
+				//reference temperature and apply modfifier to watering durations
+				//open thread for flow sensor
+				//run spray program
+				sysStateTimerWakeUp = solar;
+				break;
+			}
 
-		case sleep:
-		{
-			sysStateTimerWakeUp = low_power;
-			wakeUpTimerStateNotDoneFlag = 0;
-			deepSleep();
-			break;
+			case solar:
+			{
+				// if(solarPanelVoltage > 0)
+				solarPowerTracker();
+				sysStateTimerWakeUp = sleepy;
+				break;
+			}
+
+			case sleepy:
+			{
+				sysStateTimerWakeUp = low_power;
+				wakeUpTimerStateNotDoneFlag = 0;
+				deepSleep();
+				break;
+			}
 		}
 	}
-
 }

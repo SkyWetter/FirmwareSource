@@ -168,14 +168,9 @@ void getSerialData()
 			executeSquare(getSquareID(&singleSquareData[0]));
 			delay(1000);
 			valveGoHome();
-
-
-
 			break;
 		case ignore: break;
-		case resend: 
-			
-			;
+		case resend: break;
 			//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 		}
 	break;
@@ -418,36 +413,36 @@ void debugInputParse(char debugCommand)
 		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
-		case '1':                             // send vavle stepper to home posisiton
-			valveGoHome();
+	case '1':                             // send vavle stepper to home posisiton
+		valveGoHome();
 		break;
 
-		case 'a':
-			crazyDomeStepperFromDebugA();
+	case 'a':
+		crazyDomeStepperFromDebugA();
 		break;
 
-		case 'b':
-			stepperDomeDirCW();					// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
+	case 'b':
+		stepperDomeDirCW();					// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
 		break;
 
-		case 'c':
-			stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
+	case 'c':
+		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
-		case 'd':
-			valveStepperOneStep();				//one step on valveStepper
+	case 'd':
+		valveStepperOneStep();				//one step on valveStepper
 		break;
 
-		case 'e':
-			toggleStepperValveDir();
+	case 'e':
+		toggleStepperValveDir();
 		break;
 
-		case 'f':
-			displaySolarCurrent();
-			displaySolarVoltage();
+	case 'f':
+		displaySolarCurrent();
+		displaySolarVoltage();
 		break;
 
-		case 'g':
+	case 'g':
 			solarPowerTracker();
 		break;
 
@@ -455,26 +450,25 @@ void debugInputParse(char debugCommand)
 		executeSquare(100);
 		delay(1000);
 		valveGoHome();
-
 		break;
 
-		case 'i':
-			//spiffsBegin();
-			//spiffsSave();
-			Serial.println("test");
+	case 'i':
+		//spiffsBegin();
+		//spiffsSave();
+		Serial.println("test");
 		break;
 
-		case 'j':
-			spiffsRead();
+	case 'j':
+		spiffsRead();
 		break;
 
-		case 's':
-			//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
-			initSleepClock();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
+	case 's':
+		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
+		initSleepClock();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
 		break;
 
-		case 't':
-			printLocalTime();					// display time
+	case 't':
+		printLocalTime();					// display time
 		break;
 
 	}

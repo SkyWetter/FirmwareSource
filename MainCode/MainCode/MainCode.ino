@@ -1,33 +1,41 @@
 // **********   S * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
-//  november 20, 2018
+//  november 22, 2018
 
 
 // *********   P R E P R O C E S S O R S
-#include "stateMachine.h"
-#include "deepSleep.h"
-#include "SPIFFSFunctions.h"
-#include <SPIFFS.h>
-#include <Stepper.h>
-#include <BluetoothSerial.h>
-#include <soc\rtc.h>
-#include "InitESP.h"
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "GeneralFunctions.h"
-#include "StepperFunctions.h"
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
-#include "SolarPowerTracker.h"
-#include "SerialData.h"
 #include "sdkconfig.h"
-#include <driver/adc.h>
-#include "realTimeFunctions.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 //#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
+#include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
+
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define CCW -1
@@ -68,15 +76,13 @@ void setup()
 	initRainBow();
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
-	initSleepClock();
+	initSleepClock();		 // should not actually land here unless the program flow fell out of the state Machine
 }
-
 
 void loop()
 {
-	Serial.println("wont ever be here??? Should not be here");
+	Serial.println("wont ever be here??? You should not be here");
 }
-
 
 void shootSingleSquare()
 {
