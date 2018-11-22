@@ -146,6 +146,8 @@ void spiffsParse(char fileNum[])
 	char lengthArray[4];
 	int length;
 
+	clearArray(bedsToSprayFile, 5000);		//clear temp array for new file
+
 	//desired packet number is file name
 	for (int i = 0; i < 4; i++)
 	{
@@ -181,6 +183,8 @@ void spiffsParse(char fileNum[])
 	Serial.print("spiffsParse length: ");
 	Serial.println(length);
 
+	
+
 	//pull out full file in to global variable for spraying
 	for (int i = 0; i < 11; i++)
 	{
@@ -200,10 +204,14 @@ void spiffsParse(char fileNum[])
 
 //pass in bedsToSprayFile[]
 //format: !3,123,124,124!2,12,13
-void parseBedData(char array[])
+void extractBedData(char array[])
 {
 	int j = 0;	//bedsToSprayFile incrementer
 	int k = 0;	//bedsToSprayInstructions incrementer
+
+	clearArray(bedsToSprayInstructions, 5000);		//clear temp array for new file
+
+	Serial.print("bedsToSprayInstructions: ");
 	
 	while (j <= bedsToSprayLength)
 	{
@@ -215,7 +223,8 @@ void parseBedData(char array[])
 
 			j++;	//step to number of repeats
 
-			timesToWrite = array[j];	
+			timesToWrite = array[j] - 48;	//convert char to int 
+			Serial.printf("timesToWrite is %i \n", timesToWrite);
 
 			j++;	//step to comma
 
@@ -224,7 +233,7 @@ void parseBedData(char array[])
 				for (int i = 0; i < 3; i++)
 				{
 					j++;
-					bedNumArray[i] = array[j];
+					bedNumArray[i] = array[j];		
 				}
 
 				bedNum = charToInt(bedNumArray, 3);
@@ -232,6 +241,7 @@ void parseBedData(char array[])
 				for (int i = 0; i < timesToWrite; i++)
 				{
 					bedsToSprayInstructions[k] = bedNum;
+					Serial.println(bedNum);
 					k++;
 				}
 
@@ -245,4 +255,7 @@ void parseBedData(char array[])
 		j++;
 
 	}
+
+	Serial.println();
+	Serial.println("parseBedData done");
 }

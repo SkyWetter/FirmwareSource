@@ -52,10 +52,11 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
-char testHeader[] = "#0001@0029!3,123,124,125!2,12";
-char testPackageNum1[] = "0001";
-char testPackageNum2[] = "0002";
-char testPackageNum3[] = "0003";
+//test using serial port for commented strings and array for file to open
+
+char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
+char testNum2[] = "0002"; //#0002@0022!2,999!3,123
+char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
 void getSerialData()
 {
@@ -470,14 +471,20 @@ void debugInputParse(char debugCommand)
 		SerialBT.println(freq);
 		break;
 
-	case 'i':
-		spiffsParse(testPackageNum1);
+	case 'i':		//test1
+		spiffsParse(testNum1);
+		extractBedData(bedsToSprayFile);
+		spiffsParse(testNum2);
+		extractBedData(bedsToSprayFile);
+		spiffsParse(testNum3);
+		extractBedData(bedsToSprayFile);
+
 		break;
 
-	case 'j':
-		spiffsRead(testPackageNum1);
-		spiffsRead(testPackageNum2);
-		spiffsRead(testPackageNum3);
+	case 'j':		//test2
+		spiffsParse(testNum2);
+		extractBedData(bedsToSprayFile);
+
 		break;
 
 	case 's':
