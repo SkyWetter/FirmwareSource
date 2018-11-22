@@ -31,7 +31,7 @@
 
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP  60       /* Time ESP32 will go to sleep (in seconds) */
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -39,7 +39,6 @@
 #define PCNT_H_LIM_VAL      10
 #define PCNT_L_LIM_VAL     -10
 #define pulsePin GPIO_NUM_23  // Pulse Input GPIO
-
 
 // dome stepper
 #define stepperDomeDirPin 19
@@ -78,11 +77,13 @@ void initRainBow()
 	initPins();
 	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
 	initThreads();
+	initSleepClock();
 
 	createSquareArray(25);
 	spiffsBegin();
 
-	Serial.println("RainBow Initialized...");
+	Serial.print("RainBow Initialized at ... ");
+	printLocalTime();
 }
 
 void initPins()
@@ -236,11 +237,19 @@ void checkWakeUpReason()
 
 void initSleepClock()
 {
+
 	//Print the wakeup reason for ESP32
 	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
 	Serial.print("# of seconds since last boot: ");
 	//Serial.println(now.tv_sec);
-	deepSleep();
+
+	// sleep, rtc and power mangement
+	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
 }
 
 void codeForTask1(void * parameter)						//speecial code for task1

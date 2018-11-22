@@ -1,22 +1,34 @@
-#include <BluetoothSerial.h> 
-#include <Stepper.h>
-#include <soc\rtc.h>
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "InitESP.h"
-#include "driver\adc.h"
+// *********   P R E P R O C E S S O R S
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
 #include "sdkconfig.h"
-#include "StepperFunctions.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+//#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
 #include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
-#include "realTimeFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -45,8 +57,8 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 26
 #define rgbLedGreen 25
+#define rgbLedBlue 26
 #define rgbLedRed 27
 
 // solar panel
@@ -117,13 +129,13 @@ void getSerialData()
 		break;
 
 		case '$':
-			if (bootCount == 0)
-			{
+			//if (bootCount == 0)
+			//{
 				// get time
 				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 				// maybe confirm that it has a good time???
-			}
-			++bootCount;
+			//}
+			//++bootCount;
 			//Serial.println("time is money");SerialBT.println("time is money");	
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			serialState = doNothing;
@@ -464,11 +476,15 @@ void debugInputParse(char debugCommand)
 
 	case 's':
 		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
-		initSleepClock();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
+		deepSleep();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
 		break;
 
 	case 't':
 		printLocalTime();					// display time
+		break;
+
+	case 'z':
+		programStateNotDoneFlag = 0;				// display time
 		break;
 
 	}

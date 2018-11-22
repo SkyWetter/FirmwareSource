@@ -30,6 +30,11 @@
 #include "stateMachine.h"
 #include "StepperFunctions.h"
 
+// rgb led
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
+
 
 // power on rainbow
 // init..
@@ -42,9 +47,8 @@
 
 void programState()
 {
-
-	bool programStateNotDoneFlag = 1;
-
+	//bool programStateNotDoneFlag = 1;
+	
 	initSerialBT();
 
 	while (programStateNotDoneFlag)
@@ -61,16 +65,16 @@ void programState()
 
 	//PLUS TURN OFF THE OTHER STUFF..??
 	// WILL THIS BE A PROBLEM IF BLUETOOTH IS NEVER INIT??
-
 	//SerialBT.end;
-
+	digitalWrite(rgbLedBlue, LOW);
 	deepSleep();
 }
 
 
+
 void timerState()
 {
-	bool wakeUpTimerStateNotDoneFlag = 1;
+	
 
 	while (wakeUpTimerStateNotDoneFlag)
 	{
@@ -94,6 +98,10 @@ void timerState()
 				//}
 				//else
 				//{
+				Serial.println("Im doing low power here");
+				digitalWrite(rgbLedRed, HIGH);
+				delay(1000);
+				digitalWrite(rgbLedRed, LOW);
 				sysStateTimerWakeUp = water;
 				//}
 				break;
@@ -105,6 +113,8 @@ void timerState()
 				//reference temperature and apply modfifier to watering durations
 				//open thread for flow sensor
 				//run spray program
+				Serial.println("Im doing watering here");
+				delay(1000);
 				sysStateTimerWakeUp = solar;
 				break;
 			}
@@ -112,6 +122,8 @@ void timerState()
 			case solar:
 			{
 				// if(solarPanelVoltage > 0)
+				Serial.println("Im doing solar here");
+				delay(1000);
 				solarPowerTracker();
 				sysStateTimerWakeUp = sleepy;
 				break;
@@ -119,6 +131,8 @@ void timerState()
 
 			case sleepy:
 			{
+				Serial.println("Im doing sleep here");
+				delay(1000);
 				sysStateTimerWakeUp = low_power;
 				wakeUpTimerStateNotDoneFlag = 0;
 				deepSleep();

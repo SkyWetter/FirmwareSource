@@ -46,6 +46,10 @@ extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secs
 
 extern RTC_DATA_ATTR int waterHour, waterMin;
 
+// state machine
+extern bool programStateNotDoneFlag;
+extern bool wakeUpTimerStateNotDoneFlag;
+
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
 extern bool firstSingleSquare;  //Used to allow any packet # for first square

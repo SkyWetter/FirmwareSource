@@ -76,7 +76,7 @@ void setup()
 	initRainBow();
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
-	initSleepClock();		 // should not actually land here unless the program flow fell out of the state Machine
+	deepSleep();	 // should not actually land here unless the program flow fell out of the state Machine
 }
 
 void loop()
