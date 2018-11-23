@@ -43,8 +43,7 @@ extern RTC_DATA_ATTR struct timeval tv;
 extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 extern RTC_DATA_ATTR struct tm tm1;
 extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-
-extern RTC_DATA_ATTR int waterHour, waterMin;
+extern RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
 
 // state machine
 extern bool programStateNotDoneFlag;

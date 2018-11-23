@@ -6,6 +6,7 @@
 
 // *********   P R E P R O C E S S O R S
 // standard library includes
+#include "rgbLed.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

@@ -1,4 +1,3 @@
-
 // *********   P R E P R O C E S S O R S
 // standard library includes
 #include <stdio.h>
@@ -9,6 +8,7 @@
 #include <Stepper.h>
 #include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
 // local includes
 #include "sys/time.h"
 #include "sdkconfig.h"
@@ -16,6 +16,7 @@
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+//#include <freertos/ringbuf.h>
 // custom includes
 #include  "deepSleep.h"
 #include "GeneralFunctions.h"
@@ -23,15 +24,12 @@
 #include "InitESP.h"
 #include "pulseIn.h"
 #include "realTimeFunctions.h"
+#include "rgbLed.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
 #include "StepperFunctions.h"
-
-
-#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  60       /* Time ESP32 will go to sleep (in seconds) */
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -77,7 +75,6 @@ void initRainBow()
 	initPins();
 	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
 	initThreads();
-	initSleepClock();
 
 	createSquareArray(25);
 	spiffsBegin();
@@ -180,7 +177,7 @@ void initSerialBT()
 		SerialBT.begin("Read init serial name me");
 	}
 
-	digitalWrite(rgbLedBlue, HIGH);
+	ledBlue(1);
 
 	delay(100);
 
@@ -230,27 +227,13 @@ void checkWakeUpReason()
 		Serial.println("Wakeup caused by ULP program");
 		break;
 
-	default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
-
+	default:
+		Serial.printf("Wakeup was not caused by deep sleep -> Entering program state... %d\n", wakeup_reason);
+		programState();
+		break;
 	}
 }
 
-void initSleepClock()
-{
-
-	//Print the wakeup reason for ESP32
-	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
-	Serial.print("# of seconds since last boot: ");
-	//Serial.println(now.tv_sec);
-
-	// sleep, rtc and power mangement
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
-
-	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
-}
 
 void codeForTask1(void * parameter)						//speecial code for task1
 {

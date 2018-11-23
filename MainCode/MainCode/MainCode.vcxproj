@@ -126,6 +126,7 @@
     <ClInclude Include="GeneralFunctions.h" />
     <ClInclude Include="pulseIn.h" />
     <ClInclude Include="realTimeFunctions.h" />
+    <ClInclude Include="rgbLed.h" />
     <ClInclude Include="SerialData.h" />
     <ClInclude Include="SolarPowerTracker.h" />
     <ClInclude Include="SPIFFSFunctions.h" />
@@ -144,6 +145,7 @@
     <ClCompile Include="GeneralFunctions.cpp" />
     <ClCompile Include="pulseIn.cpp" />
     <ClCompile Include="realTimeFunctions.cpp" />
+    <ClCompile Include="rgbLed.cpp" />
     <ClCompile Include="SerialData.cpp" />
     <ClCompile Include="SolarPowerTracker.cpp" />
     <ClCompile Include="SPIFFSFunctions.cpp" />

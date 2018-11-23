@@ -93,6 +93,7 @@ void printLocalTime()
 	Serial.printf("ctime()         : %.24s\n", ctime_r(&time1, buf1));				// ctime convert time type into a format string
 	Serial.printf("asctime()       : %.24s \n", asctime_r(gmtime(&time1), buf2));	// sane as ctune but taks any structure
 
+	Serial.printf("%.24s \n", asctime(&tm1));
 	gmtime_r(&time1, &tm1);
 	Serial.printf("gmtime()      : %d : %d  : %d : %d : %d : %d \n", tm1.tm_mday, tm1.tm_hour, tm1.tm_min, tm1.tm_sec, tm1.tm_isdst);
 
@@ -114,5 +115,33 @@ void printLocalTime()
 
 void wateringWakeUp()
 {
+	//tm1.tm_mon += (usrMon - 1);
+	//tm1.tm_hour += (usrHour);
+	//tm1.tm_min += usrMin;
+}
 
+void solarWakeUp()
+{
+
+	int q;
+	q = tm1.tm_min;
+	Serial.println(q);
+
+	if (q == 30)
+	{
+		//int q = analogRead(currentSense);
+
+		//if ( q > 0)
+		//{ 
+			Serial.println("im doing a solar power track");
+			solarPowerTracker();
+		//}
+	}
+}
+
+int getNowSec()
+{
+	int nowSec;
+	nowSec = tm1.tm_sec;
+	return nowSec;
 }

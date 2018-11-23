@@ -24,6 +24,7 @@
 #include "InitESP.h"
 #include "pulseIn.h"
 #include "realTimeFunctions.h"
+#include "rgbLed.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
@@ -455,7 +456,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'g':
-			solarPowerTracker();
+		solarPowerTracker();
 		break;
 
 	case 'h':
