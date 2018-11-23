@@ -118,3 +118,7 @@ enum systemStates systemState_previous;
 int spiffsSize;		//size of total spiffs contents
 char *input2DArray[13];	//container for each of 14 input strings
 int input2DArrayPosition = 0;	//position in 2D array
+
+char bedsToSprayFile[5000]; 
+int bedsToSprayLength;
+char bedsToSprayInstructions[5000];

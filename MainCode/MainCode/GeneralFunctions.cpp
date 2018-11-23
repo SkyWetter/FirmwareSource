@@ -111,3 +111,11 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 		return length + 1;
 	}
 }
+
+void clearArray(char array[], int arrayLength)
+{
+	for(int i = 0; i < arrayLength; i++)
+	{
+		array[i] = 0;
+	}
+}

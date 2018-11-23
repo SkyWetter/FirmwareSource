@@ -53,6 +53,11 @@
 #define currentSense A6
 #define solarPanelVoltage A7
 
+//test using serial port for commented strings and array for file to open
+
+char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
+char testNum2[] = "0002"; //#0002@0022!2,999!3,123
+char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
 void getSerialData()
 {
@@ -192,8 +197,10 @@ void getSerialData()
 
 	case parseGarden:
 
-		parseInput();
-
+		if (input2DArrayPosition < 14)
+		{
+			parseInput();
+		}
 		break;
 
 	default:;
@@ -206,39 +213,37 @@ void getSerialData()
 
 void parseInput()
 {
-	//Serial.println("test");
-
-
 	int j = 11;
 	int length;
+	int packageNum;
 	char headerArray[11] = { '#' };
-	char charNumArray[4];
-
-	//Serial.print("Entering case # - header array: #");
+	char lengthArray[4];
+	char packageNumArray[4];
 
 	//pull header array
-
 	for (int i = 1; i < 11; i++)
 	{
-		headerArray[i] = Serial.read();
-		//Serial.print(headerArray[i]);
+		if (Serial.available())
+		{
+			headerArray[i] = Serial.read();
+		}
+		else if(SerialBT.available())
+		{
+			headerArray[i] = SerialBT.read();
+		}
 	}
-
-	//Serial.println();
-	//Serial.print("String length, array: ");
 
 	//pull out string length
 	for (int i = 0; i < 4; i++)
 	{
-		charNumArray[i] = headerArray[(i + 6)];
-		//Serial.print(charNumArray[i]);
+		lengthArray[i] = headerArray[(i + 6)];
+		packageNumArray[i] = headerArray[(i + 1)];
 	}
 
-	length = charToInt(charNumArray, 4);
+	length = charToInt(lengthArray, 4);
+	packageNum = charToInt(packageNumArray, 4);
 
-	//Serial.println();
-	//Serial.print("String length, conversion: ");
-	//Serial.println(length);
+	Serial.printf("packageNumArray = %i \n", packageNum);
 
 	//create new array to match
 	input2DArray[input2DArrayPosition] = new char[length];
@@ -249,10 +254,17 @@ void parseInput()
 		input2DArray[input2DArrayPosition][i] = headerArray[i];
 	}
 
-	//pull rest of data  --- replace Serial w/ Serial.BT
-	while (Serial.available())
+	//pull rest of data - Serial
+	while(Serial.available())
 	{
 		input2DArray[input2DArrayPosition][j] = Serial.read();
+		j++;
+	}
+
+	//pull rest of data - Serial.BT
+	while(SerialBT.available())
+	{
+		input2DArray[input2DArrayPosition][j] = SerialBT.read();
 		j++;
 	}
 
@@ -264,14 +276,9 @@ void parseInput()
 
 	Serial.println();
 
-	if (input2DArrayPosition == 0)
-	{
-		spiffsSave(input2DArray[input2DArrayPosition], length);
-	}
-	else
-	{
-		spiffsAppend(input2DArray[input2DArrayPosition], length);
-	}
+	//
+	spiffsSave(input2DArray[input2DArrayPosition], length, packageNumArray);
+
 
 	Serial.println();
 	Serial.printf("Length was %i, J count is %i \n", length, j);
@@ -488,14 +495,20 @@ void debugInputParse(char debugCommand)
 
 		break;
 
-	case 'i':
-		//spiffsBegin();
-		//spiffsSave();
-		Serial.println("test");
+	case 'i':		//test1
+		spiffsParse(testNum1);
+		extractBedData(bedsToSprayFile);
+		spiffsParse(testNum2);
+		extractBedData(bedsToSprayFile);
+		spiffsParse(testNum3);
+		extractBedData(bedsToSprayFile);
+
 		break;
 
-	case 'j':
-		spiffsRead();
+	case 'j':		//test2
+		spiffsParse(testNum2);
+		extractBedData(bedsToSprayFile);
+
 		break;
 
 	case 's':
