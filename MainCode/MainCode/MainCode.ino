@@ -24,6 +24,7 @@
 #include "SerialData.h"
 #include "sdkconfig.h"
 #include <driver/adc.h>
+#include "realTimeFunctions.h"
 //#include <freertos/ringbuf.h>
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
@@ -52,9 +53,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -66,7 +67,7 @@ void setup()
 	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
 				// starting systemState (see InitESP.cpp)
 	Serial.println("ESP Initialized...");
-	domeGoHome(); 
+	moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 
 }
 
@@ -74,11 +75,8 @@ void setup()
 void loop()
 {
 	checkSystemState();
-
 	//Serial.println(systemState);
 }
-
-
 
 void checkSystemState()
 {
@@ -89,9 +87,9 @@ void checkSystemState()
 
 		if (SerialBT.available() || Serial.available())
 		{
+			
 			systemState = program;
 		}
-
 		break;
 	}
 
@@ -99,10 +97,7 @@ void checkSystemState()
 	{
 
 		solarPowerTracker();
-
-
 		systemState = sleeping;
-
 		break;
 	}
 
@@ -110,14 +105,15 @@ void checkSystemState()
 	{
 		if (freq != oldfreq) {
 			Serial.println(freq);
-			SerialBT.println(freq);
+			//SerialBT.println(freq);
 			oldfreq = freq;
 		}
-		//Serial.println("main code program case");
+		Serial.println("main code program case");
 		getSerialData();
 
 
 		systemState = sleeping;
+		
 
 		break;
 	}

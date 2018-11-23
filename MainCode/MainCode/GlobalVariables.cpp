@@ -51,25 +51,28 @@ current-[mA],step limit-[# of steps],
 direction of home
 }
 */
-int valveStepperDefaults[5] = { 250,400,450,100,LOW };	//low on dir pin is close
-int domeStepperDefaults[5] = { 250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
+
+int valveStepperDefaults[5] = {15,300,1500,100,LOW };	//low on dir pin is close
+int domeStepperDefaults[5] = {250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
  
 byte hallSensorDomeVal;
 byte hallSensorValveVal;
 
 // pulse counter
-double duration;
 float freq;
 float oldfreq;
+
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
 
-// power management
-// RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
-RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
-struct timeval now;
-
+// sleep, realtimeclock, power management 
+RTC_DATA_ATTR int bootCount = 0;
+RTC_DATA_ATTR struct timeval tv;
+RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
+RTC_DATA_ATTR struct tm tm1;
+RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+RTC_DATA_ATTR int waterHour, waterMin;
 
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
@@ -93,11 +96,11 @@ char singleSquareData[11] = { '%', '@', '@', '@', '@', '@', '@', '@', '@', '@', 
 bool quickOff = false;  //Used in debug to flag something off to avoid repeat serial prints
 bool message = false;
 
-const int SQUARES_PER_ROW = 7;
+const int SQUARES_PER_ROW = 25;
 const int TOTAL_SQUARES = SQUARES_PER_ROW * SQUARES_PER_ROW;
 const int STEPS_PER_FULL_TURN = 400;
 
-int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+float squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 
 enum serialStates serialState;
 				// Used during serial error handling checks

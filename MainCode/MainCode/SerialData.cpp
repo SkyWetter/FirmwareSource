@@ -16,6 +16,7 @@
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
+#include "realTimeFunctions.h"
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -44,9 +45,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -64,16 +65,20 @@ void getSerialData()
 	{
 		char incomingChar;
 		
+
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
+			
 		}
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-
 		}
 		
+		//Serial.println("incoming leading char is");
+		//Serial.println((uint8_t)incomingChar);
+
 		switch (incomingChar)
 		{
 		case '*':
@@ -90,21 +95,25 @@ void getSerialData()
 				
 				if (incomingChar == ' ' || incomingChar == NULL)
 				{
+					Serial.print((uint8_t)incomingChar);
 					Serial.printf("incoming char was an illegal character \n");
-					singleSquareData[i + 1] = '@';
+					singleSquareData[i+1] = '@';
 				}
 				else
 				{
-					singleSquareData[i + 1] = incomingChar;
+					singleSquareData[i+1] = incomingChar;
 				}
+				//ignore
 			}
 			break;
 
 		case '&':
+			Serial.println("debug command");
+			SerialBT.println("debug command");
 			serialState = debugCommand;
 			break;
 
-		case '#':
+		case '#': 
 			//header #0001@0028!data
 			if (input2DArrayPosition < 14)
 			{
@@ -112,7 +121,21 @@ void getSerialData()
 			}
 
 			break;
+
+		case '$':
+			Serial.println("time is money");
+			SerialBT.println("time is money");	
+			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
+			break;
+		
+		default:
+
+			Serial.println("IM IN DEFAULTED SERIAL CASE");
+			
+			//do nothing i guess
+			break;	
 		}
+		
 	}
 
 
@@ -131,7 +154,13 @@ void getSerialData()
 		{
 		case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
 		case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
-		case resend: SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1); break; //Request a missed packet
+		case resend:
+
+			Serial.println("Asking for resend packet in square PacketState");
+			
+			//SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
+			
+			break; //Request a missed packet
 		}
 
 		//Check checksum state
@@ -144,11 +173,18 @@ void getSerialData()
 			squarePacketState = ignore;
 			squareIDInt = charToInt(squareID, 3);
 
+			executeSquare(getSquareID(&singleSquareData[0]));
+			delay(1000);
+			valveGoHome();
+
 
 
 			break;
 		case ignore: break;
-		case resend: SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+		case resend: 
+			
+			;
+			//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 		}
 
 		break;
@@ -281,6 +317,8 @@ void checkPacketNumber(char singleSquareData[])
 	{
 		if (singleSquareData[i] == '@')
 		{
+			Serial.println("received @ in check packet number");
+	
 			return;
 		}
 	}
@@ -292,10 +330,20 @@ void checkPacketNumber(char singleSquareData[])
 	}
 
 	squarePacketNumberInt = charToInt(squarePacketNumberChar, 3);
+	Serial.println("packet number received is");
+	Serial.println(squarePacketNumberInt);
+	Serial.println("last packet number received is");
+	Serial.println(lastSquarePacketNumber);
+
 
 
 	//If this is the first square rx'd, assume its the right packet number, or an inc of last packet (including rollover)
-	if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+	
+	
+	//if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+	//the line below is a temporary fix for what happens when a packet comes out of sequence
+	if (squarePacketNumberInt != lastSquarePacketNumber  || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+
 	{
 		//Set this packet to last packet number and set packetState
 		lastSquarePacketNumber = squarePacketNumberInt;
@@ -308,9 +356,14 @@ void checkPacketNumber(char singleSquareData[])
 	//If this packet is old (already received) or the same as the last packet, ignore it
 	else if (squarePacketNumberInt <= lastSquarePacketNumber)
 	{
+
+		//Serial.println("packet is old and already received");
+		lastSquarePacketNumber = squarePacketNumberInt;     //If the phone app restarts and restarts packet count this will accept the new count
+
 		//Ignore this packet
 		if (!repeatPacketReceived)
 		{
+			Serial.println("ignore this packet");
 			repeatPacketReceived = true;
 		}
 
@@ -320,13 +373,14 @@ void checkPacketNumber(char singleSquareData[])
 	//If packet received is out of sequence, request resend
 	else if (lastSquarePacketNumber == 999 && squarePacketNumberInt != 0 || squarePacketNumberInt > lastSquarePacketNumber + 1)
 	{
+		lastSquarePacketNumber = squarePacketNumberInt -1;		//this was put here to debug single square
+	
+		Serial.println("packet out of sequence");
 		repeatPacketReceived = false;
 		squarePacketState = resend;
 	}
 
 }
-
-
 
 //CHECK CHECKSUM
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
@@ -386,7 +440,7 @@ void debugInputParse(char debugCommand)
 	{
 
 	case '0':                             // send dome stepper to home posistion
-		domeGoHome();
+		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
 	case '1':                             // send vavle stepper to home posisiton
@@ -398,40 +452,12 @@ void debugInputParse(char debugCommand)
 		
 		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
 		delay(500);		// if active dome count incorrect
-		domeGoHome();
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		//delay(500);		// if active dome count incorrect
-		//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
-		//delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		//delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		domeGoHome();
+		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
 		delay(500);		// if active dome count incorrect
 		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
 		delay(500);		// if active dome count incorrect
-		domeGoHome();
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
-		//delay(500);		// if active dome count incorrect
-		//domeGoHome();
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		delay(500);		// if active dome count incorrect														// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
-		break;
+
+		executeSquare(0);
 
 	case 'b':
 		// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
@@ -453,7 +479,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'f':
-
 		// panel shit
 		displaySolarCurrent();
 		displaySolarVoltage();
@@ -464,11 +489,10 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'h':
-		//doPulseIn();
-		Serial.print("frequency is ");
-		Serial.println(freq);
-		Serial.println("exiting pulseIn");
-		SerialBT.println(freq);
+		executeSquare(100);
+		delay(1000);
+		valveGoHome();
+
 		break;
 
 	case 'i':		//test1
@@ -488,17 +512,13 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 's':
-		//esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-		esp_deep_sleep_start();
+		Serial.println("debug case: s -> going to sleep...");
+		SerialBT.println("debug case: s -> going to sleep...");
+		initSleepClock();	/// andy -- add comment
 		break;
 
 	case 't':
-		gettimeofday(&now, NULL);
-
-		SerialBT.println(now.tv_sec);
-		SerialBT.println(last);
-
-		last = now.tv_sec;
+		printLocalTime();
 		break;
 
 	}

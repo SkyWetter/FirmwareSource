@@ -46,6 +46,9 @@
     <ClInclude Include="SPIFFSFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="realTimeFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InitESP.cpp">
@@ -70,6 +73,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SPIFFSFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="realTimeFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

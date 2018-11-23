@@ -16,8 +16,10 @@
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+#include "realTimeFunctions.h"
 
-
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  900        /* Time ESP32 will go to sleep (in seconds) */
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -45,9 +47,9 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 27
-#define rgbLedGreen 26
-#define rgbLedRed 25
+#define rgbLedBlue 26
+#define rgbLedGreen 25
+#define rgbLedRed 27
 
 // solar panel
 #define currentSense A6
@@ -55,32 +57,54 @@
 
 int serialBaud = 115200;
 
-int getFlow(int column, int row, int turretColumn, int turretRow);
+float getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
 void initESP()
 {
-	initSerial();
+	
 	initPins();
+	initSerial();
 	initThreads();
+	createSquareArray(25);
+	print_wakeup_reason(); // andy -- add comment
+	
 
 	spiffsBegin();
 
 	systemState = sleeping;
-	
-	// power management
-	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
-
 }
-
 
 void initSerial()
 {
-	SerialBT.begin("ESP_Bready");
 	Serial.begin(serialBaud);
+	int chipid = ESP.getEfuseMac();
+
+	//switch (chipid) 
+	switch (chipid)
+	{
+		case 163842596:
+			SerialBT.begin("PCB Version sick name bro");
+			break;
+	
+
+
+
+
+
+
+
+		default:
+			SerialBT.begin("Read init serial name me");
+	}
+
+	
+	digitalWrite(rgbLedBlue, HIGH);
+
 	
 	Serial.printf("Serial Intialized with %d baud rate", serialBaud);
+	Serial.println(chipid);
 }
 
 void initPins()
@@ -95,8 +119,6 @@ void initPins()
 
 	ledcAttachPin(stepperValveCrntPin, stepperValveCrntPin);
 	ledcAttachPin(stepperDomeCrntPin, stepperDomeCrntPin);
-
-
 
 	// pin assignments
 	//pinMode(pulsePin, INPUT);               // pin to read pulse frequency                    // init timers need for pulseCounters
@@ -125,7 +147,6 @@ void initPins()
 	pinMode(rgbLedRed, OUTPUT);
 	pinMode(rgbLedGreen, OUTPUT);
 
-
 	// init pin states
 	digitalWrite(stepperDomeStpPin, LOW);
 	digitalWrite(stepperValveStpPin, LOW);
@@ -146,6 +167,8 @@ void initPins()
 
 void initThreads()
 {
+
+
 	//multiple threads
 	TaskHandle_t Task1;				//creating the handle for Task1
 
@@ -156,7 +179,76 @@ void initThreads()
 		NULL,
 		1,
 		&Task1,                   /* Task handle to keep track of created task */
-		0);                       /* Core */
+		1);                       /* Core */
+}
+
+void initSleepClock()
+{
+	if (bootCount == 0)
+	{
+		//timeShift();
+	}
+	++bootCount;
+
+	printLocalTime();
+	print_wakeup_reason();								//Print the wakeup reason for ESP32
+
+	Serial.println("Boot number: " + String(bootCount)); //Increment boot number and print it every reboot
+	Serial.print("# of seconds since last boot: ");
+	//Serial.println(now.tv_sec);
+
+	// sleep, rtc and power mangement
+	esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 1);
+	esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+	Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+	Serial.println("Configured all RTC Peripherals to be powered on in sleep");
+
+	Serial.println("Going to sleep now");
+	Serial.flush();
+	esp_deep_sleep_start();
+	Serial.println("This will never be printed");
+}
+
+void print_wakeup_reason()
+{
+	esp_sleep_wakeup_cause_t wakeup_reason;
+	wakeup_reason = esp_sleep_get_wakeup_cause();
+
+	switch (wakeup_reason)
+	{
+
+	case 1:
+		Serial.println("Wakeup caused by external signal using RTC_IO");
+		// if we are here its because there was a wake-up push button event
+		systemState = program;// so we will want to enter program mode
+		// enable bluetooth
+		// goto to sleep when done
+		break;
+
+	case 2:
+		Serial.println("Wakeup caused by external signal using RTC_CNTL");
+		break;
+
+	case 3:
+		Serial.println("Wakeup caused by timer");
+		//timer should wakeup device every soo often...
+		//rainbow will check for solar power
+		//rainbow will check to see if it is time to water or not
+		break;
+
+	case 4:
+		Serial.println("Wakeup caused by touchpad");
+		break;
+
+	case 5:
+		Serial.println("Wakeup caused by ULP program");
+		break;
+
+	default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
+
+	}
 }
 
 void codeForTask1(void * parameter)						//speecial code for task1
@@ -175,7 +267,8 @@ void codeForTask1(void * parameter)						//speecial code for task1
 // M A I N   F U N C T I O N -- CREATE SQUARE ARRAY
 /*
 * Initializes the array of squares on startup
-* squareArray[squareID][{x,y,distance,angle}]
+* squareArray[squareID][{x,y,
+,angle}]
 * Each position in the first dimension of array is a given square id
 *
 */
@@ -196,13 +289,14 @@ void createSquareArray(int squaresPerRow)
 
 			// Calculates flow needed to reach this square, stores it in array
 			squareArray[squareID][2] = getFlow(column, row, turretColumn, turretRow);
+			//printf("flow requred to hit target %f\n", squareArray[squareID][2]);
 
 			// Calculates # of steps taken from home needed to make turret face square
 			squareArray[squareID][3] = convertAngleToStep(angleToSquare(column, row, turretColumn, turretRow));
-			Serial.println(squareArray[squareID][3]);
+			//Serial.println(squareArray[squareID][3]);
 
 			squareID += 1;
-			printf("Square id: %d\n", squareID);
+			//printf("Square id: %d\n", squareID);
 		}
 	}
 }
@@ -217,10 +311,27 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 {
 	int x = sqCol - turCol;
 	int y = sqRow - turRow;
+	// one square is equal to 0.5 meters and our flow data is measured in meters so 2x one suare = 1 meter
+	x = x / 2;					
+	y = y / 2;
+
+	//printf(" in DistanceToSquare column number is %i\n", sqCol);
+	//printf(" in DistanceToSquare turret column number is %i\n", turCol);
+	//printf(" in DistanceToSquare row number is %i\n", sqRow);
+	//printf(" in DistanceToSquare urent row number is %i\n", turRow);
+
+	//printf(" in DistanceToSquare int x is %i\n", x);
+	//printf(" in DistanceToSquareint y number is %i\n", y);
+
 
 	int squareCoords = (x * x) + (y * y);
 
-	return sqrt((double)squareCoords);
+	//printf(" in DistanceToSquaresquare coords are %i\n", squareCoords);
+
+	float squareDistance = sqrt(squareCoords);
+	//printf(" in DistanceToSquare square distance is%f\n", squareDistance);
+
+	return squareDistance;
 }
 
 // S U B   F U N C T I O N -- angleToSquare
@@ -309,7 +420,7 @@ int convertAngleToStep(double angle)
 	else
 	{
 		double stepsDouble = angle / anglePerStep;   //Get number of steps to reach this angle starting from home)
-		Serial.println(stepsDouble);
+		//Serial.println(stepsDouble);
 		int steps = stepsDouble * 1000;
 
 		for (int i = 0; i < 3; i++)   //Rounds the number (including 3 sigfigs after the decimal point)
@@ -336,13 +447,22 @@ int convertAngleToStep(double angle)
 */
 
 
-int getFlow(int column, int row, int turretColumn, int turretRow)
+float getFlow(int column, int row, int turretColumn, int turretRow)
 {
 
-	double squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
-	double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
 
-	return (int)flow;
+	float squareDistance = distanceToSquare(column, row, turretColumn, turretRow);   //Gets the distance from target square to the central turret square
+	//double flow = 99857.81 - 23136.9*squareDistance + 1636.316*pow(squareDistance, 2); //Converts the distance value to flow (2nd-Order Polynomial)
+	
+	//printf(" in getFlow square distance prew math is are %f\n", squareDistance);
+	
+	float flow = squareDistance * 4.54 + 1.69;
+
+	//printf(" in getFlow calculated distance is %f\n", squareDistance);
+	//printf(" in getFlow calculated flow is %f\n", flow);
+
+
+	return flow;
 
 	// ** Other equations describing our curve **
 	// 4PL has the best R^2 value, but might be difficult to tweak.

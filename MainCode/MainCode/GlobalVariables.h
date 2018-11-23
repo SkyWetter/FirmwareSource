@@ -30,18 +30,22 @@ extern byte hallSensorDomeVal;
 extern byte hallSensorValveVal;
 
 // pulse counter
-extern double duration;
+
 extern float freq;
 extern float oldfreq;
+
 
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
 
-// power management
-// RTC_DATA_ATTR int bootCount = 0;                 // this will be saved in deep sleep memory (RTC mem apprently == 8k)
-extern RTC_DATA_ATTR time_t last;                 // remember last boot in RTC Memory
-extern struct timeval now;
+// sleep, realtimeclock, power management 
+extern RTC_DATA_ATTR int bootCount;
+extern RTC_DATA_ATTR struct timeval tv;
+extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
+extern RTC_DATA_ATTR struct tm tm1;
+extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
 
+extern RTC_DATA_ATTR int waterHour, waterMin;
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
@@ -86,7 +90,7 @@ extern const int SQUARES_PER_ROW;
 extern const int TOTAL_SQUARES; 
 extern const int STEPS_PER_FULL_TURN;
 
-extern int squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
+extern float squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 
 
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
