@@ -40,7 +40,6 @@
 // case 2 do current sense
 // ext. ISR if GPIO13 wakeUpButton = HIGH --> enable BT for program mode
 
-
 void programState()
 {
 	//bool programStateNotDoneFlag = 1;
@@ -62,8 +61,6 @@ void programState()
 	SerialBT.end();
 	deepSleep();
 }
-
-
 
 void timerState()
 {
