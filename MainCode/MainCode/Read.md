@@ -31,3 +31,6 @@
 <<<<< S T E P P E R  F U N C T I O NS
 	
 	[ Functions for control of both the valve and dome stepper motors]
+
+<<<<< R E A L T I M E  F U N C T I O N S
+	[ Functions for altering time and monitoring wake up timers ]

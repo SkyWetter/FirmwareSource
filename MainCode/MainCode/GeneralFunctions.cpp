@@ -1,17 +1,35 @@
-#include <BluetoothSerial.h> 
-#include <Stepper.h>
-#include <soc\rtc.h>
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "InitESP.h"
-#include "driver\adc.h"
+// *********   P R E P R O C E S S O R S
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
 #include "sdkconfig.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+//#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
 #include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "rgbLed.h"
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
 
 #define pulsePin 23 
 
@@ -26,7 +44,6 @@
 
 int charToInt(char *thisChar, int thisCharLength)
 {
-
 	int intConversion = 0;
 	for (int i = 0; i < thisCharLength; i++)
 	{
@@ -109,5 +126,13 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 	else
 	{
 		return length + 1;
+	}
+}
+
+void clearArray(char array[], int arrayLength)
+{
+	for(int i = 0; i < arrayLength; i++)
+	{
+		array[i] = 0;
 	}
 }

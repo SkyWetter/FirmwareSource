@@ -30,13 +30,12 @@ extern byte hallSensorDomeVal;
 extern byte hallSensorValveVal;
 
 // pulse counter
-
 extern float freq;
 extern float oldfreq;
 
-
 // power    
 extern float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
+extern long currentSenseVal1;
 
 // sleep, realtimeclock, power management 
 extern RTC_DATA_ATTR int bootCount;
@@ -44,8 +43,11 @@ extern RTC_DATA_ATTR struct timeval tv;
 extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 extern RTC_DATA_ATTR struct tm tm1;
 extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+extern RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
 
-extern RTC_DATA_ATTR int waterHour, waterMin;
+// state machine
+extern bool programStateNotDoneFlag;
+extern bool wakeUpTimerStateNotDoneFlag;
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
 
@@ -65,23 +67,18 @@ extern int squareIDInt;
 extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
-
-
 /* Program State enums */
-
-
-
 enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
 extern enum serialStates serialState;
 
-enum packetState { ok, ignore, resend };						// Used during serial error handling checks
+enum packetState { ok, ignore, resend };										// Used during serial error handling checks
 extern enum packetState squareChecksumState;			
-extern enum packetState squarePacketState;// Ok -- proceed with serial packet handling
+extern enum packetState squarePacketState;										// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet
 																				// Resend -- request packet again
-enum systemStates { sleeping, solar, program, water, low_power };
-extern enum systemStates systemState;
-extern enum systemStates systemState_previous;
+enum systemStatesTimerWakeUp { low_power, water, solar, sleepy };
+extern enum systemStatesTimerWakeUp sysStateTimerWakeUp;
+extern enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 
 extern bool quickOff;  //Used in debug to flag something off to avoid repeat serial prints
 extern bool message;
@@ -94,7 +91,10 @@ extern float squareArray[625][4]; // [square id #][ {x,y,distance,angle} ]
 
 
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
-
+ 
 extern int spiffsSize;
 extern char *input2DArray[];
 extern int input2DArrayPosition;
+extern char bedsToSprayFile[];
+extern int bedsToSprayLength;
+extern char bedsToSprayInstructions[];

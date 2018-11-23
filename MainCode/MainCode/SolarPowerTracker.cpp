@@ -184,15 +184,23 @@ void solarPowerTracker()
 	}
 }
 
+void solarVoltage()
+{
+	float tempFloat;
+
+	tempFloat = (float)analogRead(solarPanelVoltage);
+	delay(1);
+
+	solarPanelVoltageVal = (((tempFloat / 4096) * 3.3) * 4);
+}
 void displaySolarVoltage()
 {
-	solarPanelVoltageVal = (float)analogRead(solarPanelVoltage);
-	delay(1);
-	solarPanelVoltageVal = (((solarPanelVoltageVal / 4096) * 3.3) * 4.2448);
+	solarVoltage();
 
 	Serial.print("solar panel voltage: ");
 	Serial.print(solarPanelVoltageVal);
 	Serial.println("V");
+
 	SerialBT.print("solar panel voltage: ");
 	SerialBT.print(solarPanelVoltageVal);
 	SerialBT.println("V");
@@ -200,12 +208,11 @@ void displaySolarVoltage()
 
 void displaySolarCurrent()
 {
-	long currentSenseVal1 = 0;
-
 	currentSenseVal1 = analogRead(currentSense);
 
 	Serial.print("current val: ");
 	Serial.println(currentSenseVal1);
+
 	SerialBT.print("current val: ");
 	SerialBT.println(currentSenseVal1);
 }
