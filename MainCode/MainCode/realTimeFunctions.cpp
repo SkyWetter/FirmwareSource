@@ -76,14 +76,6 @@ void timeShift()
 		buf2[i] = incomingTime[i + 11];
 		usrSec = charToInt(buf2, 2);
 	}
-
-	Serial.println(usrYear);
-	Serial.println(usrMon);
-	Serial.println(usrDay);
-	Serial.println(usrHour);
-	Serial.println(usrMin);
-	Serial.println(usrSec);
-
 	printLocalTime();
 }
 
@@ -101,6 +93,7 @@ void printLocalTime()
 	Serial.printf("ctime()         : %.24s\n", ctime_r(&time1, buf1));				// ctime convert time type into a format string
 	Serial.printf("asctime()       : %.24s \n", asctime_r(gmtime(&time1), buf2));	// sane as ctune but taks any structure
 
+	Serial.printf("%.24s \n", asctime(&tm1));
 	gmtime_r(&time1, &tm1);
 	Serial.printf("gmtime()      : %d : %d  : %d : %d : %d : %d \n", tm1.tm_mday, tm1.tm_hour, tm1.tm_min, tm1.tm_sec, tm1.tm_isdst);
 
@@ -116,6 +109,39 @@ void printLocalTime()
 
 	time1 = mktime(&tm1);
 
-	Serial.printf("%.24s \n", asctime(&tm1));				// %A = full weekday name, %B full month name,  %d = day of the month, %Y = year with century, %H = hour (24hr),  %M = minute 900-59), %S= second (00-61)
+	Serial.printf("%.24s \n", asctime(&tm1));										// %A = full weekday name, %B full month name,  %d = day of the month, %Y = year with century, %H = hour (24hr),  %M = minute 900-59), %S= second (00-61)
 
+}
+
+void wateringWakeUp()
+{
+	//tm1.tm_mon += (usrMon - 1);
+	//tm1.tm_hour += (usrHour);
+	//tm1.tm_min += usrMin;
+}
+
+void solarWakeUp()
+{
+
+	int q;
+	q = tm1.tm_min;
+	Serial.println(q);
+
+	if (q == 30)
+	{
+		//int q = analogRead(currentSense);
+
+		//if ( q > 0)
+		//{ 
+			Serial.println("im doing a solar power track");
+			solarPowerTracker();
+		//}
+	}
+}
+
+int getNowSec()
+{
+	int nowSec;
+	nowSec = tm1.tm_sec;
+	return nowSec;
 }

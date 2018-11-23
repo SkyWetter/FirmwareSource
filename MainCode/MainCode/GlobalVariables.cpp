@@ -28,8 +28,38 @@ In the header file, first create the enum prototype :
 	enum week weekFive;
 
 */
-#include "GlobalVariables.h"
+// *********   P R E P R O C E S S O R S
+// standard library includes
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
 #include <BluetoothSerial.h> 
+#include <pthread.h>
+#include <SPIFFS.h>
+// local includes
+#include "sys/time.h"
+#include "sdkconfig.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+//#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
+#include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "rgbLed.h"
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
 
 
 // ************* U S E R   D E F I N E D   V A R I A B L E S
@@ -65,14 +95,19 @@ float oldfreq;
 
 // power    
 float solarPanelVoltageVal;                     // VALUE READ FROM GPIO 3   OR ADC7
+long currentSenseVal1;
 
 // sleep, realtimeclock, power management 
 RTC_DATA_ATTR int bootCount = 0;
 RTC_DATA_ATTR struct timeval tv;
 RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 RTC_DATA_ATTR struct tm tm1;
-RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-RTC_DATA_ATTR int waterHour, waterMin;
+RTC_DATA_ATTR int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
+
+// state machine
+bool programStateNotDoneFlag = 1;
+bool wakeUpTimerStateNotDoneFlag = 1;
 
 
 //******* V A R I A B L E S  A N D  A R R A Y S -- D A V E 
@@ -107,9 +142,8 @@ enum serialStates serialState;
 enum packetState squareChecksumState;
 enum packetState squarePacketState;// Ok -- proceed with serial packet handling
 																				// Ignore -- skip packet																				// Resend -- request packet aga
-enum systemStates systemState;
-enum systemStates systemState_previous;
-
+enum systemStatesTimerWakeUp sysStateTimerWakeUp;
+enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 
 //J A M E S '  S U P E R  C O O L  S P I F F S  V A R I A B L E S
 

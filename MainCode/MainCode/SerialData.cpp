@@ -1,22 +1,35 @@
-#include <BluetoothSerial.h> 
-#include <Stepper.h>
-#include <soc\rtc.h>
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "InitESP.h"
-#include "driver\adc.h"
+// *********   P R E P R O C E S S O R S
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
 #include "sdkconfig.h"
-#include "StepperFunctions.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+//#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
 #include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "rgbLed.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
-#include "realTimeFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
@@ -45,8 +58,8 @@
 #define wakeUpPushButton GPIO_NUM_13
 
 // rgb led
-#define rgbLedBlue 26
 #define rgbLedGreen 25
+#define rgbLedBlue 26
 #define rgbLedRed 27
 
 // solar panel
@@ -81,9 +94,10 @@ void getSerialData()
 
 		switch (incomingChar)
 		{
+
 		case '*':
 			Serial.println("Resent from android");  //Debug message to alert through serial monitor that data has been resent on ESP request
-			break;
+		break;
 
 		case '%':
 			serialState = singleSquare;  //Puts serialState in singleSquare mode 
@@ -105,13 +119,12 @@ void getSerialData()
 				}
 				//ignore
 			}
-			break;
+		break;
 
 		case '&':
-			Serial.println("debug command");
-			SerialBT.println("debug command");
+			//Serial.println("debug command"); SerialBT.println("debug command");
 			serialState = debugCommand;
-			break;
+		break;
 
 		case '#': 
 			//header #0001@0028!data
@@ -119,35 +132,32 @@ void getSerialData()
 			{
 				serialState = parseGarden;
 			}
-
-			break;
+		break;
 
 		case '$':
-			Serial.println("time is money");
-			SerialBT.println("time is money");	
-			timeShift();			///andy -- this function takes a 14byte time char array sent from BT and parses it out to time_t
-			break;
-		
-		default:
-
-			Serial.println("IM IN DEFAULTED SERIAL CASE");
-			
-			//do nothing i guess
-			break;	
+			//if (bootCount == 0)
+			//{
+				// get time
+				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+				// maybe confirm that it has a good time???
+			//}
+			//++bootCount;
+			//Serial.println("time is money");SerialBT.println("time is money");	
+			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+			serialState = doNothing;
+		break;
 		}
 		
 	}
 
-
-
 	// Check the serial state 
-
 	switch (serialState)
 	{
-	case doNothing: break;
+	case doNothing: 
+	break;
 
-	case singleSquare:       //If in singleSquare mode
-		checkPacketNumber(&singleSquareData[0]); //Check the packet number
+	case singleSquare:											 //If in singleSquare mode
+		checkPacketNumber(&singleSquareData[0]);				 //Check the packet number
 
 		// Check Packet State
 		switch (squarePacketState)
@@ -176,24 +186,17 @@ void getSerialData()
 			executeSquare(getSquareID(&singleSquareData[0]));
 			delay(1000);
 			valveGoHome();
-
-
-
 			break;
 		case ignore: break;
-		case resend: 
-			
-			;
+		case resend: break;
 			//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
 		}
-
-		break;
+	break;
 
 	case debugCommand:
 		//Serial.print("here in debug command");
 		debugInputParse(getDebugChar());
-
-		break;
+	break;
 
 	case parseGarden:
 
@@ -208,11 +211,12 @@ void getSerialData()
 }
 
 
-
-// S U B F U N C T I O N S -- getSerialData
-
+// S U B F U N C  T I O N S -- getSerialData
 void parseInput()
 {
+	//Serial.println("test");
+
+
 	int j = 11;
 	int length;
 	int packageNum;
@@ -302,7 +306,6 @@ int getSquareID(char singleSquaredata[])
 
 	return charToInt(thisSquareChar, 3);
 
-
 }
 
 //CHECK PACKET NUMBER
@@ -384,25 +387,22 @@ void checkPacketNumber(char singleSquareData[])
 
 //CHECK CHECKSUM
 //Checks ESP-calculted checksum against rx'd android checksum value, changes checksumState
-
 void checkChecksum(char singleSquareData[])
 {
-	int espChecksum = 0;      //Value of checksum calculated on esp side
-	int androidChecksum = 0;  //Value of checksum sent by android
+	int espChecksum = 0;								//Value of checksum calculated on esp side
+	int androidChecksum = 0;							//Value of checksum sent by android
 
 	for (int i = 0; i < 3; i++)
 	{
 		squareChecksumChar[i] = singleSquareData[i + 7]; //Get checksum substring from data packet
-		espChecksum += singleSquareData[i + 4];     //Esp calculate checksum  
-
+		espChecksum += singleSquareData[i + 4];			 //Esp calculate checksum  
 	}
 
-	androidChecksum = charToInt(squareChecksumChar, 3);// Convert checksum substring to int
+	androidChecksum = charToInt(squareChecksumChar, 3);	 // Convert checksum substring to int
 
-	if (androidChecksum == espChecksum) //If they match, allow the packet data to be used
+	if (androidChecksum == espChecksum)					 //If they match, allow the packet data to be used
 	{
 		squareChecksumState = ok;
-
 	}
 
 	else
@@ -431,8 +431,6 @@ char getDebugChar()
 }
 
 // M A I N   F U N C T I O N --- inputCase statement
-
-
 void debugInputParse(char debugCommand)
 {     // read the incoming byte:
 
@@ -448,30 +446,19 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'a':
-		
-		
-		moveToPosition(stepperDomeStpPin, 10,0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-		moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
-		delay(500);		// if active dome count incorrect
-
-		executeSquare(0);
+		crazyDomeStepperFromDebugA();
+		break;
 
 	case 'b':
-		// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
-		stepperDomeDirCW();
+		stepperDomeDirCW();					// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
 		break;
 
 	case 'c':
-		// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
-		stepperDomeDirCCW();
+		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
 	case 'd':
-		//one step on valveStepper
-		valveStepperOneStep();
+		valveStepperOneStep();				//one step on valveStepper
 		break;
 
 	case 'e':
@@ -479,7 +466,6 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'f':
-		// panel shit
 		displaySolarCurrent();
 		displaySolarVoltage();
 		break;
@@ -492,7 +478,6 @@ void debugInputParse(char debugCommand)
 		executeSquare(100);
 		delay(1000);
 		valveGoHome();
-
 		break;
 
 	case 'i':		//test1
@@ -512,13 +497,16 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 's':
-		Serial.println("debug case: s -> going to sleep...");
-		SerialBT.println("debug case: s -> going to sleep...");
-		initSleepClock();	/// andy -- add comment
+		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
+		deepSleep();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
 		break;
 
 	case 't':
-		printLocalTime();
+		printLocalTime();					// display time
+		break;
+
+	case 'z':
+		programStateNotDoneFlag = 0;				// display time
 		break;
 
 	}

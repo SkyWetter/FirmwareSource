@@ -1,4 +1,6 @@
 #pragma once
 void timeShift();
-void print_wakeup_reason();
+void checkWakeUpReason();
 void printLocalTime();
+void solarWakeUp();
+extern int getNowSec();

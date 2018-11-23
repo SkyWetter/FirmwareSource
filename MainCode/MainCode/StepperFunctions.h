@@ -20,3 +20,5 @@ void stepperDomeDirCW();
 void stepperDomeDirCCW();
 void toggleStepperValveDir();
 void valveStepperOneStep();
+
+void crazyDomeStepperFromDebugA();

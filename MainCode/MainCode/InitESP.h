@@ -2,8 +2,10 @@
 
 void initPins();
 void initSerial();
-void initESP();
+void initRainBow();
 void initThreads();
 void initSleepClock();
 void codeForTask1(void * parameter);
+void checkWakeUpReason();
+void initSerialBT();
 void createSquareArray(int squaresPerRow);

@@ -163,14 +163,12 @@ void domeGoHome()
 	stepperDomeOneStepHalfPeriod(5);
 	stepperDomeOneStepHalfPeriod(5);
 
-
 	//digitalWrite(stepperDomeDirPin, HIGH);																				// HIGH IS CLOSEWISE!!!
 	stepperGoHome(stepperDomeStpPin, stepperDomeDirPin, stepperDomeSlpPin, hallSensorDome);									// dome stepper go to home posisition
 
 	stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
-
-																															//digitalWrite(stepperDomeDirPin, LOW);		
+																													//digitalWrite(stepperDomeDirPin, LOW);		
 	// LOW ON DOME DIR PIN MEANS CW MOVEMENT AND HIGHER VALUE for stepCountDome -- ALWAYS INCREMENT FROM HERE
 	//ledcWrite(stepperDomeCrntPin, 255);			//turn down stepper current once home
 	digitalWrite(stepperDomeSlpPin, LOW);		// low means sleep
@@ -180,8 +178,6 @@ void domeGoHome()
 }
 void valveGoHome()
 {
-	
-
 	digitalWrite(stepperValveDirPin, HIGH);		// low is home direction
 
 	stepperGoHome(stepperValveStpPin, stepperValveDirPin, stepperValveSlpPin, hallSensorValve);
@@ -538,4 +534,43 @@ void valveStepperOneStep()
 	Serial.println(currentValvePosition);
 	SerialBT.println(currentValvePosition);
 	//digitalWrite(stepperValveEnPin, LOW);
+}
+
+void crazyDomeStepperFromDebugA() // F!Y!I! I TOOK A FUNCTION FROM THE SerialData.CPP debug case statement and moved it here
+{
+	moveToPosition(stepperDomeStpPin, 10, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	//delay(500);		// if active dome count incorrect
+	//moveToPosition(stepperDomeStpPin, 30, 0, 0, 0);
+	//delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	//delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 40, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 50, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	domeGoHome();
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 100, 0, 0, 0);
+	//delay(500);		// if active dome count incorrect
+	//domeGoHome();
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
+	delay(500);		// if active dome count incorrect														// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 150, 0, 0, 0);
+	delay(500);		// if active dome count incorrect
+	moveToPosition(stepperDomeStpPin, 20, 0, 0, 0);
 }

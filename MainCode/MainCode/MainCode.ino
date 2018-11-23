@@ -1,34 +1,44 @@
 // **********   S * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
-//  october 31, 2018
+//  november 22, 2018
 
 
 // *********   P R E P R O C E S S O R S
-#include "SPIFFSFunctions.h"
-#include <SPIFFS.h>
-#include <Stepper.h>
-#include <BluetoothSerial.h>
-#include <soc\rtc.h>
-#include "InitESP.h"
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "GeneralFunctions.h"
-#include "StepperFunctions.h"
+// standard library includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <soc\rtc.h>
+// esp32 periph includes
+#include <Stepper.h>
+#include <BluetoothSerial.h> 
 #include <pthread.h>
+#include <SPIFFS.h>
+// local includes
 #include "sys/time.h"
-#include "SolarPowerTracker.h"
-#include "SerialData.h"
 #include "sdkconfig.h"
-#include <driver/adc.h>
-#include "realTimeFunctions.h"
+#include "driver\adc.h"
+#include "driver/gpio.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 //#include <freertos/ringbuf.h>
+// custom includes
+#include  "deepSleep.h"
+#include "GeneralFunctions.h"
+#include "GlobalVariables.h"
+#include "InitESP.h"
+#include "pulseIn.h"
+#include "realTimeFunctions.h"
+#include "rgbLed.h"s
+#include "SerialData.h"
+#include "SolarPowerTracker.h"
+#include "SPIFFSFunctions.h"
+#include "stateMachine.h"
+#include "StepperFunctions.h"
+
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
-#define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
 #define CW  1
 
@@ -63,100 +73,20 @@
 
 
 void setup()
-{
-	initESP();  // Configures inputs and outputs/pin assignments, serial baud rate,
-				// starting systemState (see InitESP.cpp)
-	Serial.println("ESP Initialized...");
-	moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
-
+{	
+	initRainBow();
+	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
+	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
+	deepSleep();	 // should not actually land here unless the program flow fell out of the state Machine
 }
-
 
 void loop()
 {
-	checkSystemState();
-	//Serial.println(systemState);
-}
-
-void checkSystemState()
-{
-	switch (systemState)
-	{
-	case sleeping:
-	{
-
-		if (SerialBT.available() || Serial.available())
-		{
-			
-			systemState = program;
-		}
-		break;
-	}
-
-	case solar:
-	{
-
-		solarPowerTracker();
-		systemState = sleeping;
-		break;
-	}
-
-	case program:
-	{
-		if (freq != oldfreq) {
-			Serial.println(freq);
-			//SerialBT.println(freq);
-			oldfreq = freq;
-		}
-		Serial.println("main code program case");
-		getSerialData();
-
-
-		systemState = sleeping;
-		
-
-		break;
-	}
-
-	case water:
-	{
-		//load correct instruction set for date and time
-		//reference temperature and apply modfifier to watering durations
-		//open thread for flow sensor
-		//run spray program
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Watering Mode");
-		}
-
-
-		systemState_previous = systemState;
-
-		break;
-	}
-
-	case low_power:
-	{
-		//close the valve
-		//set LED to red
-		//allow solar
-		//prevent water until battery > 50%
-		  //>50% -> perform last spray cycle
-		if (systemState_previous != systemState)
-		{
-			Serial.printf("SystemState: Low Power Mode");
-		}
-
-		systemState_previous = systemState;
-
-		break;
-	}
-	}
+	Serial.println("wont ever be here??? You should not be here");
 }
 
 void shootSingleSquare()
 {
 	int targetFlow = squareArray[getSquareID(singleSquareData)][2];
 	int targetStep = squareArray[getSquareID(singleSquareData)][3];
-
 }
