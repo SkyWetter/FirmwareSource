@@ -30,7 +30,7 @@
 #include "InitESP.h"
 #include "pulseIn.h"
 #include "realTimeFunctions.h"
-#include "rgbLed.h"s
+#include "rgbLed.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
@@ -76,8 +76,7 @@ void setup()
 {	
 	initRainBow();
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
-	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
-	deepSleep();	 // should not actually land here unless the program flow fell out of the state Machine
+	deepSleep();			 // should not actually land here unless the program flow fell out of the state Machine
 }
 
 void loop()

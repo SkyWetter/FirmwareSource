@@ -57,7 +57,7 @@ void programState()
 		//Serial.println("main code program case");
 		getSerialData();
 	}
-	ledBlue(1);
+	ledBlue(0);
 	SerialBT.end();
 	deepSleep();
 }
