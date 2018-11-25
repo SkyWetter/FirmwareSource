@@ -197,12 +197,12 @@ void moveValve(int targetPosition, int speed, int accel,int current)
 void makeRain(float desiredFlow)
 {
 	
-	valveGoHome();
+	//valveGoHome();
 
 	digitalWrite(stepperValveSlpPin, HIGH);
 	digitalWrite(stepperValveDirPin, LOW);
 
-	for(int i=0; i < 30; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
+	for(int i=0; i < 0; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
 	{
 		//Serial.println("taking extra steps");
 		digitalWrite(stepperValveStpPin, HIGH);
@@ -237,9 +237,9 @@ void makeRain(float desiredFlow)
 	////Serial.println("compensated speed is");
 	Serial.println(fastTime);
 
-	while (desiredFreq > freq && currentValvePosition != 100) 
+	while (desiredFreq >= freq+2 || desiredFreq <= freq - 2 && currentValvePosition != 100)
 	{
-		Serial.println(freq);
+		//Serial.println(freq);
 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 
@@ -322,15 +322,16 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			//Serial.println(currentDomePosition);
 			printf("move starting at %i", currentDomePosition);
 			
+			int stepsTaken = 0;
 
 			digitalWrite(stepperDomeSlpPin, HIGH);
 
 			//if statement below checks to see if the dome is supposed to home but isnt
-			if (currentDomePosition == 0 && digitalRead(hallSensorDome) == 1) {
+			if (currentDomePosition == 0 && digitalRead(hallSensorDome) == 1 ) {
 
 				digitalWrite(stepperDomeDirPin, 0);
 
-				while (digitalRead(hallSensorDome) == 1) {
+				while (digitalRead(hallSensorDome) == 1 && stepsTaken < 500) {
 
 					
 
@@ -339,6 +340,20 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 					digitalWrite(stepperDomeStpPin, LOW);
 					delay(5);
+
+					stepsTaken++;
+				}
+
+				if (stepsTaken >= 500) {
+					Serial.print("Help! I'm stuck and I cant get up");
+
+					digitalWrite(stepperDomeDirPin, !digitalRead(stepperDomeDirPin));		//change direction and try other way		
+					for (int i = 0; i < (500 / 5); i++) {
+						digitalWrite(stepperDomeStpPin, HIGH);
+						delay(4);
+						digitalWrite(stepperDomeStpPin, LOW);
+						delay(4);
+					}
 				}
 
 				digitalWrite(stepperDomeStpPin, HIGH);		//extra step to hit home
@@ -352,7 +367,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			}
 
 
-			int stepsTaken = 0;
+			stepsTaken = 0;
 			int stepsToGo = targetPosition - currentDomePosition;   //determines the number of steps from current position to target position
 			if (getSign(stepsToGo) == 1) { currentDomeDirection = 1; }
 			else { currentDomeDirection = 0; }
@@ -377,7 +392,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 			
 			
-			while (currentDomePosition != targetPosition) {
+			while (currentDomePosition != targetPosition && stepsTaken < 500) {
 
 
 				//Serial.println("entered while loop");
@@ -447,8 +462,8 @@ void executeSquare(int mysquare) {
 
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
-	//delay(100);
-	//makeRain(targetFlow);
+	delay(100);
+	makeRain(targetFlow);
 
 }
 

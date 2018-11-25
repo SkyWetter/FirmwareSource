@@ -122,7 +122,8 @@ void getSerialData()
 		break;
 
 		case '&':
-			//Serial.println("debug command"); SerialBT.println("debug command");
+			//Serial.println("debug command"); 
+			//("debug command");
 			serialState = debugCommand;
 		break;
 
@@ -184,8 +185,8 @@ void getSerialData()
 			squareIDInt = charToInt(squareID, 3);
 
 			executeSquare(getSquareID(&singleSquareData[0]));
-			delay(1000);
-			valveGoHome();
+			//delay(2000);
+			//valveGoHome();
 			break;
 		case ignore: break;
 		case resend: break;
@@ -509,8 +510,17 @@ void debugInputParse(char debugCommand)
 		programStateNotDoneFlag = 0;				// display time
 		break;
 	case 'o':
-		valveStepperOneStep();
+
+		digitalWrite(stepperValveSlpPin, HIGH);
+		digitalWrite(stepperValveDirPin, LOW);
+
+		digitalWrite(stepperValveStpPin, HIGH);
+		delay(4);
+		//delay(100);
+		digitalWrite(stepperValveStpPin, LOW);
+		delay(4);
 		break;
+
 	case 'x':
 		valveGoHome();
 		break;

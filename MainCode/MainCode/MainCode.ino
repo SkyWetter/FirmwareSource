@@ -30,7 +30,7 @@
 #include "InitESP.h"
 #include "pulseIn.h"
 #include "realTimeFunctions.h"
-#include "rgbLed.h"s
+#include "rgbLed.h"
 #include "SerialData.h"
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"

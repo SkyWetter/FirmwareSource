@@ -51,7 +51,7 @@ void programState()
 		if (freq != oldfreq)
 		{
 			Serial.println(freq);
-			SerialBT.println(freq);
+			//SerialBT.println(freq);
 			oldfreq = freq;
 		}
 		//Serial.println("main code program case");
