@@ -43,7 +43,9 @@ extern RTC_DATA_ATTR struct timeval tv;
 extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 extern RTC_DATA_ATTR struct tm tm1;
 extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-extern RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
+extern RTC_DATA_ATTR int waterHourAM;
+extern RTC_DATA_ATTR int waterHourPM;
+extern RTC_DATA_ATTR bool amPmFlag;
 
 // state machine
 extern bool programStateNotDoneFlag;
@@ -97,4 +99,4 @@ extern char *input2DArray[];
 extern int input2DArrayPosition;
 extern char bedsToSprayFile[];
 extern int bedsToSprayLength;
-extern char bedsToSprayInstructions[];
+extern int bedsToSprayInstructions[];

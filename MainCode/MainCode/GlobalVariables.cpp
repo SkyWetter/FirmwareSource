@@ -103,7 +103,9 @@ RTC_DATA_ATTR struct timeval tv;
 RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 RTC_DATA_ATTR struct tm tm1;
 RTC_DATA_ATTR int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
+RTC_DATA_ATTR int waterHourAM;
+RTC_DATA_ATTR int waterHourPM;
+RTC_DATA_ATTR bool amPmFlag;
 
 // state machine
 bool programStateNotDoneFlag = 1;
@@ -155,4 +157,4 @@ int input2DArrayPosition = 0;	//position in 2D array
 
 char bedsToSprayFile[5000]; 
 int bedsToSprayLength;
-char bedsToSprayInstructions[5000];
+int bedsToSprayInstructions[5000];

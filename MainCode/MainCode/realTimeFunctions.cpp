@@ -115,14 +115,16 @@ void printLocalTime()
 
 void wateringWakeUp()
 {
-	//tm1.tm_mon += (usrMon - 1);
-	//tm1.tm_hour += (usrHour);
-	//tm1.tm_min += usrMin;
+	Serial.print("tm1.tm_hour time is: ");
+	Serial.println(tm1.tm_hour);
+
+	Serial.print("usr hour: ");
+	Serial.println(usrHour);
+	
 }
 
 void solarWakeUp()
 {
-
 	int q;
 	q = tm1.tm_min;
 	Serial.println(q);

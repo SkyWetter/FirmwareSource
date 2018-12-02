@@ -174,7 +174,7 @@ void initSerialBT()
 		break;
 
 	default:
-		SerialBT.begin("Read init serial name me");
+		SerialBT.begin("ANDY->ESP");
 	}
 
 	ledBlue(1);

@@ -433,23 +433,18 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 }
 
-void executeSquare(int mysquare) {
-
-
-
+void executeSquare(int mysquare) 
+{
 	int steps2go = squareArray[mysquare][3];
 
 	float targetFlow = squareArray[mysquare][2];
 
-
-	Serial.println("Target flow frequency is");
-	Serial.println(targetFlow);
-
+	Serial.printf("Target flow frequency is: %f\n", targetFlow);
+	//Serial.println(targetFlow);
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	//delay(100);
 	//makeRain(targetFlow);
-
 }
 
 
