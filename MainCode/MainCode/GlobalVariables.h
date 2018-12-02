@@ -99,4 +99,4 @@ extern char *input2DArray[];
 extern int input2DArrayPosition;
 extern char bedsToSprayFile[];
 extern int bedsToSprayLength;
-extern int bedsToSprayInstructions[];
+extern char bedsToSprayInstructions[];

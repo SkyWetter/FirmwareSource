@@ -151,10 +151,10 @@ enum systemStatesTimerWakeUp sysStateTimerWakeUp_previous;
 
 //string to write to SPIFFS, received from bluetooth
 
-int spiffsSize;		//size of total spiffs contents
-char *input2DArray[13];	//container for each of 14 input strings
-int input2DArrayPosition = 0;	//position in 2D array
+int spiffsSize;								//size of total spiffs contents
+char *input2DArray[14];						//container for each of 14 input strings
+int input2DArrayPosition = 0;				//position in 2D array
 
 char bedsToSprayFile[5000]; 
 int bedsToSprayLength;
-int bedsToSprayInstructions[5000];
+char bedsToSprayInstructions[5000];
