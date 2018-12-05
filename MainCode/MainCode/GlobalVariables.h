@@ -42,7 +42,8 @@ extern RTC_DATA_ATTR int bootCount;
 extern RTC_DATA_ATTR struct timeval tv;
 extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 extern RTC_DATA_ATTR struct tm tm1;
-extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear;
+extern RTC_DATA_ATTR unsigned long secsLastBootOffset;
 extern RTC_DATA_ATTR int waterHourAM;
 extern RTC_DATA_ATTR int waterHourPM;
 extern RTC_DATA_ATTR bool amPmFlag;
@@ -55,6 +56,7 @@ extern bool wakeUpTimerStateNotDoneFlag;
 
 extern bool firstSingleSquare;  //Used to allow any packet # for first square
 extern bool repeatPacketReceived;  //Flag if packet received was a duplicate
+extern bool incomingSerialBTFlag;
 
 extern char squarePacketNumberChar[4];
 extern char lastSquarePacketNumberChar[4];

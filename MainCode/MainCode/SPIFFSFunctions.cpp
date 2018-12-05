@@ -137,7 +137,7 @@ void extractBedData(char array[])
 	int j = 0;	//bedsToSprayFile incrementer
 	int k = 0;	//bedsToSprayInstructions incrementer
 
-	clearArray(bedsToSprayInstructions, 5000);					//clear temp array for new file
+	//clearArray(bedsToSprayInstructions, 5000);					//clear temp array for new file
 
 	Serial.println("bedsToSprayInstructions: ");
 	

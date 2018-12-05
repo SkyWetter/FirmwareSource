@@ -80,11 +80,13 @@ void getSerialData()
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
+			incomingSerialBTFlag = 1;		 // a 1 means the incoming serial data is from BT. a 0 is for serial port 
 			
 		}
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
+			incomingSerialBTFlag = 0;
 		}
 		
 		//Serial.println("incoming leading char is");
@@ -187,6 +189,7 @@ void getSerialData()
 		case debugCommand:
 			//Serial.print("here in debug command");
 			debugInputParse(getDebugChar());
+			serialState = doNothing;
 		break;
 
 		case parseGarden: // sent here if initial char was a '#'

@@ -102,7 +102,8 @@ RTC_DATA_ATTR int bootCount = 0;
 RTC_DATA_ATTR struct timeval tv;
 RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 RTC_DATA_ATTR struct tm tm1;
-RTC_DATA_ATTR int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
+RTC_DATA_ATTR int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear;
+RTC_DATA_ATTR unsigned long secsLastBootOffset;
 RTC_DATA_ATTR int waterHourAM;
 RTC_DATA_ATTR int waterHourPM;
 RTC_DATA_ATTR bool amPmFlag;
@@ -116,6 +117,7 @@ bool wakeUpTimerStateNotDoneFlag = 1;
 
 bool firstSingleSquare = true;  //Used to allow any packet # for first square
 bool repeatPacketReceived = false;  //Flag if packet received was a duplicate
+bool incomingSerialBTFlag;
 
 char squarePacketNumberChar[4] = { '0', '0', '0', 0x00 };
 char lastSquarePacketNumberChar[4] = { '0', '0', '0', 0x00 };
