@@ -133,8 +133,7 @@ void getSerialData()
 
 		case '$':
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
-			timeShift();
-			serialState = doNothing;
+			serialState = timeChange;
 		break;
 		}
 		
@@ -200,6 +199,11 @@ void getSerialData()
 			serialState = doNothing;
 		break;
 
+		case timeChange: // sent here if initial char was a '$'
+			timeShift();
+			serialState = doNothing;
+			break;
+
 		default:;
 	}
 }
@@ -238,10 +242,10 @@ void parseInput()
 		lengthArray[i] = headerArray[(i + 6)];		// take out length of incoming String
 	}
 
-	length = charToInt(lengthArray, 4);				// compute length
-	packageNum = charToInt(packageNumArray, 4);		// compute pack #
+	length = charToInt(lengthArray, 4);				// compute length from char string to int
+	packageNum = charToInt(packageNumArray, 4);		// compute pack # from char string to int
 	Serial.printf("packageNumArray = %i \n", packageNum);
-	input2DArrayPosition = (packageNum - 1);		// andy code could be fucked
+	input2DArrayPosition = (packageNum - 1);		// andy code could be fucked?!?!/
 
 	//create new array to match
 	input2DArray[input2DArrayPosition] = new char[length];	// is creating the second dimension of the array?!?!?
@@ -274,11 +278,9 @@ void parseInput()
 
 	// save parsed input to flash memeory
 	spiffsSave(input2DArray[input2DArrayPosition], length, packageNumArray);
-
 	Serial.printf("\nLength was %i, J count is %i \n", length, j);
 
 	//input2DArrayPosition++;
-
 	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
 }
 
@@ -469,6 +471,7 @@ void debugInputParse(char debugCommand)
 		extractBedData(bedsToSprayFile);
 		spiffsParse(testNum3);
 		extractBedData(bedsToSprayFile);
+		Serial.println("did i get here???");
 	break;
 
 	case 'j':		//test2

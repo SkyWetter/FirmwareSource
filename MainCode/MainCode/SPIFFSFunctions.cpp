@@ -26,7 +26,7 @@ void spiffsSave(char array[], int arraySize, char packageNum[])
 {
 	//bool success = false;
 
-	int j;
+	int j = 0;
 	char fileName[] = "/xxxx.txt";
 
 	//pull out packet number for save file name

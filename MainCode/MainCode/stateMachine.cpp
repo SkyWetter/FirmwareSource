@@ -57,6 +57,8 @@ void programState()
 		//Serial.println("main code program case");
 		getSerialData();
 	}
+
+	//init shutdown from program state
 	ledBlue(0);
 	SerialBT.end();
 	deepSleep();
