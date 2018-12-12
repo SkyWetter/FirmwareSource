@@ -31,6 +31,7 @@
 #include "stateMachine.h"
 #include "StepperFunctions.h"
 
+
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
@@ -65,6 +66,8 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
+
+
 
 //test using serial port for commented strings and array for file to open
 
@@ -459,7 +462,9 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'd':
-		valveStepperOneStep();				//one step on valveStepper
+		
+			
+			
 		break;
 
 	case 'e':
@@ -526,3 +531,4 @@ void debugInputParse(char debugCommand)
 		break;
 	}
 }
+

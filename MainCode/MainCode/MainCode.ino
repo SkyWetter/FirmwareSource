@@ -6,6 +6,7 @@
 
 // *********   P R E P R O C E S S O R S
 // standard library includes
+#include <Adafruit_NeoPixel.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,6 +37,7 @@
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
 #include "StepperFunctions.h"
+#include <Adafruit_NeoPixel.h>
 
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
@@ -74,6 +76,9 @@
 
 void setup()
 {	
+
+
+
 	initRainBow();
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	//domeGoHome();			 // M A Y BE DONT COMMENT THIS OUT???! THIS NEED TO BE HERE OR NOT??
