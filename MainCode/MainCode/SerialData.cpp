@@ -129,6 +129,11 @@ void getSerialData()
 			serialState = parseGarden;
 		break;
 
+		case '+':
+			//Science fair test
+			serialState = sprayNow;
+			break;
+
 		case '$':
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			timeShift();
@@ -196,6 +201,11 @@ void getSerialData()
 			}
 			serialState = doNothing;
 		break;
+
+		case sprayNow:
+			spiffsParse(testNum1);
+			extractBedData(bedsToSprayFile);
+			break;
 
 		default:;
 	}

@@ -70,7 +70,7 @@ extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
 /* Program State enums */
-enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
+enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden, sprayNow };   // State during getSerial fxn
 extern enum serialStates serialState;
 
 enum packetState { ok, ignore, resend };										// Used during serial error handling checks
