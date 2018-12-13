@@ -69,7 +69,7 @@ void programState()
 
 
 		digitalWrite(stepperDomeDirPin, HIGH);
-		for (int i = 0; i < 200; i++) {
+		for (int i = 0; i < 50; i++) {
 
 			colorWipe(strip.Color(0, 0, i), 5); // blue
 			digitalWrite(stepperDomeStpPin, HIGH);
@@ -79,11 +79,11 @@ void programState()
 			delay(1);
 
 		}
-		rainbow(25);
+		rainbow(5);
 
 		digitalWrite(stepperDomeDirPin, LOW);
 
-		for (int i = 0; i < 200; i++) {
+		for (int i = 0; i < 50; i++) {
 			colorWipe(strip.Color(0, i, 0), 5); // green
 			digitalWrite(stepperDomeStpPin, HIGH);
 			delay(1);
@@ -92,13 +92,13 @@ void programState()
 			delay(1);
 
 		}
-		rainbow(25);
+		rainbow(5);
 
 	}
-	for (int x = 0; x < 10000; x++)
-	{
-		rainbow(500);
-	}
+	//for (int x = 0; x < 10; x++)
+	//{
+	//	rainbow(5);
+	//}
 
 
 	while (programStateNotDoneFlag)
