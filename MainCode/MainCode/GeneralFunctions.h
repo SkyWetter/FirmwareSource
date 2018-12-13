@@ -15,3 +15,4 @@ void doPulseIn();
 int getArrayLength(char charArray[], bool lengthIncludesNull);
 void printString(char charArray[], int charsPerLine);
 void clearArray(char array[], int arrayLength);
+extern void clearIntArray(int array[], int arrayLength);

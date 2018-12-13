@@ -1,31 +1,19 @@
 // *********   P R E P R O C E S S O R S
-#include "SPIFFSFunctions.h"
-#include <SPIFFS.h>
-#include <Stepper.h>
-#include <BluetoothSerial.h>
 #include <soc\rtc.h>
-#include "InitESP.h"
-#include <pthread.h>
-#include "GlobalVariables.h"
-#include "GeneralFunctions.h"
-#include "StepperFunctions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include "sys/time.h"
-#include "SolarPowerTracker.h"
-#include "SerialData.h"
-#include "sdkconfig.h"
-#include <driver/adc.h>
-#include "realTimeFunctions.h"
-//#include <freertos/ringbuf.h>
 #include <time.h>
 #include <esp_clk.h>
-#include <esp_sleep.h>
 #include <esp_timer.h>
+#include "sys/time.h"
 
+#include "GlobalVariables.h"
+#include "GeneralFunctions.h"
+#include "realTimeFunctions.h"
+#include "SolarPowerTracker.h"
 
+int offMin, offSec;
 
 
 void timeShift()
@@ -35,10 +23,22 @@ void timeShift()
 	char buf1[4];
 	char buf2[2];
 
-	for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
+	if (incomingSerialBTFlag == 0)
 	{
-		incomingByte = SerialBT.read();
-		incomingTime[j] = incomingByte;
+		for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
+		{
+			incomingByte = Serial.read();
+			incomingTime[j] = incomingByte;
+		}
+	}
+
+	if (incomingSerialBTFlag == 1)
+	{
+		for (int j = 0; j < 16; j++)		// get incoming time string and put it in char array incomingTime[]
+		{
+			incomingByte = SerialBT.read();
+			incomingTime[j] = incomingByte;
+		}
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -73,56 +73,64 @@ void timeShift()
 
 	for (int i = 0; i < 2; i++)
 	{
-		buf2[i] = incomingTime[i + 11];
+		buf2[i] = incomingTime[i + 12];
 		usrSec = charToInt(buf2, 2);
 	}
+	//timeOffsetSinceBoot();
+	
 	printLocalTime();
 }
 
 void printLocalTime()
 {
-
 	char buf1[30];
 	char buf2[30];
 
-	gettimeofday(&tv, NULL);														//struct timeval tv;
-	Serial.printf("gettimeofday()  : %ld : %ld \n", tv.tv_sec, tv.tv_usec);
-
-	time(&time1);																	// time_t time1;	returns numbers seconds since first of jan 1970
-	Serial.printf("time()          : %ld \n", time1);
-	Serial.printf("ctime()         : %.24s\n", ctime_r(&time1, buf1));				// ctime convert time type into a format string
-	Serial.printf("asctime()       : %.24s \n", asctime_r(gmtime(&time1), buf2));	// sane as ctune but taks any structure
-
-	Serial.printf("%.24s \n", asctime(&tm1));
+	time(&time1);			// time_t time1;	returns numbers seconds since first of jan 1970
+	ctime_r(&time1, buf1);
+	asctime_r(gmtime(&time1), buf2);
 	gmtime_r(&time1, &tm1);
-	Serial.printf("gmtime()      : %d : %d  : %d : %d : %d : %d \n", tm1.tm_mday, tm1.tm_hour, tm1.tm_min, tm1.tm_sec, tm1.tm_isdst);
-
 	localtime_r(&time1, &tm1);
-	Serial.printf("localtime()      %d : %d : %d : %d : %d \n", tm1.tm_mday, tm1.tm_hour, tm1.tm_min, tm1.tm_sec, tm1.tm_isdst);
-
+	
 	tm1.tm_year += (usrYear - 1970);
+	tm1.tm_wday -= 1;
 	tm1.tm_mday += (usrDay - 1);
 	tm1.tm_mon += (usrMon - 1);
 	tm1.tm_hour += (usrHour);
 	tm1.tm_min += usrMin;
-	tm1.tm_sec += (usrSec);
-
-	time1 = mktime(&tm1);
+	tm1.tm_sec += ((usrSec));
 
 	Serial.printf("%.24s \n", asctime(&tm1));										// %A = full weekday name, %B full month name,  %d = day of the month, %Y = year with century, %H = hour (24hr),  %M = minute 900-59), %S= second (00-61)
+}
+void timeOffsetSinceBoot()
+{
+	secsLastBootOffset = (millis() / 1000);
+	Serial.printf("Secs since boot: %d\n", secsLastBootOffset);
 
+	offMin = ((secsLastBootOffset / 60) + 1);
+	offSec = (60 - (secsLastBootOffset % 60));
+
+	Serial.println(offMin);
+	Serial.println(offSec);
+
+	usrMin = (usrMin - offMin);
+	usrSec = offSec;
+
+	Serial.println(usrMin);
+	Serial.println(usrSec);
 }
 
 void wateringWakeUp()
 {
-	//tm1.tm_mon += (usrMon - 1);
-	//tm1.tm_hour += (usrHour);
-	//tm1.tm_min += usrMin;
+	Serial.print("tm1.tm_hour time is: ");
+	Serial.println(tm1.tm_hour);
+
+	Serial.print("usr hour: ");
+	Serial.println(usrHour);
 }
 
 void solarWakeUp()
 {
-
 	int q;
 	q = tm1.tm_min;
 	Serial.println(q);
