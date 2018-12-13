@@ -463,7 +463,7 @@ void executeSquare(int mysquare) {
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	delay(100);
-	makeRain(targetFlow);
+	//makeRain(targetFlow);
 
 }
 
