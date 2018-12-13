@@ -188,8 +188,8 @@ void getSerialData()
 			squareIDInt = charToInt(squareID, 3);
 
 			executeSquare(getSquareID(&singleSquareData[0]));
-			//delay(2000);
-			//valveGoHome();
+			delay(2000);
+			valveGoHome();
 			break;
 		case ignore: break;
 		case resend: break;

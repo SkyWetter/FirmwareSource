@@ -125,12 +125,12 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 
-	while (digitalRead(s) == 1 && stepcount <= limit)																// if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(4);
+		delay(5);
 		digitalWrite(x, LOW);
-		delay(4);
+		delay(5);
 		stepcount++;
 	}
 	Serial.print("current dome position");
@@ -185,6 +185,7 @@ void valveGoHome()
 	currentValvePosition = 0;
 	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
 	//SerialBT.println("valve go home");
+	//currentValvePosition = 0;
 }
 
 //Move valve to flow Function
@@ -223,7 +224,6 @@ void makeRain(float desiredFlow)
 	//Serial.println(desiredFreq);
 	//Serial.println(desiredFreq);
 
-
 	int fastTime;
 	int stepTime;
 
@@ -236,8 +236,9 @@ void makeRain(float desiredFlow)
 	stepTime = fastTime * 2;
 	////Serial.println("compensated speed is");
 	Serial.println(fastTime);
+	Serial.println(currentValvePosition);
 
-	while (desiredFreq >= freq+2 || desiredFreq <= freq - 2 && currentValvePosition != 100)
+	while (desiredFreq >= freq+2 && currentValvePosition <= 80 || desiredFreq <= freq - 2)
 	{
 		//Serial.println(freq);
 
@@ -273,7 +274,7 @@ void makeRain(float desiredFlow)
 
 			//printf("desiredFreq is %f \n", desiredFreq);
 //Serial.println(desiredFreq);
-//Serial.println(currentValvePosition);
+Serial.println(currentValvePosition);
 //Serial.println(fastTime);
 	//Serial.println(stepTime);
 	}
@@ -285,7 +286,7 @@ void makeRain(float desiredFlow)
 	Serial.println("the desired frequency at end of makeRain was");
 	Serial.println(desiredFreq);
 
-	if (currentValvePosition == 100) 
+	if (currentValvePosition >= 80) 
 	{ 
 		delay(1000);
 		valveGoHome();
@@ -463,7 +464,7 @@ void executeSquare(int mysquare) {
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	delay(100);
-	//makeRain(targetFlow);
+	makeRain(targetFlow);
 
 }
 
