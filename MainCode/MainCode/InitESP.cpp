@@ -257,7 +257,7 @@ void codeForTask1(void * parameter)						//speecial code for task1
 
 void createSquareArray(int squaresPerRow)
 {
-	int squareID = 0;
+	int squareID = 624;
 	int turretColumn = (squaresPerRow - 1) / 2;
 	int turretRow = turretColumn;
 
@@ -277,7 +277,7 @@ void createSquareArray(int squaresPerRow)
 			squareArray[squareID][3] = convertAngleToStep(angleToSquare(column, row, turretColumn, turretRow));
 			//Serial.println(squareArray[squareID][3]);
 
-			squareID += 1;
+			squareID -= 1;
 			//printf("Square id: %d\n", squareID);
 		}
 	}
@@ -294,8 +294,8 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 	int x = sqCol - turCol;
 	int y = sqRow - turRow;
 	// one square is equal to 0.5 meters and our flow data is measured in meters so 2x one suare = 1 meter
-	x = x / 2;					
-	y = y / 2;
+	//x = x;					
+	//y = y;
 
 	//printf(" in DistanceToSquare column number is %i\n", sqCol);
 	//printf(" in DistanceToSquare turret column number is %i\n", turCol);
@@ -313,7 +313,7 @@ double distanceToSquare(int sqCol, int sqRow, int turCol, int turRow)
 	float squareDistance = sqrt(squareCoords);
 	//printf(" in DistanceToSquare square distance is%f\n", squareDistance);
 
-	return squareDistance;
+	return squareDistance/2;
 }
 
 // S U B   F U N C T I O N -- angleToSquare
