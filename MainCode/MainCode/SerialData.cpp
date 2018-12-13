@@ -471,12 +471,12 @@ void debugInputParse(char debugCommand)
 		extractBedData(bedsToSprayFile);
 		spiffsParse(testNum3);
 		extractBedData(bedsToSprayFile);
-		Serial.println("did i get here???");
+		Serial.println("did i get here??? im DONE SPRAYIN");
 	break;
 
 	case 'j':		//test2
 		spiffsParse(testNum1);
-		extractBedData(bedsToSprayFile);
+		//extractBedData(bedsToSprayFile);
 	break;
 
 	case 's':
