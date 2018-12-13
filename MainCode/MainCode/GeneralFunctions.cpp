@@ -34,14 +34,13 @@
 #define pulsePin 23 
 
 
-// M I S C   F U N C T I O N S
+
 
 // CHAR TO INT 
 /*
 * Takes a char array, and the given length of the array
 * and returns
 */
-
 int charToInt(char *thisChar, int thisCharLength)
 {
 	int intConversion = 0;
@@ -58,7 +57,6 @@ int charToInt(char *thisChar, int thisCharLength)
  *  takes an int, returns sign (-1 = negative, 1 = positive, 0 = neither)
  *
  */
-
 int getSign(int x)
 {
 	if (x > 0) { return 1; }
@@ -132,6 +130,14 @@ int getArrayLength(char charArray[],bool lengthIncludesNull)
 void clearArray(char array[], int arrayLength)
 {
 	for(int i = 0; i < arrayLength; i++)
+	{
+		array[i] = 0;
+	}
+}
+
+void clearIntArray(int array[], int arrayLength)
+{
+	for (int i = 0; i < arrayLength; i++)
 	{
 		array[i] = 0;
 	}

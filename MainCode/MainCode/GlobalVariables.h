@@ -42,8 +42,11 @@ extern RTC_DATA_ATTR int bootCount;
 extern RTC_DATA_ATTR struct timeval tv;
 extern RTC_DATA_ATTR time_t time1;									 // delcare time1 as a typedef time type
 extern RTC_DATA_ATTR struct tm tm1;
-extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear, secsLastBootOffset;
-extern RTC_DATA_ATTR int waterDay, waterHour1, waterHour2, waterMin;
+extern RTC_DATA_ATTR  int usrHour, usrMin, usrSec, usrDay, usrMon, usrYear;
+extern RTC_DATA_ATTR unsigned long secsLastBootOffset;
+extern RTC_DATA_ATTR int waterHourAM;
+extern RTC_DATA_ATTR int waterHourPM;
+extern RTC_DATA_ATTR bool amPmFlag;
 
 // state machine
 extern bool programStateNotDoneFlag;
@@ -53,6 +56,7 @@ extern bool wakeUpTimerStateNotDoneFlag;
 
 extern bool firstSingleSquare;  //Used to allow any packet # for first square
 extern bool repeatPacketReceived;  //Flag if packet received was a duplicate
+extern bool incomingSerialBTFlag;
 
 extern char squarePacketNumberChar[4];
 extern char lastSquarePacketNumberChar[4];
@@ -68,7 +72,7 @@ extern char singleSquare_lastPacket[11];
 extern char singleSquareData[11];
 
 /* Program State enums */
-enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden };   // State during getSerial fxn
+enum serialStates { doNothing, singleSquare, fullBed, sendData, debugCommand, parseGarden, timeChange };   // State during getSerial fxn
 extern enum serialStates serialState;
 
 enum packetState { ok, ignore, resend };										// Used during serial error handling checks
