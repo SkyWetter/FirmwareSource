@@ -133,8 +133,8 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 		delay(5);
 		stepcount++;
 	}
-	Serial.print("current dome position");
-	Serial.println(currentDomePosition);
+	//Serial.print("current dome position");
+	//Serial.println(currentDomePosition);
 	Serial.print("current valve position");
 	Serial.println(currentValvePosition);
 	Serial.print("step count back to home was");
@@ -274,7 +274,7 @@ void makeRain(float desiredFlow)
 
 			//printf("desiredFreq is %f \n", desiredFreq);
 //Serial.println(desiredFreq);
-Serial.println(currentValvePosition);
+//Serial.println(currentValvePosition);
 //Serial.println(fastTime);
 	//Serial.println(stepTime);
 	}
@@ -345,6 +345,17 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					stepsTaken++;
 				}
 
+				for (int i; i < 2; i++) {	//extra steps home incase of early hall
+					digitalWrite(stepperDomeStpPin, HIGH);
+					delay(5);
+
+					digitalWrite(stepperDomeStpPin, LOW);
+					delay(5);
+
+					stepsTaken++;
+
+				}
+
 				if (stepsTaken >= 500) {
 					Serial.print("Help! I'm stuck and I cant get up");
 
@@ -363,7 +374,8 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				digitalWrite(stepperDomeStpPin, LOW);
 				delay(10);
 
-				delay(100);
+				currentDomePosition = 0;
+				
 				Serial.println("taking corrective steps home\n");
 			}
 
@@ -430,15 +442,15 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					//Serial.println("decelerating");
 				}
 
-				if (currentDomeDirection == 0) {
-					if (digitalRead(hallSensorDome) == 0) {
-						currentDomePosition = targetPosition;
-						digitalWrite(stepperDomeSlpPin, LOW);
-					}
-				}
+				//if (currentDomeDirection == 0) {
+					//if (digitalRead(hallSensorDome) == 0) {
+						//currentDomePosition = targetPosition;
+						//digitalWrite(stepperDomeSlpPin, LOW);
+					//}
+				//}
 
 			}
-			if (digitalRead(hallSensorDome) == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
+			if (digitalRead(hallSensorDome) == 0 && currentDomePosition == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
 		printf("and took %i steps", stepsTaken);
 		}
 	}
