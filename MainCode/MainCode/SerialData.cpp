@@ -31,6 +31,7 @@
 #include "stateMachine.h"
 #include "StepperFunctions.h"
 
+
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
@@ -62,11 +63,15 @@
 #define rgbLedBlue 26
 #define rgbLedRed 27
 
+
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
 
+
+
 //test using serial port for commented strings and array for file to open
+
 char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
 char testNum2[] = "0002"; //#0002@0022!2,999!3,123
 char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
@@ -77,16 +82,15 @@ void getSerialData()
 	{
 		char incomingChar;
 		
+
 		if (SerialBT.available())
 		{
 			incomingChar = SerialBT.read();  //Read a single byte
-			incomingSerialBTFlag = 1;		 // a 1 means the incoming serial data is from BT. a 0 is for serial port 
 			
 		}
 		else if (Serial.available())
 		{
 			incomingChar = Serial.read();
-			incomingSerialBTFlag = 0;
 		}
 		
 		//Serial.println("incoming leading char is");
@@ -100,7 +104,7 @@ void getSerialData()
 		break;
 
 		case '%':
-			serialState = singleSquare;  
+			serialState = singleSquare;  //Puts serialState in singleSquare mode 
 
 			//Grabs a 10-byte single square packet from the serial buffer
 			for (int i = 0; i < 9; i++)  //
@@ -122,18 +126,30 @@ void getSerialData()
 		break;
 
 		case '&':
-			//Serial.println("debug command"); SerialBT.println("debug command");
+			//Serial.println("debug command"); 
+			//("debug command");
 			serialState = debugCommand;
 		break;
 
 		case '#': 
 			//header #0001@0028!data
-			serialState = parseGarden;
+			if (input2DArrayPosition < 14)
+			{
+				serialState = parseGarden;
+			}
 		break;
 
 		case '$':
+			//if (bootCount == 0)
+			//{
+				// get time
+				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
+				// maybe confirm that it has a good time???
+			//}
+			//++bootCount;
+			//Serial.println("time is money");SerialBT.println("time is money");	
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
-			serialState = timeChange;
+			serialState = doNothing;
 		break;
 		}
 		
@@ -142,87 +158,78 @@ void getSerialData()
 	// Check the serial state 
 	switch (serialState)
 	{
-		case doNothing: 
-		break;
+	case doNothing: 
+	break;
 
-		case singleSquare:											 //If in singleSquare mode get from a '%' in incomingChar switch cse
-			checkPacketNumber(&singleSquareData[0]);				 //Check the packet number
+	case singleSquare:											 //If in singleSquare mode
+		checkPacketNumber(&singleSquareData[0]);				 //Check the packet number
 
-			// Check Packet State
-			switch (squarePacketState)
-			{
-				case ok:		//if packet is ok, check the checksum
-					checkChecksum(&singleSquareData[0]); 
-				break;  
-				case ignore:    //do nothing if packet number is old or same as previous successful rx
-				break;                           
-				case resend:	//Request a missed packet
-					Serial.println("Asking for resend packet in square PacketState");  
-					//SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
-				break;
-			}
+		// Check Packet State
+		switch (squarePacketState)
+		{
+		case ok: checkChecksum(&singleSquareData[0]); break;  //if packet is ok, check the checksum
+		case ignore: break;                   //do nothing if packet number is old or same as previous successful rx        
+		case resend:
 
-			//Check checksum state
-			switch (squareChecksumState)
-			{
-				case ok: 
-					getSquareID(&singleSquareData[0]); //If checksum is fine, move turret
-					message = false;;
-					serialState = doNothing;
-					squareChecksumState = ignore;
-					squarePacketState = ignore;
-					squareIDInt = charToInt(squareID, 3);
+			Serial.println("Asking for resend packet in square PacketState");
+			
+			//SerialBT.write(lastSquarePacketNumber == 999 ? 0 : lastSquarePacketNumber + 1);
+			
+			break; //Request a missed packet
+		}
 
-					executeSquare(getSquareID(&singleSquareData[0]));
-					delay(1000);
-					valveGoHome();
-				break;
-				case ignore: 
-				break;
-				case resend: 
-				break;
-				//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
-			}
-		break;
-
-		case debugCommand:
-			//Serial.print("here in debug command");
-			debugInputParse(getDebugChar());
+		//Check checksum state
+		switch (squareChecksumState)
+		{
+		case ok: getSquareID(&singleSquareData[0]); //If checksum is fine, move turret
+			message = false;;
 			serialState = doNothing;
-		break;
+			squareChecksumState = ignore;
+			squarePacketState = ignore;
+			squareIDInt = charToInt(squareID, 3);
 
-		case parseGarden: // sent here if initial char was a '#'
-			if (input2DArrayPosition < 14)	
-			{
-				parseInput();
-			}
-			serialState = doNothing;
-		break;
-
-		case timeChange: // sent here if initial char was a '$'
-			timeShift();
-			serialState = doNothing;
+			executeSquare(getSquareID(&singleSquareData[0]));
+			delay(2000);
+			valveGoHome();
 			break;
+		case ignore: break;
+		case resend: break;
+			//SerialBT.write(lastSquarePacketNumber); //If checksum is incorrect, request the same packet from the app
+		}
+	break;
 
-		default:;
+	case debugCommand:
+		//Serial.print("here in debug command");
+		debugInputParse(getDebugChar());
+	break;
+
+	case parseGarden:
+
+		if (input2DArrayPosition < 14)
+		{
+			parseInput();
+		}
+		break;
+
+	default:;
 	}
 }
 
 
-// S U B F U N C  T I O N S -- getSerialData //#0001@0028!1,001!2,002!3,003
-//#0003@0040 !3,000!2,765!3,604!2,111!1,001
-//0123456789 0123456
+// S U B F U N C  T I O N S -- getSerialData
 void parseInput()
 {
+	//Serial.println("test");
+
+
 	int j = 11;
 	int length;
 	int packageNum;
 	char headerArray[11] = { '#' };
 	char lengthArray[4];
 	char packageNumArray[4];
-	char tempIncomingArray[5000];
 
-
+	//pull header array
 	for (int i = 1; i < 11; i++)
 	{
 		if (Serial.available())
@@ -238,17 +245,17 @@ void parseInput()
 	//pull out string length
 	for (int i = 0; i < 4; i++)
 	{
-		packageNumArray[i] = headerArray[(i + 1)];	// take out pack number of incoming String
-		lengthArray[i] = headerArray[(i + 6)];		// take out length of incoming String
+		lengthArray[i] = headerArray[(i + 6)];
+		packageNumArray[i] = headerArray[(i + 1)];
 	}
 
-	length = charToInt(lengthArray, 4);				// compute length from char string to int
-	packageNum = charToInt(packageNumArray, 4);		// compute pack # from char string to int
+	length = charToInt(lengthArray, 4);
+	packageNum = charToInt(packageNumArray, 4);
+
 	Serial.printf("packageNumArray = %i \n", packageNum);
-	input2DArrayPosition = (packageNum - 1);		// andy code could be fucked?!?!/
 
 	//create new array to match
-	input2DArray[input2DArrayPosition] = new char[length];	// is creating the second dimension of the array?!?!?
+	input2DArray[input2DArrayPosition] = new char[length];
 
 	//replace header chars
 	for (int i = 0; i < 11; i++)
@@ -262,6 +269,7 @@ void parseInput()
 		input2DArray[input2DArrayPosition][j] = Serial.read();
 		j++;
 	}
+
 	//pull rest of data - Serial.BT
 	while(SerialBT.available())
 	{
@@ -274,13 +282,19 @@ void parseInput()
 	{
 		Serial.print(input2DArray[input2DArrayPosition][i]);
 	}
+
 	Serial.println();
 
-	// save parsed input to flash memeory
+	//
 	spiffsSave(input2DArray[input2DArrayPosition], length, packageNumArray);
-	Serial.printf("\nLength was %i, J count is %i \n", length, j);
 
-	//input2DArrayPosition++;
+
+	Serial.println();
+	Serial.printf("Length was %i, J count is %i \n", length, j);
+	Serial.println("Nice");
+
+	input2DArrayPosition++;
+
 	Serial.printf("arrayPosition = %i \n", input2DArrayPosition);
 }
 
@@ -299,7 +313,10 @@ int getSquareID(char singleSquaredata[])
 
 }
 
+//CHECK PACKET NUMBER
+
 //Check packet number, changes packetState
+
 void checkPacketNumber(char singleSquareData[])
 {
 
@@ -309,6 +326,7 @@ void checkPacketNumber(char singleSquareData[])
 		if (singleSquareData[i] == '@')
 		{
 			Serial.println("received @ in check packet number");
+	
 			return;
 		}
 	}
@@ -325,12 +343,15 @@ void checkPacketNumber(char singleSquareData[])
 	//Serial.println("last packet number received is");
 	//Serial.println(lastSquarePacketNumber);
 
+
+
 	//If this is the first square rx'd, assume its the right packet number, or an inc of last packet (including rollover)
 	
-	//if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
 	
+	//if (squarePacketNumberInt == lastSquarePacketNumber + 1 || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
 	//the line below is a temporary fix for what happens when a packet comes out of sequence
 	if (squarePacketNumberInt != lastSquarePacketNumber  || firstSingleSquare || (squarePacketNumberInt == 0 && lastSquarePacketNumber == 999))
+
 	{
 		//Set this packet to last packet number and set packetState
 		lastSquarePacketNumber = squarePacketNumberInt;
@@ -423,46 +444,48 @@ void debugInputParse(char debugCommand)
 
 	case '0':                             // send dome stepper to home posistion
 		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
-	break;
+		break;
 
 	case '1':                             // send vavle stepper to home posisiton
 		valveGoHome();
-	break;
+		break;
 
 	case 'a':
 		crazyDomeStepperFromDebugA();
-	break;
+		break;
 
 	case 'b':
 		stepperDomeDirCW();					// set dome stepper to CW ---> HIGH IS CLOSEWISE!!!
-	break;
+		break;
 
 	case 'c':
 		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
-	break;
+		break;
 
 	case 'd':
-		valveStepperOneStep();				//one step on valveStepper
-	break;
+		
+			
+			
+		break;
 
 	case 'e':
 		toggleStepperValveDir();
-	break;
+		break;
 
 	case 'f':
 		displaySolarCurrent();
 		displaySolarVoltage();
-	break;
+		break;
 
 	case 'g':
 		solarPowerTracker();
-	break;
+		break;
 
 	case 'h':
 		executeSquare(100);
 		delay(1000);
 		valveGoHome();
-	break;
+		break;
 
 	case 'i':		//test1
 		spiffsParse(testNum1);
@@ -471,32 +494,42 @@ void debugInputParse(char debugCommand)
 		extractBedData(bedsToSprayFile);
 		spiffsParse(testNum3);
 		extractBedData(bedsToSprayFile);
-		Serial.println("did i get here???");
-	break;
+
+		break;
 
 	case 'j':		//test2
-		spiffsParse(testNum1);
+		spiffsParse(testNum2);
 		extractBedData(bedsToSprayFile);
-	break;
+
+		break;
 
 	case 's':
-		deepSleep();					
-	break;
+		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
+		deepSleep();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
+		break;
 
 	case 't':
-		printLocalTime();					
-	break;
+		printLocalTime();					// display time
+		break;
 
+	case 'z':
+		programStateNotDoneFlag = 0;				// display time
+		break;
 	case 'o':
-		valveStepperOneStep();
-	break;
+
+		digitalWrite(stepperValveSlpPin, HIGH);
+		digitalWrite(stepperValveDirPin, LOW);
+
+		digitalWrite(stepperValveStpPin, HIGH);
+		delay(4);
+		//delay(100);
+		digitalWrite(stepperValveStpPin, LOW);
+		delay(4);
+		break;
 
 	case 'x':
 		valveGoHome();
-	break;
-
-	case 'z':
-		programStateNotDoneFlag = 0;				// set this FLag false to leave program State
-	break;
+		break;
 	}
 }
+

@@ -16,6 +16,7 @@
 #include "driver/gpio.h"
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
+
 //#include <freertos/ringbuf.h>
 // custom includes
 #include  "deepSleep.h"
@@ -30,7 +31,19 @@
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
 #include "StepperFunctions.h"
+#include <Adafruit_NeoPixel.h>
 
+#define stepperDomeDirPin 19	//put here for presentaiton
+#define stepperDomeStpPin 18
+#define stepperDomeSlpPin 2
+#define hallSensorDome 16
+#define stepperDomeCrntPin 14
+
+//destroy after presntation
+uint32_t Wheel(byte WheelPos);
+void rainbow(uint8_t wait);
+void colorWipe(uint32_t c, uint8_t wait);	//destroy after presentation
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(3, 27, NEO_GRB + NEO_KHZ800);
 
 // power on rainbow
 // init..
@@ -40,23 +53,88 @@
 // case 2 do current sense
 // ext. ISR if GPIO13 wakeUpButton = HIGH --> enable BT for program mode
 
+
+
 void programState()
 {
 	//bool programStateNotDoneFlag = 1;
 	
 	initSerialBT();
 
-	while (programStateNotDoneFlag)
-	{
-		if (freq != oldfreq)
-		{
-			Serial.println(freq);
-			SerialBT.println(freq);
-			oldfreq = freq;
+	strip.begin();
+	strip.show();
+
+
+	for (int x = 0; x <= 0; x++) {
+
+		digitalWrite(stepperDomeSlpPin, HIGH);
+
+
+		digitalWrite(stepperDomeDirPin, HIGH);
+		for (int i = 0; i < 50; i++) {
+
+			colorWipe(strip.Color(0, 0, i), 5); // blue
+			digitalWrite(stepperDomeStpPin, HIGH);
+			delay(1);
+
+			digitalWrite(stepperDomeStpPin, LOW);
+			delay(1);
+
 		}
-		//Serial.println("main code program case");
-		getSerialData();
+		rainbow(5);
+
+		digitalWrite(stepperDomeDirPin, LOW);
+
+		for (int i = 0; i < 50; i++) {
+			colorWipe(strip.Color(0, i, 0), 5); // green
+			digitalWrite(stepperDomeStpPin, HIGH);
+			delay(1);
+
+			digitalWrite(stepperDomeStpPin, LOW);
+			delay(1);
+
+		}
+		rainbow(5);
+
 	}
+	//for (int x = 0; x < 10; x++)
+	//{
+		rainbow(10);
+	//}
+
+		int rainbowcount = 0;
+		int colour = 0;
+
+		while (programStateNotDoneFlag)
+		{
+
+			if (freq != oldfreq)
+			{
+				Serial.println(freq);
+				//SerialBT.println(freq);
+				oldfreq = freq;
+			}
+			//Serial.println("main code program case");
+			getSerialData();
+			rainbowcount++;
+			if (rainbowcount >= 10000) {
+
+				
+					for (int i = 0; i < strip.numPixels(); i++) {
+						strip.setPixelColor(i, Wheel((i + colour) & 255));
+					}
+					delay(1);
+
+					strip.show();
+					colour++;
+
+					if (colour >= 255) {
+						colour = 0;
+					}
+					rainbowcount = 0;
+			}
+		}
+	
 
 	//init shutdown from program state
 	ledBlue(0);
@@ -126,4 +204,39 @@ void timerState()
 			}
 		}
 	}
+}
+
+//destroy all below after presentation
+void colorWipe(uint32_t c, uint8_t wait) {
+	for (uint16_t i = 0; i < strip.numPixels(); i++) {
+		strip.setPixelColor(i, c);
+		strip.show();
+		delay(wait);
+	}
+}
+
+
+void rainbow(uint8_t wait) {
+	uint16_t i, j;
+
+	for (j = 0; j < 256; j++) {
+		for (i = 0; i < strip.numPixels(); i++) {
+			strip.setPixelColor(i, Wheel((i + j) & 255));
+		}
+		strip.show();
+		delay(wait);
+	}
+}
+
+uint32_t Wheel(byte WheelPos) {
+	WheelPos = 255 - WheelPos;
+	if (WheelPos < 85) {
+		return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+	}
+	if (WheelPos < 170) {
+		WheelPos -= 85;
+		return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+	}
+	WheelPos -= 170;
+	return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }

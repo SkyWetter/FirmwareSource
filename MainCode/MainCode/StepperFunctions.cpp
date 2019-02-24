@@ -125,16 +125,16 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 	//stepperDomeOneStepHalfPeriod(10);
 	//stepperDomeOneStepHalfPeriod(10);
 
-	while (digitalRead(s) == 1 && stepcount <= limit)																// if hallSensor is HIGH the stepper is NOT at HOME
+	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(4);
+		delay(5);
 		digitalWrite(x, LOW);
-		delay(4);
+		delay(5);
 		stepcount++;
 	}
-	Serial.print("current dome position");
-	Serial.println(currentDomePosition);
+	//Serial.print("current dome position");
+	//Serial.println(currentDomePosition);
 	Serial.print("current valve position");
 	Serial.println(currentValvePosition);
 	Serial.print("step count back to home was");
@@ -185,6 +185,7 @@ void valveGoHome()
 	currentValvePosition = 0;
 	digitalWrite(stepperValveSlpPin, LOW);	//turns the valve stepper off after completing a go home
 	//SerialBT.println("valve go home");
+	//currentValvePosition = 0;
 }
 
 //Move valve to flow Function
@@ -197,12 +198,12 @@ void moveValve(int targetPosition, int speed, int accel,int current)
 void makeRain(float desiredFlow)
 {
 	
-	valveGoHome();
+	//valveGoHome();
 
 	digitalWrite(stepperValveSlpPin, HIGH);
 	digitalWrite(stepperValveDirPin, LOW);
 
-	for(int i=0; i < 30; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
+	for(int i=0; i < 0; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
 	{
 		//Serial.println("taking extra steps");
 		digitalWrite(stepperValveStpPin, HIGH);
@@ -223,7 +224,6 @@ void makeRain(float desiredFlow)
 	//Serial.println(desiredFreq);
 	//Serial.println(desiredFreq);
 
-
 	int fastTime;
 	int stepTime;
 
@@ -236,10 +236,11 @@ void makeRain(float desiredFlow)
 	stepTime = fastTime * 2;
 	////Serial.println("compensated speed is");
 	Serial.println(fastTime);
+	Serial.println(currentValvePosition);
 
-	while (desiredFreq > freq && currentValvePosition != 100) 
+	while (desiredFreq >= freq+2 && currentValvePosition <= 80 || desiredFreq <= freq - 2)
 	{
-		Serial.println(freq);
+		//Serial.println(freq);
 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 
@@ -285,7 +286,7 @@ void makeRain(float desiredFlow)
 	Serial.println("the desired frequency at end of makeRain was");
 	Serial.println(desiredFreq);
 
-	if (currentValvePosition == 100) 
+	if (currentValvePosition >= 80) 
 	{ 
 		delay(1000);
 		valveGoHome();
@@ -322,15 +323,16 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			//Serial.println(currentDomePosition);
 			printf("move starting at %i", currentDomePosition);
 			
+			int stepsTaken = 0;
 
 			digitalWrite(stepperDomeSlpPin, HIGH);
 
 			//if statement below checks to see if the dome is supposed to home but isnt
-			if (currentDomePosition == 0 && digitalRead(hallSensorDome) == 1) {
+			if (currentDomePosition == 0 && digitalRead(hallSensorDome) == 1 ) {
 
 				digitalWrite(stepperDomeDirPin, 0);
 
-				while (digitalRead(hallSensorDome) == 1) {
+				while (digitalRead(hallSensorDome) == 1 && stepsTaken < 500) {
 
 					
 
@@ -339,6 +341,31 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 					digitalWrite(stepperDomeStpPin, LOW);
 					delay(5);
+
+					stepsTaken++;
+				}
+
+				for (int i; i < 2; i++) {	//extra steps home incase of early hall
+					digitalWrite(stepperDomeStpPin, HIGH);
+					delay(5);
+
+					digitalWrite(stepperDomeStpPin, LOW);
+					delay(5);
+
+					stepsTaken++;
+
+				}
+
+				if (stepsTaken >= 500) {
+					Serial.print("Help! I'm stuck and I cant get up");
+
+					digitalWrite(stepperDomeDirPin, !digitalRead(stepperDomeDirPin));		//change direction and try other way		
+					for (int i = 0; i < (500 / 5); i++) {
+						digitalWrite(stepperDomeStpPin, HIGH);
+						delay(4);
+						digitalWrite(stepperDomeStpPin, LOW);
+						delay(4);
+					}
 				}
 
 				digitalWrite(stepperDomeStpPin, HIGH);		//extra step to hit home
@@ -347,12 +374,13 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 				digitalWrite(stepperDomeStpPin, LOW);
 				delay(10);
 
-				delay(100);
+				currentDomePosition = 0;
+				
 				Serial.println("taking corrective steps home\n");
 			}
 
 
-			int stepsTaken = 0;
+			stepsTaken = 0;
 			int stepsToGo = targetPosition - currentDomePosition;   //determines the number of steps from current position to target position
 			if (getSign(stepsToGo) == 1) { currentDomeDirection = 1; }
 			else { currentDomeDirection = 0; }
@@ -377,7 +405,7 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 			
 			
-			while (currentDomePosition != targetPosition) {
+			while (currentDomePosition != targetPosition && stepsTaken < 500) {
 
 
 				//Serial.println("entered while loop");
@@ -414,15 +442,15 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					//Serial.println("decelerating");
 				}
 
-				if (currentDomeDirection == 0) {
-					if (digitalRead(hallSensorDome) == 0) {
-						currentDomePosition = targetPosition;
-						digitalWrite(stepperDomeSlpPin, LOW);
-					}
-				}
+				//if (currentDomeDirection == 0) {
+					//if (digitalRead(hallSensorDome) == 0) {
+						//currentDomePosition = targetPosition;
+						//digitalWrite(stepperDomeSlpPin, LOW);
+					//}
+				//}
 
 			}
-			if (digitalRead(hallSensorDome) == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
+			if (digitalRead(hallSensorDome) == 0 && currentDomePosition == 0) { digitalWrite(stepperDomeSlpPin, LOW); }	//flush the toilet AFTER YOUVE HAD A SHET
 		printf("and took %i steps", stepsTaken);
 		}
 	}
@@ -433,18 +461,23 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 
 }
 
-void executeSquare(int mysquare) 
-{
+void executeSquare(int mysquare) {
+
+
+
 	int steps2go = squareArray[mysquare][3];
 
 	float targetFlow = squareArray[mysquare][2];
 
-	Serial.printf("Target flow frequency is: %f\n", targetFlow);
-	//Serial.println(targetFlow);
+
+	Serial.println("Target flow frequency is");
+	Serial.println(targetFlow);
+
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
-	//delay(100);
-	//makeRain(targetFlow);
+	delay(100);
+	makeRain(targetFlow);
+
 }
 
 
