@@ -63,7 +63,9 @@ void programState()
 
 	strip.begin();
 	strip.show();
-	for (int x = 0; x <= 1; x++) {
+
+
+	for (int x = 0; x <= 0; x++) {
 
 		digitalWrite(stepperDomeSlpPin, HIGH);
 
@@ -97,22 +99,42 @@ void programState()
 	}
 	//for (int x = 0; x < 10; x++)
 	//{
-	//	rainbow(5);
+		rainbow(10);
 	//}
 
+		int rainbowcount = 0;
+		int colour = 0;
 
-	while (programStateNotDoneFlag)
-	{
-		if (freq != oldfreq)
+		while (programStateNotDoneFlag)
 		{
-			Serial.println(freq);
-			//SerialBT.println(freq);
-			oldfreq = freq;
+
+			if (freq != oldfreq)
+			{
+				Serial.println(freq);
+				//SerialBT.println(freq);
+				oldfreq = freq;
+			}
+			//Serial.println("main code program case");
+			getSerialData();
+			rainbowcount++;
+			if (rainbowcount >= 10000) {
+
+				
+					for (int i = 0; i < strip.numPixels(); i++) {
+						strip.setPixelColor(i, Wheel((i + colour) & 255));
+					}
+					delay(1);
+
+					strip.show();
+					colour++;
+
+					if (colour >= 255) {
+						colour = 0;
+					}
+					rainbowcount = 0;
+			}
 		}
-		//Serial.println("main code program case");
-		getSerialData();
-		
-	}
+	
 
 	//init shutdown from program state
 	ledBlue(0);
