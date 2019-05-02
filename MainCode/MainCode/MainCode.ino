@@ -1,7 +1,7 @@
 // **********   S * K * Y  |)  W * E * T *
 //  -=-=-=-=-=-=-=-=-=-=-=-=-
 // turret control firmware for esp32 dev kit C
-//  november 22, 2018
+//  may 1, 2019
 
 
 // *********   P R E P R O C E S S O R S
@@ -76,9 +76,6 @@
 
 void setup()
 {	
-
-
-
 	initRainBow();
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	

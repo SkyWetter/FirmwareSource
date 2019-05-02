@@ -73,7 +73,7 @@
 //test using serial port for commented strings and array for file to open
 
 char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
-char testNum2[] = "0002"; //#0002@0022!2,999!3,123
+char testNum2[] = "0002"; //#0002@0022!2,333!3,123
 char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
 void getSerialData()
@@ -121,6 +121,7 @@ void getSerialData()
 				{
 					singleSquareData[i+1] = incomingChar;
 				}
+
 				//ignore
 			}
 		break;

@@ -122,10 +122,8 @@ void programState()
 
 void timerState()
 {
-
 	while (wakeUpTimerStateNotDoneFlag)
 	{
-
 		switch (sysStateTimerWakeUp)
 		{
 
