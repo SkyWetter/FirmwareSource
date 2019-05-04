@@ -70,6 +70,7 @@ byte stepperCase;
 // steppers
 int currentDomePosition = 0;
 int currentDomeDirection = 0;
+int stepAmount = 1;
 
 int currentValvePosition = 0;
 int currentValveDirection = 0;
