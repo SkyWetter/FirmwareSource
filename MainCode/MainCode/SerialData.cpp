@@ -78,6 +78,7 @@ char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
 void getSerialData()
 {
+	
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
 		char incomingChar;

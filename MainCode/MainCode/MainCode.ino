@@ -5,12 +5,21 @@
 
 
 // *********   P R E P R O C E S S O R S
+
+// WIFI TEST LIBRARIES
+
+
+#include <WiFi.h>
+
+#include "DataLogging.h"
+
 // standard library includes
 #include <Adafruit_NeoPixel.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <soc\rtc.h>
+
 // esp32 periph includes
 #include <Stepper.h>
 #include <BluetoothSerial.h> 
@@ -72,14 +81,35 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-
+const char* ssid = "chicken_house";
+const char* password ="quadra3604";
 
 void setup()
 {	
-
-
-
 	initRainBow();
+
+	WiFi.begin(ssid, password);
+
+	while (WiFi.status() != WL_CONNECTED)
+	{
+		delay(500);
+		Serial.print(".");
+	}
+
+	printf("... Wifi Connected!\n");
+	printf("IP Address is: %d\n", WiFi.localIP());
+	Serial.println(WiFi.localIP());
+
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		float d[2] = { 15.0,11.92 };
+		int f[2] = { 0,1 };
+		logData(d, f, 2);
+
+	}
+
+	delay(5000);
+
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	
 	Serial.println("i fell out of state machine and now going to sleep");
@@ -88,7 +118,7 @@ void setup()
 
 void loop()
 {
-	Serial.println("wont ever be here??? You should not be here");
+	
 }
 
 void shootSingleSquare()
