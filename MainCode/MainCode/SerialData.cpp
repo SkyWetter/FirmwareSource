@@ -73,11 +73,12 @@
 //test using serial port for commented strings and array for file to open
 
 char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
-char testNum2[] = "0002"; //#0002@0022!2,999!3,123
+char testNum2[] = "0002"; //#0002@0022!2,333!3,123
 char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
 void getSerialData()
 {
+	
 	if (SerialBT.available() || Serial.available())     //If there is some data waiting in the buffer
 	{
 		char incomingChar;
@@ -121,6 +122,7 @@ void getSerialData()
 				{
 					singleSquareData[i+1] = incomingChar;
 				}
+
 				//ignore
 			}
 		break;
@@ -450,6 +452,25 @@ void debugInputParse(char debugCommand)
 		valveGoHome();
 		break;
 
+	case '2':
+		moveToPosition(stepperDomeStpPin,(currentDomePosition - stepAmount),0,0,0);
+
+	case '3': 
+		moveToPosition(stepperDomeStpPin, (currentDomePosition + stepAmount), 0, 0, 0);
+
+	case '=':
+		stepAmount += 1;
+		if (stepAmount > 15)
+		{
+			stepAmount = 15;
+		}
+
+	case '-':
+		stepAmount -= 1;
+		if (stepAmount < 1)
+		{
+			stepAmount = 1;
+		}
 	case 'a':
 		crazyDomeStepperFromDebugA();
 		break;

@@ -111,6 +111,11 @@
 #define solarPanelVoltage A7
 
 
+//TESTER HARDCODE VARIABLES
+
+int curDomePos = 0;
+
+
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
 void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL
 {
@@ -190,10 +195,10 @@ void valveGoHome()
 
 //Move valve to flow Function
 
-void moveValve(int targetPosition, int speed, int accel,int current) 
-{
 
-}
+// Make Rain -- (float)Flow -> 
+//
+// Takes a desired flow level
 
 void makeRain(float desiredFlow)
 {
@@ -306,13 +311,20 @@ void moveDome(int targetPosition)
 	targetPosition -= currentDomePosition;   //determines the number of steps from current position to target position
 	setDomeDirection(getSign(targetPosition)); //Sets dome direction CW or CCW
 
+}
 
+
+
+void moveDome(int dir, int steps)
+{
+		
 }
 
 //general move a gat dang shtepper
 void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, int current)
 {
 	digitalWrite(rgbLedGreen, HIGH);
+
 	if (396 > targetPosition) {
 		switch (stepperpin)
 		{
@@ -407,27 +419,16 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 			
 			while (currentDomePosition != targetPosition && stepsTaken < 500) {
 
-
-				//Serial.println("entered while loop");
-				//Serial.println(targetPosition);
-				//Serial.print("current dome position is");
-				//Serial.println(currentDomePosition);
-				//Serial.println(accel);
-				//Serial.println(fastTime);
-			//	Serial.println(stepTime);
-
 				digitalWrite(stepperDomeStpPin, HIGH);
 				delayMicroseconds(stepTime);
-				//delay(100);
 				digitalWrite(stepperDomeStpPin, LOW);
 				delayMicroseconds(stepTime);
-				//delay(100);
 
 				if (currentDomeDirection == 1) { currentDomePosition += 1; stepsTaken += 1; }
 				else { currentDomePosition -= 1; stepsTaken += 1; }
 
 				if (stepTime != fastTime && stepsToGo - stepsTaken >= decelUnit) {
-					//Serial.println("accelerating");
+
 					stepTime -= accel;
 					if (stepTime < fastTime) {
 						stepTime = fastTime;
@@ -435,11 +436,9 @@ void moveToPosition(int stepperpin, int targetPosition, int speed, int accel, in
 					}
 					decelUnit++;
 				}
-				//Serial.println(decelUnit);
 
 				if (stepsToGo - stepsTaken <= decelUnit) {
 					stepTime += accel;
-					//Serial.println("decelerating");
 				}
 
 				//if (currentDomeDirection == 0) {
