@@ -65,7 +65,7 @@ void programState()
 	strip.show();
 
 
-	for (int x = 0; x <= 0; x++) {
+	for (int x = 0; x <= 0; x++) {	// this is the little turn on dance
 
 		digitalWrite(stepperDomeSlpPin, HIGH);
 
@@ -96,14 +96,17 @@ void programState()
 		}
 		rainbow(5);
 
+		strip.clear();
+		strip.show();
+	
+
 	}
 	//for (int x = 0; x < 10; x++)
 	//{
-		rainbow(10);
+
+
 	//}
 
-		int rainbowcount = 0;
-		int colour = 0;
 
 		while (programStateNotDoneFlag)
 		{
@@ -116,28 +119,12 @@ void programState()
 			}
 			//Serial.println("main code program case");
 			getSerialData();
-			rainbowcount++;
-			if (rainbowcount >= 10000) {
 
-				
-					for (int i = 0; i < strip.numPixels(); i++) {
-						strip.setPixelColor(i, Wheel((i + colour) & 255));
-					}
-					delay(1);
-
-					strip.show();
-					colour++;
-
-					if (colour >= 255) {
-						colour = 0;
-					}
-					rainbowcount = 0;
-			}
 		}
 	
 
 	//init shutdown from program state
-	ledBlue(0);
+
 	SerialBT.end();
 	deepSleep();
 }

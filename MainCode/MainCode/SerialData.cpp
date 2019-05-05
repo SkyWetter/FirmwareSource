@@ -142,14 +142,14 @@ void getSerialData()
 		break;
 
 		case '$':
-			//if (bootCount == 0)
-			//{
+			if (bootCount == 0)
+			{
 				// get time
 				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 				// maybe confirm that it has a good time???
-			//}
-			//++bootCount;
-			//Serial.println("time is money");SerialBT.println("time is money");	
+			}
+			++bootCount;
+			Serial.println("time is money");SerialBT.println("time is money");	
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			serialState = doNothing;
 		break;
@@ -452,6 +452,25 @@ void debugInputParse(char debugCommand)
 		valveGoHome();
 		break;
 
+	case '2':
+		moveToPosition(stepperDomeStpPin,(currentDomePosition - stepAmount),0,0,0);
+
+	case '3': 
+		moveToPosition(stepperDomeStpPin, (currentDomePosition + stepAmount), 0, 0, 0);
+
+	case '=':
+		stepAmount += 1;
+		if (stepAmount > 15)
+		{
+			stepAmount = 15;
+		}
+
+	case '-':
+		stepAmount -= 1;
+		if (stepAmount < 1)
+		{
+			stepAmount = 1;
+		}
 	case 'a':
 		crazyDomeStepperFromDebugA();
 		break;

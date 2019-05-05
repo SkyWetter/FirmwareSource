@@ -19,6 +19,7 @@ extern byte stepperCase;
 // steppers
 extern int currentDomePosition;
 extern int currentDomeDirection;
+extern int stepAmount;
 
 extern int currentValvePosition;
 extern int currentValveDirection;
