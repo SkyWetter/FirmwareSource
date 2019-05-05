@@ -224,7 +224,7 @@ void spiffsRead(char fileNum[])
 	file.close();
 }
 
-/*
+
 //add additional arrays to SPIFFS - not used currently
 void spiffsAppend(char array[], int arraySize)
 {
@@ -259,6 +259,74 @@ void spiffsAppend(char array[], int arraySize)
 	}
 
 	file.close();
+}
 
-	//return success;
-}*/
+
+//pass in flow nad position variables with button press for each position 
+void spiffsFlowPos(float flow, int position)
+{
+	String data;
+
+	data += String(flow) + "," + String(position) + "#";
+
+	if (flowPosCreated == false)
+	{
+		File file = SPIFFS.open("/flowPos.txt", FILE_WRITE);
+
+		if (!file)
+		{
+			Serial.println("There was an error opening flowPos for writing");
+			return;
+		}
+		else
+		{
+			flowPosCreated = true;
+		}
+
+		file.print(data);
+
+		file.close();
+	}
+	else
+	{
+		File file = SPIFFS.open("/flowPos.txt", FILE_APPEND);
+
+		if (!file)
+		{
+			Serial.println("There was an error opening flowPos for appending");
+			return;
+		}
+
+		file.print(data);
+
+		file.close();
+	}
+
+}
+
+//populates GlobalVariables sprayFlow & sprayPos for use with manual spray sequence for Phils backyard
+void spiffsFlowPosRead()
+{
+	File file = SPIFFS.open("/flowPos.txt");
+
+	int i = 0;
+
+	if (!file)
+	{
+		Serial.println("There was an error opening flowPos for reading");
+		return;
+	}
+
+	while (file.available())
+	{
+		String flow = file.readStringUntil(',');;
+		String pos = file.readStringUntil('#');;
+
+		sprayFlow[i] = flow.toFloat();
+		sprayPos[i] = pos.toInt();
+
+		Serial.printf("Array %i flow: %.2f position: %i \n", i, sprayFlow[i], sprayPos[i]);
+
+		i++;
+	}
+}

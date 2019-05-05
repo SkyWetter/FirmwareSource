@@ -6,3 +6,5 @@ void spiffsAppend(char array[], int arraySize);
 void spiffsRead(char fileNum[]);
 void spiffsParse(char header[]);
 void extractBedData(char array[]);
+void spiffsFlowPos(float flow, int position);
+void spiffsFlowPosRead();
