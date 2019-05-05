@@ -243,7 +243,7 @@ void makeRain(float desiredFlow)
 	Serial.println(fastTime);
 	Serial.println(currentValvePosition);
 
-	while (desiredFreq >= freq+2 && currentValvePosition <= 80 || desiredFreq <= freq - 2)
+	while (desiredFreq >= freq+1 && currentValvePosition <= 80 || desiredFreq <= freq - 1)
 	{
 		//Serial.println(freq);
 
@@ -466,16 +466,16 @@ void executeSquare(int mysquare) {
 
 	int steps2go = squareArray[mysquare][3];
 
-	float targetFlow = squareArray[mysquare][2];
+	float targetDist = squareArray[mysquare][2];
 
 
 	Serial.println("Target flow frequency is");
-	Serial.println(targetFlow);
+	Serial.println(targetDist);
 
 
 	moveToPosition(stepperDomeStpPin,squareArray[mysquare][3],0,0,0);
 	delay(100);
-	makeRain(targetFlow);
+	makeRain(targetDist);
 
 }
 

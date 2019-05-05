@@ -31,7 +31,7 @@
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
 #include "StepperFunctions.h"
-#include <Adafruit_NeoPixel.h>
+
 
 #define stepperDomeDirPin 19	//put here for presentaiton
 #define stepperDomeStpPin 18
@@ -40,10 +40,7 @@
 #define stepperDomeCrntPin 14
 
 //destroy after presntation
-uint32_t Wheel(byte WheelPos);
-void rainbow(uint8_t wait);
-void colorWipe(uint32_t c, uint8_t wait);	//destroy after presentation
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(3, 27, NEO_GRB + NEO_KHZ800);
+
 
 // power on rainbow
 // init..
@@ -61,54 +58,7 @@ void programState()
 	
 	initSerialBT();
 
-	strip.begin();
-	strip.show();
-
-
-	for (int x = 0; x <= 0; x++) {	// this is the little turn on dance
-
-		digitalWrite(stepperDomeSlpPin, HIGH);
-
-
-		digitalWrite(stepperDomeDirPin, HIGH);
-		for (int i = 0; i < 50; i++) {
-
-			colorWipe(strip.Color(0, 0, i), 5); // blue
-			digitalWrite(stepperDomeStpPin, HIGH);
-			delay(1);
-
-			digitalWrite(stepperDomeStpPin, LOW);
-			delay(1);
-
-		}
-		rainbow(5);
-
-		digitalWrite(stepperDomeDirPin, LOW);
-
-		for (int i = 0; i < 50; i++) {
-			colorWipe(strip.Color(0, i, 0), 5); // green
-			digitalWrite(stepperDomeStpPin, HIGH);
-			delay(1);
-
-			digitalWrite(stepperDomeStpPin, LOW);
-			delay(1);
-
-		}
-		rainbow(5);
-
-		strip.clear();
-		strip.show();
-	
-
-	}
-	//for (int x = 0; x < 10; x++)
-	//{
-
-
-	//}
-
-
-		while (programStateNotDoneFlag)
+		while (programStateNotDoneFlag) //this is currently where the code loops 
 		{
 
 			if (freq != oldfreq)
@@ -119,6 +69,8 @@ void programState()
 			}
 			//Serial.println("main code program case");
 			getSerialData();
+
+			
 
 		}
 	
@@ -152,8 +104,7 @@ void timerState()
 				//}
 				//else
 				//{
-				Serial.println("Im doing low power here");
-				ledRed(1);
+				Serial.println("Im doing low power here");				
 				sysStateTimerWakeUp = water;
 				//}
 				break;
@@ -192,36 +143,3 @@ void timerState()
 }
 
 //destroy all below after presentation
-void colorWipe(uint32_t c, uint8_t wait) {
-	for (uint16_t i = 0; i < strip.numPixels(); i++) {
-		strip.setPixelColor(i, c);
-		strip.show();
-		delay(wait);
-	}
-}
-
-
-void rainbow(uint8_t wait) {
-	uint16_t i, j;
-
-	for (j = 0; j < 256; j++) {
-		for (i = 0; i < strip.numPixels(); i++) {
-			strip.setPixelColor(i, Wheel((i + j) & 255));
-		}
-		strip.show();
-		delay(wait);
-	}
-}
-
-uint32_t Wheel(byte WheelPos) {
-	WheelPos = 255 - WheelPos;
-	if (WheelPos < 85) {
-		return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-	}
-	if (WheelPos < 170) {
-		WheelPos -= 85;
-		return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-	}
-	WheelPos -= 170;
-	return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}

@@ -87,7 +87,7 @@ const char* password ="quadra3604";
 void setup()
 {	
 	initRainBow();
-
+	
 	WiFi.begin(ssid, password);
 
 	while (WiFi.status() != WL_CONNECTED)
@@ -110,6 +110,13 @@ void setup()
 
 	delay(5000);
 
+	//makes the rainboy panel face south if hose enters from west			
+	moveToPosition(stepperDomeStpPin, 300, 150, 100, 0); //(int stepperpin, int targetPosition, int speed, int accel, int current)
+	digitalWrite(stepperDomeSlpPin, LOW);
+		digitalWrite(stepperValveStpPin, LOW);
+		
+
+	
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	
 	Serial.println("i fell out of state machine and now going to sleep");

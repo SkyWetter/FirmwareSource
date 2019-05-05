@@ -454,23 +454,24 @@ void debugInputParse(char debugCommand)
 
 	case '2':
 		moveToPosition(stepperDomeStpPin,(currentDomePosition - stepAmount),0,0,0);
-
+		break;
 	case '3': 
 		moveToPosition(stepperDomeStpPin, (currentDomePosition + stepAmount), 0, 0, 0);
-
+		break;
 	case '=':
 		stepAmount += 1;
 		if (stepAmount > 15)
 		{
 			stepAmount = 15;
 		}
-
+		break;
 	case '-':
 		stepAmount -= 1;
 		if (stepAmount < 1)
 		{
 			stepAmount = 1;
 		}
+		break;
 	case 'a':
 		crazyDomeStepperFromDebugA();
 		break;
@@ -549,7 +550,14 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'x':
-		valveGoHome();
+		digitalWrite(stepperValveSlpPin, HIGH);
+		digitalWrite(stepperValveDirPin, HIGH);
+
+		digitalWrite(stepperValveStpPin, HIGH);
+		delay(4);
+		//delay(100);
+		digitalWrite(stepperValveStpPin, LOW);
+		delay(4);
 		break;
 	}
 }
