@@ -102,3 +102,7 @@ extern int input2DArrayPosition;
 extern char bedsToSprayFile[];
 extern int bedsToSprayLength;
 extern char bedsToSprayInstructions[];
+
+extern bool flowPosCreated;
+extern float sprayFlow[];
+extern int sprayPos[];

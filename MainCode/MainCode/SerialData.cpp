@@ -466,8 +466,12 @@ void debugInputParse(char debugCommand)
 
 	case 'd':
 		
+		spiffsFlowPos(1.1, 1);
+		spiffsFlowPos(22.22, 22);
+		spiffsFlowPos(333.333, 333);
 			
-			
+		spiffsFlowPosRead();
+		
 		break;
 
 	case 'e':
