@@ -454,9 +454,11 @@ void debugInputParse(char debugCommand)
 
 	case '2':
 		moveToPosition(stepperDomeStpPin,(currentDomePosition - stepAmount),0,0,0);
+		break;
 
 	case '3': 
 		moveToPosition(stepperDomeStpPin, (currentDomePosition + stepAmount), 0, 0, 0);
+		break;
 
 	case '=':
 		stepAmount += 1;
@@ -464,6 +466,7 @@ void debugInputParse(char debugCommand)
 		{
 			stepAmount = 15;
 		}
+		break;
 
 	case '-':
 		stepAmount -= 1;
@@ -471,6 +474,7 @@ void debugInputParse(char debugCommand)
 		{
 			stepAmount = 1;
 		}
+		break;
 	case 'a':
 		crazyDomeStepperFromDebugA();
 		break;
@@ -551,6 +555,14 @@ void debugInputParse(char debugCommand)
 	case 'x':
 		valveGoHome();
 		break;
+
+	case 'v':
+		storeSpray(freq,currentDomePosition);
+		break;
 	}
 }
 
+void storeSpray(float freq, int pos)
+{
+
+}
