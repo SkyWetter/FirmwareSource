@@ -484,12 +484,11 @@ void debugInputParse(char debugCommand)
 		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
+	//case to store position and flow values to spiffs
 	case 'd':
 		
-		spiffsFlowPos(1.1, 1);
-		spiffsFlowPos(22.22, 22);
-		spiffsFlowPos(333.333, 333);
-			
+		spiffsFlowPos(freq, currentDomePosition);
+		//function to pull values from spiffs to global arrays for watering cycle
 		spiffsFlowPosRead();
 		
 		break;
