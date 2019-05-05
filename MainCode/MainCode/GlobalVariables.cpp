@@ -161,3 +161,9 @@ int input2DArrayPosition = 0;				//position in 2D array
 char bedsToSprayFile[5000]; 
 int bedsToSprayLength;
 char bedsToSprayInstructions[5000];
+
+//manual spray position logging for testing
+bool flowPosCreated = false;
+float sprayFlow[500];
+int sprayPos[500];
+

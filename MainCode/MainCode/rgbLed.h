@@ -12,6 +12,7 @@
 
 #endif
 
+uint32_t Wheel(byte WheelPos);
 extern void ledBlue(bool onOff);
-extern void ledRed(bool onOff);
-extern void ledsOut();
+extern void colorWipe(uint32_t c, uint8_t wait);
+extern void rainbow(uint8_t wait);

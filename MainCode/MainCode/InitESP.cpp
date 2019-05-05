@@ -177,8 +177,6 @@ void initSerialBT()
 		SerialBT.begin("ANDY->ESP HIHIHI");
 	}
 
-	ledBlue(1);
-
 	delay(100);
 
 	Serial.println("");

@@ -62,7 +62,7 @@ void deepSleep()
 
 	Serial.println("Going to sleep now");
 
-	ledsOut();
+
 	
 	Serial.flush();
 	esp_deep_sleep_start();

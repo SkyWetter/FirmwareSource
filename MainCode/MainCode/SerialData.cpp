@@ -142,14 +142,14 @@ void getSerialData()
 		break;
 
 		case '$':
-			//if (bootCount == 0)
-			//{
+			if (bootCount == 0)
+			{
 				// get time
 				timeShift();//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 				// maybe confirm that it has a good time???
-			//}
-			//++bootCount;
-			//Serial.println("time is money");SerialBT.println("time is money");	
+			}
+			++bootCount;
+			Serial.println("time is money");SerialBT.println("time is money");	
 			//Following a % timeshift() will parse time from a string in the format YYYYMMDDhhmmss . ex: 19840815042000 is 1984 august 15 04:20.00
 			serialState = doNothing;
 		break;
@@ -487,10 +487,13 @@ void debugInputParse(char debugCommand)
 		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
+	//case to store position and flow values to spiffs
 	case 'd':
 		
-			
-			
+		spiffsFlowPos(freq, currentDomePosition);
+		//function to pull values from spiffs to global arrays for watering cycle
+		spiffsFlowPosRead();
+		
 		break;
 
 	case 'e':
@@ -553,7 +556,14 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'x':
-		valveGoHome();
+		digitalWrite(stepperValveSlpPin, HIGH);
+		digitalWrite(stepperValveDirPin, HIGH);
+
+		digitalWrite(stepperValveStpPin, HIGH);
+		delay(4);
+		//delay(100);
+		digitalWrite(stepperValveStpPin, LOW);
+		delay(4);
 		break;
 
 	case 'v':
