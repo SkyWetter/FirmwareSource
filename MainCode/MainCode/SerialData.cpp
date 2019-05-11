@@ -567,7 +567,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'v':
-		storeSpray(freq,currentDomePosition);
+		//storeSpray(freq,currentDomePosition);
 		break;
 	}
 }
