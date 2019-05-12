@@ -262,7 +262,7 @@ void spiffsAppend(char array[], int arraySize)
 }
 
 
-//pass in flow nad position variables with button press for each position 
+//pass in flow and position variables with button press for each position for manual spray pattern creation
 void spiffsFlowPos(float flow, int position)
 {
 	String data;
@@ -275,7 +275,7 @@ void spiffsFlowPos(float flow, int position)
 
 		if (!file)
 		{
-			Serial.println("There was an error opening flowPos for writing");
+			Serial.println("There was an error opening flowPos.txt for writing");
 			return;
 		}
 		else
@@ -293,7 +293,7 @@ void spiffsFlowPos(float flow, int position)
 
 		if (!file)
 		{
-			Serial.println("There was an error opening flowPos for appending");
+			Serial.println("There was an error opening flowPos.txt for appending");
 			return;
 		}
 
@@ -313,7 +313,7 @@ void spiffsFlowPosRead()
 
 	if (!file)
 	{
-		Serial.println("There was an error opening flowPos for reading");
+		Serial.println("There was an error opening flowPos.txt for reading");
 		return;
 	}
 
@@ -326,6 +326,73 @@ void spiffsFlowPosRead()
 		sprayPos[i] = pos.toInt();
 
 		Serial.printf("Array %i flow: %.2f position: %i \n", i, sprayFlow[i], sprayPos[i]);
+
+		i++;
+	}
+}
+
+void spiffsDataLog(float voltage)
+{
+	String data;
+	String time;
+	//https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
+	//tried this without success
+
+	data += time + "," + String(voltage) + "#";
+
+	if (dataLogCreated == false)
+	{
+		File file = SPIFFS.open("/data.txt", FILE_WRITE);
+
+		if (!file)
+		{
+			Serial.println("There was an error opening data.txt for writing");
+			return;
+		}
+		else
+		{
+			dataLogCreated = true;
+		}
+
+		file.print(data);
+
+		file.close();
+	}
+	else
+	{
+		File file = SPIFFS.open("/data.txt", FILE_APPEND);
+
+		if (!file)
+		{
+			Serial.println("There was an error opening data.txt for appending");
+			return;
+		}
+
+		file.print(data);
+
+		file.close();
+	}
+
+}
+
+void spiffsDataRead()
+{
+	File file = SPIFFS.open("/data.txt");
+
+	int i = 0;
+
+	if (!file)
+	{
+		Serial.println("There was an error opening data.txt for reading");
+		return;
+	}
+
+	while (file.available())
+	{
+		String time = file.readStringUntil(',');;
+		String voltage = file.readStringUntil('#');;
+
+		Serial.printf("%s: battery is at %s volts \n", time, voltage);
 
 		i++;
 	}
