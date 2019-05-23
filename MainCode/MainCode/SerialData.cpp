@@ -76,6 +76,8 @@ char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
 char testNum2[] = "0002"; //#0002@0022!2,333!3,123
 char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
+float tempVoltage = 5.0;
+
 void getSerialData()
 {
 	
@@ -455,9 +457,11 @@ void debugInputParse(char debugCommand)
 	case '2':
 		moveToPosition(stepperDomeStpPin,(currentDomePosition - stepAmount),0,0,0);
 		break;
+
 	case '3': 
 		moveToPosition(stepperDomeStpPin, (currentDomePosition + stepAmount), 0, 0, 0);
 		break;
+
 	case '=':
 		stepAmount += 1;
 		if (stepAmount > 15)
@@ -465,6 +469,7 @@ void debugInputParse(char debugCommand)
 			stepAmount = 15;
 		}
 		break;
+
 	case '-':
 		stepAmount -= 1;
 		if (stepAmount < 1)
@@ -484,14 +489,19 @@ void debugInputParse(char debugCommand)
 		stepperDomeDirCCW();				// set dome stepper to CCW ---> LOW IS COUNTER CLOCKWISE!!!
 		break;
 
+	//case to store position and flow values to spiffs
 	case 'd':
+		//function to save current flow rate and angle to spiffs
+		//spiffsFlowPos(freq, currentDomePosition);
+		//function to pull values from spiffs to global arrays for watering cycle
+		//spiffsFlowPosRead();
+
+		spiffsDataLog(tempVoltage);
+		spiffsDataRead();
 		
-		spiffsFlowPos(1.1, 1);
-		spiffsFlowPos(22.22, 22);
-		spiffsFlowPos(333.333, 333);
-			
-		spiffsFlowPosRead();
-		
+		Serial.println();
+
+
 		break;
 
 	case 'e':
@@ -563,6 +573,14 @@ void debugInputParse(char debugCommand)
 		digitalWrite(stepperValveStpPin, LOW);
 		delay(4);
 		break;
+
+	case 'v':
+		//storeSpray(freq,currentDomePosition);
+		break;
 	}
 }
 
+void storeSpray(float freq, int pos)
+{
+
+}

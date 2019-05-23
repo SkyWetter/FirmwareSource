@@ -58,7 +58,7 @@ void doPulseIn()
 
 	if (gpio_get_level(pulsePin) == 1)
 	{
-		//Serial.println("while loop for pin = 1");
+	
 		while (gpio_get_level(pulsePin) == 1)
 		{
 			
@@ -73,13 +73,12 @@ void doPulseIn()
 		}
 		else { freq = 0; }
 	}
-	//Serial.println("frequency is ");
-	//Serial.println(freq);
+
 	lastMicros = micros();
 
 	if (gpio_get_level(pulsePin) == 0)
 	{
-		//Serial.println("while loop for pin = 0");
+
 		while (gpio_get_level(pulsePin) == 0)
 		{
 			
@@ -95,8 +94,5 @@ void doPulseIn()
 		}
 		else { freq = 0; }
 	}
-	//delay(100);
-	//Serial.println("frequency is ");
-	//Serial.println(freq);
-	//Serial.println(gpio_get_level(pulsePin));
+
 }
