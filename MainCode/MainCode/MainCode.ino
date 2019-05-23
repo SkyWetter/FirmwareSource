@@ -81,8 +81,8 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-const char* ssid = "chicken_house";
-const char* password ="quadra3604";
+const char* ssid = "THEWORLDWIDEWEBATURFINGERTIPS";
+const char* password ="powerhouse";
 
 void setup()
 {	

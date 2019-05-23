@@ -450,7 +450,7 @@ void debugInputParse(char debugCommand)
 		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
-	case '1':                             // send vavle stepper to home posisiton
+	case '1':                             // send valve stepper to home posisiton
 		valveGoHome();
 		break;
 
@@ -499,9 +499,10 @@ void debugInputParse(char debugCommand)
 		spiffsDataLog(tempVoltage);
 		spiffsDataRead();
 		
-		Serial.println();
-
-
+		spiffsFlowPos(freq, currentDomePosition);
+		//function to pull values from spiffs to globyal arrays for watering cycle
+		spiffsFlowPosRead();
+		
 		break;
 
 	case 'e':
