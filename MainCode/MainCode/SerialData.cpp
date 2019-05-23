@@ -549,7 +549,21 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'z':
-		programStateNotDoneFlag = 0;				// display time
+		spiffsFlowPosRead();
+
+		for (int i = 0; i < 500; i++)
+		{
+			if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
+				break;
+			}
+			else {
+
+				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
+				makeRain(sprayFlow[i]);
+
+			}
+
+		}
 		break;
 	case 'o':
 
@@ -575,10 +589,11 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'v':
-		//storeSpray(freq,currentDomePosition);
+		Serial.println("attempting to save...");
+		spiffsFlowPos(freq,currentDomePosition);
 		break;
-	}
 }
+	}
 
 void storeSpray(float freq, int pos)
 {
