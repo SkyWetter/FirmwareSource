@@ -76,6 +76,8 @@ char testNum1[] = "0001"; //#0001@0028!1,001!2,002!3,003
 char testNum2[] = "0002"; //#0002@0022!2,333!3,123
 char testNum3[] = "0003"; //#0003@0040!3,000!2,765!3,604!2,111!1,001
 
+float tempVoltage = 5.0;
+
 void getSerialData()
 {
 	
@@ -489,6 +491,13 @@ void debugInputParse(char debugCommand)
 
 	//case to store position and flow values to spiffs
 	case 'd':
+		//function to save current flow rate and angle to spiffs
+		//spiffsFlowPos(freq, currentDomePosition);
+		//function to pull values from spiffs to global arrays for watering cycle
+		//spiffsFlowPosRead();
+
+		spiffsDataLog(tempVoltage);
+		spiffsDataRead();
 		
 		spiffsFlowPos(freq, currentDomePosition);
 		//function to pull values from spiffs to globyal arrays for watering cycle
@@ -567,7 +576,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'v':
-		storeSpray(freq,currentDomePosition);
+		//storeSpray(freq,currentDomePosition);
 		break;
 	}
 }

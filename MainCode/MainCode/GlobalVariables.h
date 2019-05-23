@@ -107,3 +107,5 @@ extern char bedsToSprayInstructions[];
 extern bool flowPosCreated;
 extern float sprayFlow[];
 extern int sprayPos[];
+
+extern bool dataLogCreated;
