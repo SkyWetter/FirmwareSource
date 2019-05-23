@@ -167,3 +167,4 @@ bool flowPosCreated = false;
 float sprayFlow[500];
 int sprayPos[500];
 
+bool dataLogCreated = false;
