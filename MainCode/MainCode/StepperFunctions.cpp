@@ -133,9 +133,9 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(5);
+		delay(10);
 		digitalWrite(x, LOW);
-		delay(5);
+		delay(10);
 		stepcount++;
 	}
 	//Serial.print("current dome position");
