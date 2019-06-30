@@ -540,6 +540,12 @@ void debugInputParse(char debugCommand)
 
 		break;
 
+	case 'r':	//make rain to a specific frequency float ex &r00.00
+
+	case ''
+
+
+
 	case 's':
 		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
 		deepSleep();					// put esp32 to sleep for 15minutes.. add to this function so it wake ups on even time
