@@ -90,12 +90,11 @@ void setup()
 	
 	WiFi.begin(ssid, password);
 
-	/*while (WiFi.status() != WL_CONNECTED)
+	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(500);
 		Serial.print(".");
 	}
-	*/
 
 	printf("... Wifi Connected!\n");
 	printf("IP Address is: %d\n", WiFi.localIP());

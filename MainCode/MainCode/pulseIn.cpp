@@ -48,76 +48,51 @@
 #define currentSense A6
 
 
-float pulseTime;	// time of pulse for math
-int counter1;
-int counter2;
-int lastMicros = micros();
-float freqbuff[8];
-float freqsum;
-
 void doPulseIn()
 {
-
-		int lastMicros = micros();
-		
-
-
-		for(int i = 0; i < 8; i++){
-
-			freqsum = 0;
-
 	
-		if (gpio_get_level(pulsePin) == 1)
+	float pulseTime;	// time of pulse for math
+	int counter1;
+	int counter2;
+	int lastMicros = micros();
+
+	if (gpio_get_level(pulsePin) == 1)
+	{
+	
+		while (gpio_get_level(pulsePin) == 1)
 		{
-			//Serial.println("while loop for pin = 1");
-			while (gpio_get_level(pulsePin) == 1)
-			{
-
-				counter1 = micros();
-				if (counter1 - lastMicros > 500000) { break; }
-			}
-			pulseTime = counter1 - lastMicros;
-
-			if (500000 > pulseTime && pulseTime > 0)
-			{
-				freqbuff[i] = 500000 / pulseTime;
-			}
-			else { freqbuff[i] = 0; }
+			
+			counter1 = micros();
+			if (counter1 - lastMicros > 500000) {  break;  }
 		}
-		//Serial.println("frequency is ");
-		//Serial.println(freq);
-		lastMicros = micros();
+		pulseTime = counter1 - lastMicros;
 
-		i++;
-
-		if (gpio_get_level(pulsePin) == 0)
+		if (500000 > pulseTime && pulseTime > 0)
 		{
-			//Serial.println("while loop for pin = 0");
-			while (gpio_get_level(pulsePin) == 0)
-			{
-
-				counter2 = micros();
-				if (counter2 - lastMicros > 500000) { break; }
-			}
-
-			pulseTime = counter2 - lastMicros;
-
-			if (500000 > pulseTime && pulseTime > 0)
-			{
-				freqbuff[i] = 500000 / pulseTime;
-			}
-			else { freqbuff[i] = 0; }
+			freq = 500000 / pulseTime;
 		}
+		else { freq = 0; }
+	}
 
-		for(int i = 0; i < 8; i++) {
-			freqsum += freqbuff[i];
-		}
-		freq = freqsum / 8;
+	lastMicros = micros();
 
+	if (gpio_get_level(pulsePin) == 0)
+	{
+
+		while (gpio_get_level(pulsePin) == 0)
+		{
+			
+			counter2 = micros();
+			if (counter2 - lastMicros > 500000) {  break; }
 		}
-		//delay(100);
-		//Serial.println("frequency is ");
-		//Serial.println(freq);
-		//Serial.println(gpio_get_level(pulsePin));
+		
+		pulseTime = counter2 - lastMicros;
+
+		if (500000 > pulseTime && pulseTime > 0)
+		{
+			freq = 500000 / pulseTime;
+		}
+		else { freq = 0; }
+	}
+
 }
-

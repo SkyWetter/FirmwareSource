@@ -450,7 +450,7 @@ void debugInputParse(char debugCommand)
 		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
-	case '1':                             // send valve stepper to home posisiton
+	case '1':                             // send vavle stepper to home posisiton
 		valveGoHome();
 		break;
 
@@ -499,10 +499,9 @@ void debugInputParse(char debugCommand)
 		spiffsDataLog(tempVoltage);
 		spiffsDataRead();
 		
-		spiffsFlowPos(freq, currentDomePosition);
-		//function to pull values from spiffs to globyal arrays for watering cycle
-		spiffsFlowPosRead();
-		
+		Serial.println();
+
+
 		break;
 
 	case 'e':
@@ -550,21 +549,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'z':
-		spiffsFlowPosRead();
-
-		for (int i = 0; i < 500; i++)
-		{
-			if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
-				break;
-			}
-			else {
-
-				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
-				makeRain(sprayFlow[i]);
-
-			}
-
-		}
+		programStateNotDoneFlag = 0;				// display time
 		break;
 	case 'o':
 
@@ -590,11 +575,10 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'v':
-		Serial.println("attempting to save...");
-		spiffsFlowPos(freq,currentDomePosition);
+		//storeSpray(freq,currentDomePosition);
 		break;
-}
 	}
+}
 
 void storeSpray(float freq, int pos)
 {
