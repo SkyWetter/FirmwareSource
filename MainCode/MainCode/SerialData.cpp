@@ -443,6 +443,9 @@ char getDebugChar()
 void debugInputParse(char debugCommand)
 {     // read the incoming byte:
 
+	String flowString;
+	float desiredFlow = 0;
+
 	switch (debugCommand)
 	{
 
@@ -540,25 +543,23 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'q':
-		String flowString = "";
-		float desiredFlow = 0;
+
 
 		flowString = Serial.readString();
-		desiredFlow = flowString.toFloat;
-
+		desiredFlow = flowString.toFloat();
 		makeRain(desiredFlow);
+		break;
 
 	case 'r':
-		String flowString = "";
-		float desiredFlow = 0;
-		
 
 		Serial.printf("enter flow value: \n");
 		while (!Serial.available()) { ; }
 		flowString = Serial.readString();
-		desiredFlow = flowString.toFloat;
+		desiredFlow = flowString.toFloat();
 
 		makeRain(desiredFlow);
+
+		break;
 
 	case 's':
 		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");

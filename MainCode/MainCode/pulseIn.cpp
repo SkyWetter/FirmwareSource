@@ -48,51 +48,86 @@
 #define currentSense A6
 
 
+float pulseTime;	// time of pulse for math
+int counter1;
+int counter2;
+int lastMicros = micros();
+float freqbuff[3];
+float freqsum;
+
 void doPulseIn()
 {
-	
-	float pulseTime;	// time of pulse for math
-	int counter1;
-	int counter2;
+
 	int lastMicros = micros();
 
-	if (gpio_get_level(pulsePin) == 1)
-	{
-	
-		while (gpio_get_level(pulsePin) == 1)
+
+
+	for (int i = 0; i < 3; i++) {
+
+		freqsum = 0;
+
+
+		if (gpio_get_level(pulsePin) == 1)
 		{
+			//Serial.println("while loop for pin = 1");
+			while (gpio_get_level(pulsePin) == 1)
+			{
+
+				counter1 = micros();
+				if (counter1 - lastMicros > 500000) { break; }
+			}
+			pulseTime = counter1 - lastMicros;
+
+			if (500000 > pulseTime && pulseTime > 0)
+			{
+				freqbuff[i] = 500000 / pulseTime;
+			}
+			else { 
+				freqbuff[0] = 0;
+				freqbuff[1] = 0;
+				freqbuff[2] = 0;
 			
-			counter1 = micros();
-			if (counter1 - lastMicros > 500000) {  break;  }
+			}
 		}
-		pulseTime = counter1 - lastMicros;
+		//Serial.println("frequency is ");
+		//Serial.println(freq);
+		lastMicros = micros();
 
-		if (500000 > pulseTime && pulseTime > 0)
+		i++;
+
+		if (gpio_get_level(pulsePin) == 0)
 		{
-			freq = 500000 / pulseTime;
-		}
-		else { freq = 0; }
-	}
+			//Serial.println("while loop for pin = 0");
+			while (gpio_get_level(pulsePin) == 0)
+			{
 
-	lastMicros = micros();
+				counter2 = micros();
+				if (counter2 - lastMicros > 500000) { break; }
+			}
 
-	if (gpio_get_level(pulsePin) == 0)
-	{
+			pulseTime = counter2 - lastMicros;
 
-		while (gpio_get_level(pulsePin) == 0)
-		{
+			if (500000 > pulseTime && pulseTime > 0)
+			{
+				freqbuff[i] = 500000 / pulseTime;
+			}
+			else { 
+
+				freqbuff[0] = 0;
+				freqbuff[1] = 0;
+				freqbuff[2] = 0;
 			
-			counter2 = micros();
-			if (counter2 - lastMicros > 500000) {  break; }
+			}
 		}
-		
-		pulseTime = counter2 - lastMicros;
 
-		if (500000 > pulseTime && pulseTime > 0)
-		{
-			freq = 500000 / pulseTime;
+		for (int i = 0; i < 3; i++) {
+			freqsum += freqbuff[i];
 		}
-		else { freq = 0; }
+		freq = freqsum / 3;
+
 	}
-
+	//delay(100);
+	//Serial.println("frequency is ");
+	//Serial.println(freq);
+	//Serial.println(gpio_get_level(pulsePin));
 }

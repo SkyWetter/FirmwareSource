@@ -83,7 +83,7 @@ direction of home
 }
 */
 
-int valveStepperDefaults[5] = {150,300,1500,100,LOW };	//low on dir pin is close
+int valveStepperDefaults[5] = {100,300,1500,100,LOW };	//low on dir pin is close
 int domeStepperDefaults[5] = {250,400,450,395,HIGH}; //high on dome dir pin is ccw and home
  
 byte hallSensorDomeVal;
