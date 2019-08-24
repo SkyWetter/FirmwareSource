@@ -570,34 +570,63 @@ void debugInputParse(char debugCommand)
 		printLocalTime();					// display time
 		break;
 
-	case 'z':
-		programStateNotDoneFlag = 0;				// display time
-		break;
 	case 'o':
 
+		ledcWrite(stepperValveCrntPin, 230);	// current setting
 		digitalWrite(stepperValveSlpPin, HIGH);
 		digitalWrite(stepperValveDirPin, LOW);
-
-		digitalWrite(stepperValveStpPin, HIGH);
 		delay(4);
+
+		for (int i = 0; i < 5; i++)
+		{
+
+			digitalWrite(stepperValveStpPin, HIGH);
+			delay(10);
+			digitalWrite(stepperValveStpPin, LOW);
+			delay(10);
+		}
 		//delay(100);
-		digitalWrite(stepperValveStpPin, LOW);
+		//digitalWrite(stepperValveSlpPin, LOW);
+
 		delay(4);
 		break;
 
 	case 'x':
 		digitalWrite(stepperValveSlpPin, HIGH);
 		digitalWrite(stepperValveDirPin, HIGH);
-
-		digitalWrite(stepperValveStpPin, HIGH);
 		delay(4);
-		//delay(100);
-		digitalWrite(stepperValveStpPin, LOW);
+		for (int i = 0; i < 5; i++)
+		{
+			digitalWrite(stepperValveStpPin, HIGH);
+			delay(10);
+			digitalWrite(stepperValveStpPin, LOW);
+			delay(10);
+		}
+		//digitalWrite(stepperValveSlpPin, LOW);
 		delay(4);
 		break;
 
 	case 'v':
-		//storeSpray(freq,currentDomePosition);
+		Serial.println("attempting to save...");
+		spiffsFlowPos(freq, currentDomePosition);
+		break;
+
+	case 'z':
+		spiffsFlowPosRead();
+
+		for (int i = 0; i < 500; i++)
+		{
+			if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
+				break;
+			}
+			else {
+
+				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
+				makeRain(sprayFlow[i]);
+
+			}
+
+		}
 		break;
 	}
 }

@@ -243,9 +243,9 @@ void makeRain(float desiredFlow)
 	Serial.println(fastTime);
 	Serial.println(currentValvePosition);
 
-	while (desiredFreq >= freq+ 0.5&& currentValvePosition <= 80 || desiredFreq <= freq - 0.5)
+	while (desiredFreq >= freq+ 0.5 && currentValvePosition <= 80 || desiredFreq <= freq - 0.5)
 	{
-		//Serial.println(freq);
+		Serial.println("doing the while loop");
 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 

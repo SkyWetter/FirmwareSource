@@ -74,6 +74,7 @@ void initRainBow()
 {
 	initPins();
 	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
+	initSerialBT();
 	initThreads();
 
 	createSquareArray(25);

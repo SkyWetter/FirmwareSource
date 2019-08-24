@@ -52,7 +52,7 @@ float pulseTime;	// time of pulse for math
 int counter1;
 int counter2;
 int lastMicros = micros();
-float freqbuff[3];
+float freqbuff[4];
 float freqsum;
 
 void doPulseIn()
@@ -62,7 +62,7 @@ void doPulseIn()
 
 
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 
 		freqsum = 0;
 
@@ -82,12 +82,7 @@ void doPulseIn()
 			{
 				freqbuff[i] = 500000 / pulseTime;
 			}
-			else { 
-				freqbuff[0] = 0;
-				freqbuff[1] = 0;
-				freqbuff[2] = 0;
-			
-			}
+			else { freqbuff[1] = 0; freqbuff[2] = 0; freqbuff[3] = 0; freqbuff[4] = 0;}
 		}
 		//Serial.println("frequency is ");
 		//Serial.println(freq);
@@ -111,19 +106,13 @@ void doPulseIn()
 			{
 				freqbuff[i] = 500000 / pulseTime;
 			}
-			else { 
-
-				freqbuff[0] = 0;
-				freqbuff[1] = 0;
-				freqbuff[2] = 0;
-			
-			}
+			else { freqbuff[1] = 0; freqbuff[2] = 0; freqbuff[3] = 0; freqbuff[4] = 0; }
 		}
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 4; i++) {
 			freqsum += freqbuff[i];
 		}
-		freq = freqsum / 3;
+		freq = freqsum / 4;
 
 	}
 	//delay(100);
