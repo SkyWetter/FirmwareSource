@@ -167,4 +167,12 @@ bool flowPosCreated = false;
 float sprayFlow[500];
 int sprayPos[500];
 
+void initSprayFlowArrays() {
+	for (int i = 0; i < 500; i++) {
+		sprayPos[i] = 0;
+		sprayFlow[i] = 0.0;
+	}
+}
+
+
 bool dataLogCreated = false;

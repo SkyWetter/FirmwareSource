@@ -29,7 +29,7 @@
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
-#include "StepperFunctions.h"
+#include "StepperFunctiolns.h"
 
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
@@ -576,12 +576,24 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'v':
-		//storeSpray(freq,currentDomePosition);
+		//spiffsFlowPos(freq, currentDomeDirection);
+		
+		spiffsFlowPosRead();
+
+		for (int i = 0; i < 500; i++)
+		{
+			if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
+				break;
+			}
+			else {
+
+				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
+				makeRain(15.0f);
+			}
+			
+		}
+
 		break;
 	}
 }
 
-void storeSpray(float freq, int pos)
-{
-
-}

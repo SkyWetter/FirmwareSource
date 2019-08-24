@@ -108,4 +108,5 @@ extern bool flowPosCreated;
 extern float sprayFlow[];
 extern int sprayPos[];
 
+extern void initSprayFlowArrays();
 extern bool dataLogCreated;
