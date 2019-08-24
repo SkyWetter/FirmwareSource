@@ -30,6 +30,8 @@
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
 #include "StepperFunctions.h"
+#include <WiFi.h>
+#include "time.h"
 
 // ********* P I N   A S S I G N M E N T S
 // flow meter
@@ -137,7 +139,7 @@ void initPins()
 	digitalWrite(rgbLedRed, LOW);
 	digitalWrite(rgbLedGreen, LOW);
 
-	ledcWrite(stepperDomeCrntPin, 204);	//sets current limi of dome to ~500mA
+	ledcWrite(stepperDomeCrntPin, 204);	// sets current limi of dome to ~500mA
 	ledcWrite(stepperValveCrntPin, 0);	// no current limit on valve so 2 amp
 }
 
@@ -152,14 +154,7 @@ void initThreads()
 	//multiple threads
 	TaskHandle_t Task1;				//creating the handle for Task1
 
-	xTaskCreatePinnedToCore(		//creating Task1 and pinning it to core 0
-		codeForTask1,
-		"Task1",
-		1000,
-		NULL,
-		1,
-		&Task1,                   /* Task handle to keep track of created task */
-		1);                       /* Core */
+	xTaskCreatePinnedToCore(codeForTask1,"Task1",1000,NULL,1,&Task1,1); //creating Task1 and pinning it to core 0                       
 }
 
 void initSerialBT()
@@ -186,6 +181,45 @@ void initSerialBT()
 	SerialBT.println("RainBow Bluetooth Serial Initialized...");
 	SerialBT.println(chipid);
 }
+
+void initWiFiClock()
+{
+	const char* ssid = "chicken_house";
+	const char* password = "quadra3604";
+
+	const char* ntpServer = "pool.ntp.org";
+	const long  gmtOffset_sec = 3600;
+	const int   daylightOffset_sec = 3600;
+
+	//connect to WiFi
+	Serial.printf("Connecting to %s ", ssid);
+	WiFi.begin(ssid, password);
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		Serial.print(".");
+	}
+	Serial.println(" CONNECTED");
+
+	//init and get the time
+	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+	printLocalTime();
+
+	//disconnect WiFi as it's no longer needed
+	WiFi.disconnect(true);
+	WiFi.mode(WIFI_OFF);
+}
+
+void printLocalTime()
+{
+	struct tm timeinfo;
+	if (!getLocalTime(&timeinfo)) 
+	{
+		Serial.println("Failed to obtain time");
+		return;
+	}
+	Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
+
 
 void checkWakeUpReason()
 {
