@@ -48,51 +48,75 @@
 #define currentSense A6
 
 
+float pulseTime;	// time of pulse for math
+int counter1;
+int counter2;
+int lastMicros = micros();
+float freqbuff[4];
+float freqsum;
+
 void doPulseIn()
 {
-	
-	float pulseTime;	// time of pulse for math
-	int counter1;
-	int counter2;
+
 	int lastMicros = micros();
 
-	if (gpio_get_level(pulsePin) == 1)
-	{
-	
-		while (gpio_get_level(pulsePin) == 1)
-		{
-			
-			counter1 = micros();
-			if (counter1 - lastMicros > 500000) {  break;  }
-		}
-		pulseTime = counter1 - lastMicros;
 
-		if (500000 > pulseTime && pulseTime > 0)
+
+	for (int i = 0; i < 4; i++) {
+
+		freqsum = 0;
+
+
+		if (gpio_get_level(pulsePin) == 1)
 		{
-			freq = 500000 / pulseTime;
+			//Serial.println("while loop for pin = 1");
+			while (gpio_get_level(pulsePin) == 1)
+			{
+
+				counter1 = micros();
+				if (counter1 - lastMicros > 500000) { break; }
+			}
+			pulseTime = counter1 - lastMicros;
+
+			if (500000 > pulseTime && pulseTime > 0)
+			{
+				freqbuff[i] = 500000 / pulseTime;
+			}
+			else { freqbuff[1] = 0; freqbuff[2] = 0; freqbuff[3] = 0; freqbuff[4] = 0;}
 		}
-		else { freq = 0; }
+		//Serial.println("frequency is ");
+		//Serial.println(freq);
+		lastMicros = micros();
+
+		i++;
+
+		if (gpio_get_level(pulsePin) == 0)
+		{
+			//Serial.println("while loop for pin = 0");
+			while (gpio_get_level(pulsePin) == 0)
+			{
+
+				counter2 = micros();
+				if (counter2 - lastMicros > 500000) { break; }
+			}
+
+			pulseTime = counter2 - lastMicros;
+
+			if (500000 > pulseTime && pulseTime > 0)
+			{
+				freqbuff[i] = 500000 / pulseTime;
+			}
+			else { freqbuff[1] = 0; freqbuff[2] = 0; freqbuff[3] = 0; freqbuff[4] = 0; }
+		}
+
+		for (int i = 0; i < 4; i++) {
+			freqsum += freqbuff[i];
+		}
+		freq = freqsum / 4;
+
 	}
-
-	lastMicros = micros();
-
-	if (gpio_get_level(pulsePin) == 0)
-	{
-
-		while (gpio_get_level(pulsePin) == 0)
-		{
-			
-			counter2 = micros();
-			if (counter2 - lastMicros > 500000) {  break; }
-		}
-		
-		pulseTime = counter2 - lastMicros;
-
-		if (500000 > pulseTime && pulseTime > 0)
-		{
-			freq = 500000 / pulseTime;
-		}
-		else { freq = 0; }
-	}
-
+	//delay(100);
+	//Serial.println("frequency is ");
+	//Serial.println(freq);
+	//Serial.println(gpio_get_level(pulsePin));
 }

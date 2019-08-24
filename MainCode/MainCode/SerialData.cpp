@@ -29,7 +29,7 @@
 #include "SolarPowerTracker.h"
 #include "SPIFFSFunctions.h"
 #include "stateMachine.h"
-#include "StepperFunctiolns.h"
+#include "StepperFunctions.h"
 
 
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
@@ -443,6 +443,9 @@ char getDebugChar()
 void debugInputParse(char debugCommand)
 {     // read the incoming byte:
 
+	String flowString;
+	float desiredFlow = 0;
+
 	switch (debugCommand)
 	{
 
@@ -540,25 +543,23 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'q':
-		String flowString = "";
-		float desiredFlow = 0;
+
 
 		flowString = Serial.readString();
-		desiredFlow = flowString.toFloat;
-
+		desiredFlow = flowString.toFloat();
 		makeRain(desiredFlow);
+		break;
 
 	case 'r':
-		String flowString = "";
-		float desiredFlow = 0;
-		
 
 		Serial.printf("enter flow value: \n");
 		while (!Serial.available()) { ; }
 		flowString = Serial.readString();
-		desiredFlow = flowString.toFloat;
+		desiredFlow = flowString.toFloat();
 
 		makeRain(desiredFlow);
+
+		break;
 
 	case 's':
 		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");
@@ -569,35 +570,48 @@ void debugInputParse(char debugCommand)
 		printLocalTime();					// display time
 		break;
 
-	case 'z':
-		programStateNotDoneFlag = 0;				// display time
-		break;
 	case 'o':
 
+		ledcWrite(stepperValveCrntPin, 230);	// current setting
 		digitalWrite(stepperValveSlpPin, HIGH);
 		digitalWrite(stepperValveDirPin, LOW);
-
-		digitalWrite(stepperValveStpPin, HIGH);
 		delay(4);
+
+		for (int i = 0; i < 5; i++)
+		{
+
+			digitalWrite(stepperValveStpPin, HIGH);
+			delay(10);
+			digitalWrite(stepperValveStpPin, LOW);
+			delay(10);
+		}
 		//delay(100);
-		digitalWrite(stepperValveStpPin, LOW);
+		//digitalWrite(stepperValveSlpPin, LOW);
+
 		delay(4);
 		break;
 
 	case 'x':
 		digitalWrite(stepperValveSlpPin, HIGH);
 		digitalWrite(stepperValveDirPin, HIGH);
-
-		digitalWrite(stepperValveStpPin, HIGH);
 		delay(4);
-		//delay(100);
-		digitalWrite(stepperValveStpPin, LOW);
+		for (int i = 0; i < 5; i++)
+		{
+			digitalWrite(stepperValveStpPin, HIGH);
+			delay(10);
+			digitalWrite(stepperValveStpPin, LOW);
+			delay(10);
+		}
+		//digitalWrite(stepperValveSlpPin, LOW);
 		delay(4);
 		break;
 
 	case 'v':
-		//spiffsFlowPos(freq, currentDomeDirection);
-		
+		Serial.println("attempting to save...");
+		spiffsFlowPos(freq, currentDomePosition);
+		break;
+
+	case 'z':
 		spiffsFlowPosRead();
 
 		for (int i = 0; i < 500; i++)
@@ -608,12 +622,16 @@ void debugInputParse(char debugCommand)
 			else {
 
 				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
-				makeRain(15.0f);
-			}
-			
-		}
+				makeRain(sprayFlow[i]);
 
+			}
+
+		}
 		break;
 	}
 }
 
+void storeSpray(float freq, int pos)
+{
+
+}

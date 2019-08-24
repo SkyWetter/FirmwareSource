@@ -133,9 +133,9 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 	while (digitalRead(s) == 1)																// if hallSensor is HIGH the stepper is NOT at HOME
 	{
 		digitalWrite(x, HIGH);
-		delay(5);
+		delay(20);
 		digitalWrite(x, LOW);
-		delay(5);
+		delay(20);
 		stepcount++;
 	}
 	//Serial.print("current dome position");
@@ -243,9 +243,9 @@ void makeRain(float desiredFlow)
 	Serial.println(fastTime);
 	Serial.println(currentValvePosition);
 
-	while (desiredFreq >= freq+ 0.5&& currentValvePosition <= 80 || desiredFreq <= freq - 0.5)
+	while (desiredFreq >= freq+ 0.5 && currentValvePosition <= 80 || desiredFreq <= freq - 0.5)
 	{
-		//Serial.println(freq);
+		Serial.println("doing the while loop");
 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 

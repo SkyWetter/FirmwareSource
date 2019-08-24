@@ -89,7 +89,7 @@ void setup()
 	initRainBow();
 	
 	WiFi.begin(ssid, password);
-
+	/*
 	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(500);
@@ -97,7 +97,8 @@ void setup()
 	}
 	
 
-	printf("... Wifi Connected!\n");
+	printf("... 
+		Connected!\n");
 	printf("IP Address is: %d\n", WiFi.localIP());
 	Serial.println(WiFi.localIP());
 
@@ -109,6 +110,7 @@ void setup()
 
 	}
 
+	*/
 	delay(5000);
 
 	//makes the rainboy panel face south if hose enters from west			
