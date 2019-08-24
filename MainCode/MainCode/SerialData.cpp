@@ -450,7 +450,7 @@ void debugInputParse(char debugCommand)
 		moveToPosition(stepperDomeStpPin, 0, 0, 0, 0);
 		break;
 
-	case '1':                             // send valve stepper to home posisiton
+	case '1':                             // send vavle stepper to home posisiton
 		valveGoHome();
 		break;
 
@@ -499,10 +499,9 @@ void debugInputParse(char debugCommand)
 		spiffsDataLog(tempVoltage);
 		spiffsDataRead();
 		
-		spiffsFlowPos(freq, currentDomePosition);
-		//function to pull values from spiffs to globyal arrays for watering cycle
-		spiffsFlowPosRead();
-		
+		Serial.println();
+
+
 		break;
 
 	case 'e':
@@ -539,6 +538,27 @@ void debugInputParse(char debugCommand)
 		extractBedData(bedsToSprayFile);
 
 		break;
+
+	case 'q':
+		String flowString = "";
+		float desiredFlow = 0;
+
+		flowString = Serial.readString();
+		desiredFlow = flowString.toFloat;
+
+		makeRain(desiredFlow);
+
+	case 'r':
+		String flowString = "";
+		float desiredFlow = 0;
+		
+
+		Serial.printf("enter flow value: \n");
+		while (!Serial.available()) { ; }
+		flowString = Serial.readString();
+		desiredFlow = flowString.toFloat;
+
+		makeRain(desiredFlow);
 
 	case 's':
 		//Serial.println("debug case: s -> going to sleep...");SerialBT.println("debug case: s -> going to sleep...");

@@ -81,8 +81,8 @@
 // solar panel
 #define currentSense A6
 #define solarPanelVoltage A7
-const char* ssid = "THEWORLDWIDEWEBATURFINGERTIPS";
-const char* password ="powerhouse";
+const char* ssid = "chicken_house";
+const char* password ="quadra3604";
 
 void setup()
 {	
@@ -95,6 +95,7 @@ void setup()
 		delay(500);
 		Serial.print(".");
 	}
+	
 
 	printf("... Wifi Connected!\n");
 	printf("IP Address is: %d\n", WiFi.localIP());
