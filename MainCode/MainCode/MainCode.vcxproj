@@ -120,6 +120,9 @@
     <ClInclude Include="cpp.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="DataLogging.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
     <ClInclude Include="deepSleep.h" />
     <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="InitESP.h" />
