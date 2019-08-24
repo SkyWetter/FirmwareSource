@@ -77,7 +77,6 @@ void timeShift()
 		usrSec = charToInt(buf2, 2);
 	}
 	//timeOffsetSinceBoot();
-	
 	printLocalTime();
 }
 

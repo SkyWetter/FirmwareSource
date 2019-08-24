@@ -95,6 +95,7 @@ void setup()
 		delay(500);
 		Serial.print(".");
 	}
+	
 
 	printf("... Wifi Connected!\n");
 	printf("IP Address is: %d\n", WiFi.localIP());
