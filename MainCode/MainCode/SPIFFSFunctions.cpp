@@ -262,9 +262,10 @@ void spiffsAppend(char array[], int arraySize)
 }
 
 
-//pass in flow and position variables with button press for each position for manual spray pattern creation
+//pass in flow and position variables with button press for each position for manual sprahhy pattern creation
 void spiffsFlowPos(float flow, int position)
 {
+
 	String data;
 
 	data += String(flow) + "," + String(position) + "#";
