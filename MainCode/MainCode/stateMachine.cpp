@@ -53,9 +53,7 @@
 
 
 void programState()
-{
-	//bool programStateNotDoneFlag = 1;
-	
+{	
 	initSerialBT();
 
 		while (programStateNotDoneFlag) //this is currently where the code loops 
@@ -69,14 +67,9 @@ void programState()
 			}
 			//Serial.println("main code program case");
 			getSerialData();
-
-			
-
 		}
 	
-
 	//init shutdown from program state
-
 	SerialBT.end();
 	deepSleep();
 }
@@ -102,7 +95,7 @@ void timerState()
 					//powerDownEverything();
 					//sysStateTimerWakeUp = solar;
 				//}
-				//else
+				//else 
 				//{
 				Serial.println("Im doing low power here");				
 				sysStateTimerWakeUp = water;
@@ -115,9 +108,14 @@ void timerState()
 				//load correct instruction set for date and time
 				//reference temperature and apply modfifier to watering durations
 				//open thread for flow sensor
-				//run spray program
-				Serial.println("Im doing watering here");
+
+				// if current Time = schedule Time then do watering
+				getLocalTime(&timeinfo);
+				if (timeinfo.tm_min == sched_m){
+					Serial.println("Im doing watering here");
+				scheduledSprayRoutine(); //run spray program
 				sysStateTimerWakeUp = solar;
+				}
 				break;
 			}
 
@@ -131,11 +129,12 @@ void timerState()
 			}
 
 			case sleepy:
-			{
+			{/*
 				Serial.println("Im doing sleep here");
 				sysStateTimerWakeUp = low_power;
 				wakeUpTimerStateNotDoneFlag = 0;
-				deepSleep();
+				deepSleep();*/
+				sysStateTimerWakeUp = low_power;
 				break;
 			}
 		}

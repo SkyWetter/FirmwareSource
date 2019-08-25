@@ -72,19 +72,21 @@ float getFlow(int column, int row, int turretColumn, int turretRow);
 int convertAngleToStep(double angle);
 double angleToSquare(int sqCol, int sqRow, int turCol, int turRow);
 
+//void printLocalWifiTime();
+
 void initRainBow()
 {
 	initPins();
 	initSerial();			//  serial monitor only ===> DOES NOT DO BLUETOOTH ANYMORE
 	initSerialBT();
 	initThreads();
-	initSprayFlowArrays();
+	initWiFiClock();
 
-	createSquareArray(25);
+	createSquareArray(25);	// creates lookup table for use with android app
 	spiffsBegin();
 
 	Serial.print("RainBow Initialized at ... ");
-	printLocalTime();
+	printLocalWifiTime();
 }
 
 void initPins()
@@ -190,7 +192,7 @@ void initWiFiClock()
 	const char* password = "quadra3604";
 
 	const char* ntpServer = "pool.ntp.org";
-	const long  gmtOffset_sec = 3600;
+	const long  gmtOffset_sec = -28800;
 	const int   daylightOffset_sec = 3600;
 
 	//connect to WiFi
@@ -204,16 +206,16 @@ void initWiFiClock()
 
 	//init and get the time
 	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-	printLocalTime();
+	printLocalWifiTime();
 
 	//disconnect WiFi as it's no longer needed
 	WiFi.disconnect(true);
 	WiFi.mode(WIFI_OFF);
 }
 
-void printLocalTime()
+void printLocalWifiTime()
 {
-	struct tm timeinfo;
+	//struct tm timeinfo;
 	if (!getLocalTime(&timeinfo)) 
 	{
 		Serial.println("Failed to obtain time");
@@ -231,40 +233,41 @@ void checkWakeUpReason()
 	switch (wakeup_reason)
 	{
 
-	case 1:
-		Serial.println("Wakeup caused by external signal using RTC_IO");
-		// if we are here its because there was a wake-up push button event
-		// init programstate.. thats BT.. 
-		programState();
-		// goto to sleep when done
-		break;
+		case 1:
+			Serial.println("Wakeup caused by external signal using RTC_IO");
+			// if we are here its because there was a wake-up push button event
+			// init programstate.. thats BT.. 
+			programState();
+			// goto to sleep when done
+			break;
 
-	case 2:
-		Serial.println("Wakeup caused by external signal using RTC_CNTL");
-		break;
+		case 2:
+			Serial.println("Wakeup caused by external signal using RTC_CNTL");
+			break;
 
-	case 3:
-		Serial.println("Wakeup caused by timer");
-		//timer event wakeup happens every 60s
-		// run wakeUpTimerStateMachine
-		// case 0: low battery ?
-		// case 1: watering time ?
-		// case 2: currentSense ?
-		timerState();
-		break;
 
-	case 4:
-		Serial.println("Wakeup caused by touchpad");
-		break;
+		case 3:
+			Serial.println("Wakeup caused by timer");
+			//timer event wakeup happens every 60s
+			// run wakeUpTimerStateMachine
+			// case 0: low battery ?
+			// case 1: watering time ?
+			// case 2: currentSense ?
+			timerState();
+			break;
 
-	case 5:
-		Serial.println("Wakeup caused by ULP program");
-		break;
+		case 4:
+			Serial.println("Wakeup caused by touchpad");
+			break;
 
-	default:
-		Serial.printf("Wakeup was not caused by deep sleep -> Entering program state... %d\n", wakeup_reason);
-		programState();
-		break;
+		case 5:
+			Serial.println("Wakeup caused by ULP program");
+			break;
+
+		default:
+			Serial.printf("Wakeup was not caused by deep sleep -> Entering program state... %d\n", wakeup_reason);
+			programState();
+			break;
 	}
 }
 
