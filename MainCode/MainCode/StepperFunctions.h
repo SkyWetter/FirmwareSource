@@ -1,5 +1,6 @@
 #pragma once
 
+void scheduledSprayRoutine();
 void stepperGoHome(byte x, byte y, byte z, byte s);
 void domeGoHome();
 void valveGoHome();

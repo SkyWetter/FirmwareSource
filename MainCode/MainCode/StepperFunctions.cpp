@@ -13,6 +13,8 @@
 #include "sdkconfig.h"
 #include "StepperFunctions.h"
 #include "GeneralFunctions.h"
+#include "SPIFFSFunctions.h"
+
 #define GPIO_INPUT_IO_TRIGGER     0  // There is the Button on GPIO 0
 #define GPIO_DEEP_SLEEP_DURATION     10  // sleep 30 seconds and then wake up
 #define CCW -1
@@ -115,6 +117,24 @@
 
 int curDomePos = 0;
 
+void scheduledSprayRoutine()
+{
+	spiffsFlowPosRead();
+
+	for (int i = 0; i < 500; i++)
+	{
+		if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
+			break;
+		}
+		else {
+
+			moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
+			makeRain(sprayFlow[i]);
+
+		}
+
+	}
+}
 
 // M A I N    F U N  C T I O N  --- STEPPER GO HOME
 void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STEP, y DIR, z EN, s HALL

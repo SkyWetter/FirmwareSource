@@ -108,6 +108,10 @@ RTC_DATA_ATTR unsigned long secsLastBootOffset;
 RTC_DATA_ATTR int waterHourAM;
 RTC_DATA_ATTR int waterHourPM;
 RTC_DATA_ATTR bool amPmFlag;
+struct tm timeinfo;
+
+int sched_h = 5;
+int sched_m = 12;
 
 // state machine
 bool programStateNotDoneFlag = 1;

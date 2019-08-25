@@ -103,6 +103,9 @@ extern int input2DArrayPosition;
 extern char bedsToSprayFile[];
 extern int bedsToSprayLength;
 extern char bedsToSprayInstructions[];
+extern int sched_h;
+extern int sched_m;
+extern struct tm timeinfo;
 
 extern bool flowPosCreated;
 extern float sprayFlow[];

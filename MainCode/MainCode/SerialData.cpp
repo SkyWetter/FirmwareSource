@@ -567,7 +567,11 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 't':
-		printLocalTime();					// display time
+
+		Serial.println("Going into timer state machine");
+
+		printLocalWifiTime();					// display time
+		timerState();							// goto Timer State. Rainbow will now wait for scheduled time to begin spraying routine.
 		break;
 
 	case 'o':
@@ -612,21 +616,7 @@ void debugInputParse(char debugCommand)
 		break;
 
 	case 'z':
-		spiffsFlowPosRead();
-
-		for (int i = 0; i < 500; i++)
-		{
-			if (sprayFlow[i] == 0 && sprayPos[i] == 0) {
-				break;
-			}
-			else {
-
-				moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
-				makeRain(sprayFlow[i]);
-
-			}
-
-		}
+		scheduledSprayRoutine();
 		break;
 	}
 }
