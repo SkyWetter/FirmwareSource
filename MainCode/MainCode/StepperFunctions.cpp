@@ -128,7 +128,13 @@ void scheduledSprayRoutine()
 		}
 		else {
 
-			moveToPosition(stepperDomeStpPin, sprayPos[i], 20, 99999, 0);
+			moveToPosition(stepperDomeStpPin, sprayPos[i], 100, 99999, 0);
+			
+			if( i >= 2) {												//Tests to see if were are past the initial position (0) if not then go back and forth between last and next pos
+				moveToPosition(stepperDomeStpPin, sprayPos[i-1], 10, 99999, 0);	//go back to last position
+				moveToPosition(stepperDomeStpPin, sprayPos[i], 10, 99999, 0);	// now go back to new position. spray more water
+			}
+
 			makeRain(sprayFlow[i]);
 
 		}
@@ -171,9 +177,9 @@ void stepperGoHome(byte x, byte y, byte z, byte s)                      // x STE
 		digitalWrite(y, !digitalRead(y));		//change direction and try other way		
 		for (int i = 0; i < (limit/5); i++) {
 			digitalWrite(x, HIGH);
-			delay(4);
+			delay(8);
 			digitalWrite(x, LOW);
-			delay(4);
+			delay(8);
 		}
 	}
 	//digitalWrite(z, HIGH);																	// put stepper back to sleep
@@ -226,7 +232,7 @@ void makeRain(float desiredFlow)
 	//valveGoHome();
 
 	digitalWrite(stepperValveSlpPin, HIGH);
-	digitalWrite(stepperValveDirPin, LOW);
+	digitalWrite(stepperValveDirPin, LOW);	// low goes out?
 
 	for(int i=0; i < 0; i++)		//this compensates for the home position of valve being about 10 steps from hall closed state
 	{
@@ -263,9 +269,9 @@ void makeRain(float desiredFlow)
 	Serial.println(fastTime);
 	Serial.println(currentValvePosition);
 
-	while (desiredFreq >= freq+ 0.5 && currentValvePosition <= 80 || desiredFreq <= freq - 0.5)
+	while (desiredFreq >= freq+ 1 && currentValvePosition <= 80 || desiredFreq <= freq - 1)
 	{
-		Serial.println("doing the while loop");
+		//Serial.println("doing the while loop");
 
 		setCurrent(stepperValveCrntPin, valveStepperDefaults[2]);
 

@@ -111,10 +111,15 @@ void timerState()
 
 				// if current Time = schedule Time then do watering
 				getLocalTime(&timeinfo);
-				if (timeinfo.tm_min == sched_m){
-					Serial.println("Im doing watering here");
+				if (timeinfo.tm_hour == sched_h_am && timeinfo.tm_min == sched_m_am){
+					Serial.println("Im doing watering here in the am");
 				scheduledSprayRoutine(); //run spray program
 				sysStateTimerWakeUp = solar;
+				}
+				else if (timeinfo.tm_hour == sched_h_pm && timeinfo.tm_min == sched_m_pm) {
+					Serial.println("Im doing watering here in the pm");
+					scheduledSprayRoutine(); //run spray program
+					sysStateTimerWakeUp = solar;
 				}
 				break;
 			}

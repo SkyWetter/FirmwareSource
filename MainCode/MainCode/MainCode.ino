@@ -101,23 +101,32 @@ void setup()
 		Connected!\n");
 	printf("IP Address is: %d\n", WiFi.localIP());
 	Serial.println(WiFi.localIP());
-
-	if (WiFi.status() == WL_CONNECTED)
+	*/
+	/*if (WiFi.status() == WL_CONNECTED)
 	{
 		float d[2] = { 15.0,11.92 };
 		int f[2] = { 0,1 };
 		logData(d, f, 2);
 
 	}
-
 	*/
+	
 	delay(5000);
 
-	//makes the rainboy panel face south if hose enters from west			
-	moveToPosition(stepperDomeStpPin, 300, 150, 100, 0); //(int stepperpin, int targetPosition, int speed, int accel, int current)
+		
+
+	valveGoHome();
+
+	//digitalWrite(stepperValveDirPin, LOW);	// hopefully high means step outwards
+
+
+	//makes the rainboy panel face south if hose enters from west
+	moveToPosition(stepperDomeStpPin, 0, 150, 100, 0); //(int stepperpin, int targetPosition, int speed, int accel, int current)
+	delay(500);
 	digitalWrite(stepperDomeSlpPin, LOW);
 	digitalWrite(stepperValveStpPin, LOW);
 
+	
 	checkWakeUpReason();	 // here it goes to see if it a wakeUp event was triggered by a timer or a pushButton event on GPIO_IO_13
 	
 	Serial.println("i fell out of state machine and now going to sleep");

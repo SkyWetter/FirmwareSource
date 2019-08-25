@@ -576,7 +576,7 @@ void debugInputParse(char debugCommand)
 
 	case 'o':
 
-		ledcWrite(stepperValveCrntPin, 230);	// current setting
+		//ledcWrite(stepperValveCrntPin, 230);	// current setting
 		digitalWrite(stepperValveSlpPin, HIGH);
 		digitalWrite(stepperValveDirPin, LOW);
 		delay(4);
